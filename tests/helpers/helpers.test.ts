@@ -14,6 +14,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
+  AGENT,
   aCiSummary,
   aCoverage,
   aCriterion,
@@ -24,9 +25,13 @@ import {
   aTestLink,
   aTestRun,
   aWaiver,
+  BRANCH,
   ISSUE_ID,
+  ISSUE_KEY,
   PROJECT_ID,
+  REPO,
   settings,
+  TESTER,
   TEST_LOG,
   TEST_REFUSAL,
 } from './builders.js';
@@ -261,15 +266,18 @@ describe('harness : passerelles externes pilotables et journal d’appels', () =
     expect(agent.agent).toBe(true);
   });
 
-  it('JobQueue conserve les messages pour rejeu', async () => {
+  it('JobQueue conserve les messages et un journal d’appels complet', async () => {
     const queue = createFakeQueue();
-    await queue.publish({
-      runId: 'r1',
-      projectId: PROJECT_ID,
-      summary: aCiSummary(),
-    });
+    const message = { runId: 'r1', projectId: PROJECT_ID, summary: aCiSummary() };
+    await queue.publish(message);
+
     expect(queue.published).toHaveLength(1);
     expect(queue.published[0]?.runId).toBe('r1');
+    // Le journal est complet : une entrée par appel, méthode et arguments.
+    expect(queue.journal.methods()).toEqual(['publish']);
+    expect(queue.journal.count('publish')).toBe(1);
+    expect(queue.journal.argsOf('publish')[0]?.[0]).toBe(message);
+    expect(queue.journal.of('publish')[0]?.args).toEqual([message]);
   });
 });
 
@@ -307,5 +315,53 @@ describe('harness : scénario PAY-123 (SPEC §7)', () => {
       'feature/PAY-123-refusal-email',
     );
     expect(outcomes.map((o) => o.name)).toEqual([TEST_REFUSAL, TEST_LOG]);
+  });
+
+  it('journalise tout le chemin d’entrée de la CI (SPEC §10, §17)', async () => {
+    const scenario = await createPay123Scenario();
+
+    const found = await scenario.jira.findIssueByBranch(PROJECT_ID, BRANCH);
+    expect(found?.key).toBe(ISSUE_KEY);
+    await scenario.queue.publish({
+      runId: 'run-1',
+      projectId: PROJECT_ID,
+      summary: scenario.ciSummary,
+    });
+    await scenario.coverage.recompute(ISSUE_ID);
+    await scenario.jira.setCoverageField(ISSUE_ID, 'Preuves', 2, 4);
+
+    // Chaque journal est complet : toutes les méthodes, dans l'ordre.
+    expect(scenario.jira.journal.methods()).toEqual(['findIssueByBranch', 'setCoverageField']);
+    expect(scenario.queue.journal.methods()).toEqual(['publish']);
+    expect(scenario.coverage.journal.methods()).toEqual(['recompute']);
+    expect(scenario.jira.journal.argsOf('setCoverageField')[0]).toEqual([
+      ISSUE_ID,
+      'Preuves',
+      2,
+      4,
+    ]);
+
+    // Le pipeline et ses deux résultats sont bien rangés.
+    expect((await scenario.store.latestRunForBranch(REPO, BRANCH))?.id).toBe('run-1');
+    expect(await scenario.store.listTestResults('run-1')).toHaveLength(2);
+  });
+
+  it('marque comme agent tout ce qui arrive par MCP (SPEC §19)', async () => {
+    const scenario = await createPay123Scenario();
+    const viaMcp = await scenario.identity.actorOf({
+      accountId: AGENT,
+      moduleId: 'attach-evidence',
+      fromMcp: true,
+      cloudId: 'cloud-1',
+    });
+    const viaPanel = await scenario.identity.actorOf({
+      accountId: TESTER,
+      moduleId: 'issuePanel',
+      fromMcp: false,
+      cloudId: 'cloud-1',
+    });
+    expect(viaMcp).toMatchObject({ agent: true, roles: [] });
+    expect(viaPanel).toMatchObject({ agent: false });
+    expect(scenario.identity.journal.count('actorOf')).toBe(2);
   });
 });
