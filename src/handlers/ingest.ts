@@ -1,11 +1,11 @@
 /**
- * Souche — point d’entrée des résultats de CI (SPEC §10)
+ * Point d’entrée des résultats de CI (SPEC §10, FP-06).
  *
- * Propriétaire : lot L4 (docs/CONTRACTS.md). Le socle pose la signature
- * exportée, qui est gelée : le lot remplace le corps sans la changer.
+ * Propriétaire : lot L4. Signature gelée : remplace le corps sans la changer.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from "../deps.js";
+import type { AppDeps } from '../deps.js';
+import { processCiWebRequest } from '../ingest/webtrigger.js';
 
 /** Requête du web trigger : le corps reste brut, la signature en dépend. */
 export interface CiWebRequest {
@@ -25,13 +25,8 @@ export interface CiWebResponse {
 
 /** Vérifie la signature, range le résumé dans la file, répond aussitôt. */
 export async function handleCiResults(
-  _request: CiWebRequest,
-  _deps: AppDeps,
+  request: CiWebRequest,
+  deps: AppDeps,
 ): Promise<CiWebResponse> {
-  // Souche : le lot L4 vérifie la signature, découpe les lots, publie sur la file.
-  return {
-    statusCode: 501,
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ error: "not-implemented", lot: "L4" }),
-  };
+  return processCiWebRequest(request, deps);
 }
