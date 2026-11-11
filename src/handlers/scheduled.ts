@@ -1,26 +1,23 @@
 /**
  * Contrôle nocturne des clôtures hors validateur (SPEC §13, §20).
  *
- * Étancheité annoncée (SPEC §20) : l'app dit ce qu'elle bloque et ce qu'elle
+ * Étanchéité annoncée (SPEC §20) : l'app dit ce qu'elle bloque et ce qu'elle
  * ne bloque pas. Les clôtures faites hors validateur (transitions en masse,
  * automatisation ou API — SPEC §19) sont relevées chaque nuit, comptées et
- * signalées au responsable du projet.
+ * signalées.
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import type { AppDeps } from '../deps.js';
-import type { Language, ProjectSettings } from '../types.js';
+import type { Language } from '../types.js';
 import { text } from '../i18n/index.js';
 import { GATE_MESSAGES } from '../i18n/gate.js';
 
 /** Plafond de tickets traités en un tick pour rester sous les quotas Forge. */
 export const NIGHTLY_MAX_ISSUES = 200;
 
-export interface ScheduledPayload {
-  projectId?: string;
-  projectKey?: string;
-  limit?: number;
-}
+/** Plafond de notifications envoyées en un tick pour ménager l'API Jira. */
+export const MAX_ALERTS_PER_RUN = 25;
 
 /** Liste chaque nuit les tickets passés à « Terminé » hors validateur. */
 export async function onScheduledTick(
@@ -38,7 +35,7 @@ export async function onScheduledTick(
   const missed = await deps.store.listClosedWithoutCoverage(project, limit);
 
   if (missed.length === 0) return;
-  await alertOnMissed(deps, project, missed, language, settings);
+  await alertOnMissed(deps, project, missed, language);
 }
 
 function resolveProjectTarget(payload: Record<string, unknown>): string | null {
@@ -47,13 +44,12 @@ function resolveProjectTarget(payload: Record<string, unknown>): string | null {
   return null;
 }
 
-/** Signale les tickets clos sans couverture au journal et par notification. */
+/** Signale les tickets clos sans couverture : journal + notification au déclarant/assigné. */
 async function alertOnMissed(
   deps: AppDeps,
   project: string,
   missed: readonly string[],
   language: Language,
-  settings: ProjectSettings | null,
 ): Promise<void> {
   const summary = text(GATE_MESSAGES, 'scheduled.summary', language, {
     count: missed.length,
@@ -61,15 +57,18 @@ async function alertOnMissed(
   });
   deps.logger.log('warn', summary, { project, missedCount: missed.length });
 
-  // Notifie le premier rôle habilité à déroger si configuré (SPEC §9.4, §14 FP-15)
-  const recipient = settings?.roles.waive[0];
-  if (!recipient) return;
-  for (const issueKey of missed.slice(0, 5)) {
+  // Chaque ticket clos hors validateur est signalé (SPEC §20) :
+  // on notifie le déclarant ou l'assigné via son accountId Jira réel.
+  for (const issueId of missed.slice(0, MAX_ALERTS_PER_RUN)) {
+    const issue = await deps.jira.getIssue(issueId);
+    if (!issue) continue;
+    const recipient = issue.reporterAccountId || issue.assigneeAccountId;
+    if (!recipient) continue;
     await deps.jira.notify(
       recipient,
       'scheduled.leak.subject',
       'scheduled.leak.body',
-      issueKey,
+      issue.key,
     );
   }
 }
