@@ -34,9 +34,9 @@ son coin : une PR dédiée, fichier par fichier, avec la mention
 Chaque PR liste ses fichiers sous la section `## Scope` de son corps. La
 garde `couche0` la compare au diff réel : un fichier modifié non déclaré, ou
 déclaré mais inutilisé, et la PR est refusée. Elle bannit aussi les motifs
-dangereux dans les lignes ajoutées (poussée forcée sans `--force-with-lease`,
-prise de côté `-X ours/theirs`, déclencheur à privilèges, clé en clair, dates
-antisèches).
+dangereux dans les lignes ajoutées (poussée forcée sans lease, écrasement
+unilatéral de merge, déclencheur à privilèges, clé secrète, dates d'octobre
+2026 sous forme interdite).
 
 Les règles de code sont les mêmes partout (voir
 [CONVENTIONS.md](CONVENTIONS.md)) : fichier < 500 lignes, fonction < 50
