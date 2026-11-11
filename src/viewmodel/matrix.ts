@@ -66,6 +66,18 @@ export interface MatrixRowViewModel {
   readonly canAttach: boolean;
 }
 
+/**
+ * Droits de geste de l'acteur courant, calculés par le résolveur avec les
+ * règles du domaine (`canAttest`, `isRoleAllowedToWaive`) : la vue ne décide
+ * rien, elle affiche ce qui est autorisé (SPEC §9.4, §12.4).
+ */
+export interface MatrixRights {
+  /** Identifiants des critères que l'acteur peut attester. */
+  readonly attestable: ReadonlySet<string>;
+  /** L'acteur peut-il accorder une dérogation ? */
+  readonly waivable: boolean;
+}
+
 export interface MatrixViewModel {
   readonly issueKey: string;
   readonly total: number;
@@ -173,7 +185,11 @@ export function formatEvidenceItem(evidence: Evidence, language: Language): Form
   };
 }
 
-export function buildMatrixRow(crit: CriterionState, language: Language): MatrixRowViewModel {
+export function buildMatrixRow(
+  crit: CriterionState,
+  language: Language,
+  rights?: MatrixRights,
+): MatrixRowViewModel {
   const status = resolveStatusKind(crit);
   return {
     criterionId: crit.criterionId,
@@ -194,9 +210,10 @@ export function buildMatrixRow(crit: CriterionState, language: Language): Matrix
     version: crit.version,
     waiverId: crit.waiverId,
     evidences: crit.evidences.map((e) => formatEvidenceItem(e, language)),
-    // SPEC §7.3 : l'attestation en un geste ; on ne ré-atteste pas un critère prouvé.
-    canAttest: !crit.proven,
-    canWaive: !crit.proven && !crit.waived,
+    // SPEC §7.3 : l'attestation en un geste ; on ne ré-atteste pas un critère
+    // prouvé, et seuls les acteurs indépendants le peuvent (SPEC §9.4).
+    canAttest: !crit.proven && (rights ? rights.attestable.has(crit.criterionId) : true),
+    canWaive: !crit.proven && !crit.waived && (rights ? rights.waivable : true),
     canAttach: true,
   };
 }
@@ -205,6 +222,7 @@ export function buildMatrixViewModel(
   coverage: Coverage | null,
   language: Language,
   issueKeyFallback = '',
+  rights?: MatrixRights,
 ): MatrixViewModel {
   if (!coverage) {
     return {
@@ -221,7 +239,7 @@ export function buildMatrixViewModel(
     };
   }
 
-  const rows = sortRowsByDefect(coverage.criteria.map((c) => buildMatrixRow(c, language)));
+  const rows = sortRowsByDefect(coverage.criteria.map((c) => buildMatrixRow(c, language, rights)));
   return {
     issueKey: coverage.issueKey,
     total: coverage.total,
