@@ -11,10 +11,10 @@
 # Chaque module renvoie à la section du cahier des charges qui le motive.
 
 app:
-  # Identifiant provisoire : la valeur définitive est fournie par `forge create`
-  # (elle change à la première installation). À remplacer avant le premier
-  # déploiement — le garde ne contrôle que le format ARI.
-  id: ari:cloud:ecosystem::app/00000000-0000-0000-0000-000000000000
+  # Identifiant de forme valide (UUID v4) : `forge lint` refuse un ARI dont
+  # l'appId n'a pas la forme d'un UUID v4. `forge create` le remplace par
+  # l'identifiant réel lors de l'enregistrement de l'app (docs/VALIDATION-PLAN.md).
+  id: ari:cloud:ecosystem::app/8f21da22-e1da-4f7f-b094-9c901007be62
   name: Fait, preuve à l'appui
   description: >-
     Proof-gated delivery for Jira: a ticket only reaches Done when every
