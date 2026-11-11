@@ -145,18 +145,25 @@ self-hosted runners, no reinstallation when `package-lock.json` is unchanged.
 
 ## Progress
 
-- **Merged on `main`**: the frozen contract (`src/types.ts`, `src/ports.ts`,
-  `src/defaults.ts`), the Forge manifest, the SQL schema and mapping, the seven
-  entry-point stubs, the shared test harness (in-memory fakes, PAY-123
-  scenario of SPEC §7), the CI guards, the demo dataset
-  ([src/sample/](src/sample/README.md)) and this documentation set.
-- **In progress, one pull request per lot**: criteria (L1), evidence (L2),
-  coverage & gate (L3), CI ingestion (L4), MCP tools & Rovo agent (L5),
-  screens (L6), matching & reports (L7), runtime adapters (L9). Ownership and
-  file map: [docs/CONTRACTS.md](docs/CONTRACTS.md) §2.
-- **Live status**: the required check `ci` on each pull request, and the
-  Mergify queue that merges green PRs on its own. The six platform points of
-  SPEC §19 are tracked in [docs/VALIDATION-PLAN.md](docs/VALIDATION-PLAN.md).
+Everything below is merged on `main` and covered by the test suite:
+
+- the frozen contract (`src/types.ts`, `src/ports.ts`, `src/defaults.ts`) and the
+  Forge manifest, checked against the published `@forge/manifest` JSON schema;
+- the SQL schema (12 tables) and its row ↔ domain mapping;
+- the nine feature lots: criteria, evidence and strengths, coverage and gate,
+  CI intake and living proof, MCP tools and Rovo agent, the four screens,
+  test ↔ criterion matching and reports, the documentation and demo dataset,
+  and the Forge runtime adapters;
+- the end-to-end acceptance recipe: the eleven points of SPEC §22 replayed with
+  the real modules wired together (`tests/acceptance/`, see
+  [docs/RECETTE.md](docs/RECETTE.md));
+- the CI guards: < 500 lines per file, < 50 lines per function, manifest
+  conformance, 5-minute budget.
+
+What still needs a human, on the Atlassian side: `forge create` to register the
+app and replace the placeholder `app.id`, `forge deploy` on a demo site, the
+video recording (script ready in
+[docs/VIDEO-SCRIPT.md](docs/VIDEO-SCRIPT.md)) and the Devpost submission.
 
 ## License
 
