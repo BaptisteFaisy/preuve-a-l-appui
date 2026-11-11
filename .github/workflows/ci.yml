@@ -76,6 +76,9 @@ jobs:
       - name: Types (tsc --noEmit)
         run: npx tsc --noEmit
 
+      - name: Site public (vite build)
+        run: npm run site:build
+
       - name: Tests unitaires (vitest)
         run: npx vitest run --passWithNoTests
 
@@ -85,7 +88,10 @@ jobs:
 
       # Même règle, au niveau des fonctions : moins de 50 lignes de code.
       - name: Garde de taille des fonctions (< 50 lignes)
-        run: node tools/check-function-limits.mjs
+        # Le site public est du code comme le reste : mêmes limites.
+        run: |
+          node tools/check-function-limits.mjs
+          node tools/check-function-limits.mjs --racine site/src
 
       # Le manifeste Forge n'est pas encore outillé : l'étape est tolérante
       # (message + code 0) tant que tools/check-manifest.mjs est absent.
