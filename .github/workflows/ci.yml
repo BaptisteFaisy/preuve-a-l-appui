@@ -19,7 +19,7 @@ on:
 
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false  # un check requis annulé bloque la file (leçon du 11 nov.)
 
 permissions:
   contents: read
