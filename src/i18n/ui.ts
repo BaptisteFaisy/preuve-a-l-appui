@@ -158,4 +158,13 @@ export const UI_MESSAGES: Messages = {
   'defect.not-independent': { en: 'Attestation not independent', fr: 'Attestation non indépendante' },
   'defect.unverified': { en: 'Evidence could not be verified', fr: 'Preuve non vérifiée' },
   'defect.no-criteria': { en: 'No acceptance criteria defined', fr: 'Aucun critère d’acceptation' },
+
+  /* Gestes du panneau : refus motivés (SPEC §9.4, §12.4, §20). */
+  'ui.gesture.unknownCriterion': { en: 'Unknown criterion.', fr: 'Critère inconnu.' },
+  'ui.gesture.unknownIssue': { en: 'Ticket not found: independence cannot be verified.', fr: 'Ticket introuvable : l’indépendance ne peut pas être vérifiée.' },
+  'ui.waiver.refusedAgent': { en: 'An agent can never grant a waiver.', fr: 'Un agent ne peut jamais accorder de dérogation.' },
+  'ui.waiver.refusedCriterion': { en: 'A waiver applies to one criterion: select it.', fr: 'Une dérogation vise un critère : sélectionnez-le.' },
+  'ui.waiver.reasonRequired': { en: 'A waiver requires a reason.', fr: 'Une dérogation exige un motif.' },
+  'ui.waiver.roleRequired': { en: 'Your role does not allow granting waivers on this project.', fr: 'Votre rôle ne permet pas d’accorder de dérogation sur ce projet.' },
+  'ui.waiver.refused': { en: 'Waiver refused: {reason}', fr: 'Dérogation refusée : {reason}' },
 };

@@ -72,31 +72,20 @@ vérifie en mémoire. Ils suivent le parcours des juges
     grille : chaque geste est refusé explicitement. Les sept outils ne font que
     lire, proposer ou déclarer.
 
-## Écart d'intégration relevé (point 4)
+## Écart d'intégration relevé — **corrigé**
 
-La recette est **verte** : les onze points sont prouvés avec les vrais modules.
-Un écart d'intégration réel est toutefois documenté, sans réécrire le module
-d'un autre lot (règle du lot L10) :
+La recette avait révélé deux écarts de câblage : les règles du domaine étaient
+justes et testées, mais les gestes de l'écran ne les appelaient pas.
 
-- **Le geste humain `attest-criterion`** (`src/handlers/resolver.ts`, lot L6)
-  n'appelle **pas** `canAttest` (`src/domain/independence.ts`, lot L2). La vue
-  matricielle non plus (`canAttest: !crit.proven` ne teste pas l'indépendance).
-  Conséquence : au moment de l'écriture, l'indépendance de l'attestant n'est pas
-  appliquée — l'assigné (voire un ancien assigné) peut attester son propre
-  travail via le panneau. La **règle de domaine est juste** et le test
-  `recette-04` la prouve avec le vrai module `canAttest` sur les acteurs réels
-  du scénario ; c'est le **câblage** dans le geste qui manque. Le sous-test
-  `recette-04 ÉCART` est écrit en `it.fails` : il redeviendra rouge dès que le
-  geste appliquera le domaine, signalant qu'il faut alors le repasser en `it`.
+| Écart | Correction |
+|---|---|
+| `attest-criterion` enregistrait l'attestation sans consulter `canAttest` : l'assigné (voire un ancien assigné) pouvait attester son propre travail (SPEC §9.4) | le geste résout l'acteur via `IdentityGateway`, charge le ticket et les réglages du projet, puis appelle `canAttest` ; en cas de refus **rien n'est écrit** et la raison traduite est renvoyée |
+| `waive-criterion` enregistrait une dérogation sans vérifier le motif ni le rôle (SPEC §12.4) | le geste appelle `validateWaiverCandidate` avec les rôles **réels** de l'acteur ; un agent, un motif vide ou un rôle non habilité sont refusés |
+| la matrice proposait le bouton « J'ai vérifié » à tout le monde (`canAttest: !crit.proven`) | le résolveur calcule les droits de geste avec le domaine et les passe au view-model (`MatrixRights`) : le bouton n'est offert qu'à un acteur indépendant, et la dérogation qu'à un rôle habilité |
 
-- **Observation voisine (hors points de recette).** Le geste `waive-criterion`
-  du même résolveur n'appelle pas `validateWaiverCandidate`
-  (`src/domain/waivers.ts`, lot L3) : il enregistre une dérogation sans vérifier
-  le motif ni le rôle. Aucun des onze points ne l'exerce (le point 6 utilise une
-  dérogation valide, motivée et signée par le PO), donc la recette reste verte ;
-  le câblage du domaine de validation dans le geste est à prévoir pour tenir le
-  SPEC §12.4 en toutes circonstances.
+Le rôle enregistré avec une attestation ou une dérogation vient désormais des
+rôles projet de l'acteur : un rôle déclaré dans la charge utile est ignoré.
 
-Ces deux écarts relèvent du lot L6 (le résolveur et ses vues). Ils sont signalés
-ici et dans le compte rendu de livraison, conformément à la règle « ne pas
-réécrire le module d'un autre lot ».
+Le sous-test `recette-04 ÉCART`, écrit en `it.fails` tant que le câblage
+manquait, est redevenu un test ordinaire : il vérifie que le geste refuse
+l'assigné **et** n'écrit aucune attestation.

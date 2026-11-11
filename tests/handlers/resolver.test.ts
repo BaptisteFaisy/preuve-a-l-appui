@@ -16,7 +16,7 @@ import type { Attestation, Evidence, Waiver } from '../../src/types.js';
 import type { CoverageFieldViewModel } from '../../src/viewmodel/coverage.js';
 import type { MatrixViewModel } from '../../src/viewmodel/matrix.js';
 import type { SettingsViewModel } from '../../src/viewmodel/settings.js';
-import { aCoverage, ISSUE_ID, ISSUE_KEY, PROJECT_ID } from '../../tests/helpers/builders.js';
+import { aCoverage, aCriterionState, AGENT, DEVELOPER, ISSUE_ID, ISSUE_KEY, OWNER, PROJECT_ID, TESTER } from '../../tests/helpers/builders.js';
 import { createPay123Scenario, type Pay123Scenario } from '../../tests/helpers/scenario.js';
 
 class FakeResolver implements ResolverLike {
@@ -223,5 +223,122 @@ describe('get-project-page', () => {
     const vm = (await resolver.call('get-project-page', { projectId: PROJECT_ID })) as { projectId: string; stats: unknown };
     expect(vm.projectId).toBe(PROJECT_ID);
     expect(vm.stats).not.toBeNull();
+  });
+});
+
+/* ---- Indépendance de l'attestation et dérogations contrôlées (SPEC §9.4, §12.4) ---- */
+
+describe('attest-criterion — indépendance (SPEC §9.4)', () => {
+  it('refuse l’assigné du ticket et n’écrit rien', async () => {
+    const { sc, resolver } = await setup();
+    const res = (await resolver.call('attest-criterion', {
+      issueId: ISSUE_ID,
+      criterionId: 'crit-3',
+      note: 'J’ai vérifié moi-même.',
+      accountId: DEVELOPER,
+    })) as { ok: boolean; reason: string };
+    expect(res.ok).toBe(false);
+    expect(res.reason.length).toBeGreaterThan(0);
+    expect(await sc.store.listAttestations('crit-3')).toHaveLength(0);
+  });
+
+  it('refuse un agent, même sur un critère non prouvé', async () => {
+    const { sc, resolver } = await setup();
+    const res = (await resolver.call('attest-criterion', {
+      issueId: ISSUE_ID,
+      criterionId: 'crit-3',
+      note: 'Auto-attestation.',
+      accountId: AGENT,
+    })) as { ok: boolean; reason: string };
+    expect(res.ok).toBe(false);
+    expect(await sc.store.listAttestations('crit-3')).toHaveLength(0);
+  });
+
+  it('accepte un autre membre du projet et enregistre son rôle réel', async () => {
+    const { sc, resolver } = await setup();
+    const res = (await resolver.call('attest-criterion', {
+      issueId: ISSUE_ID,
+      criterionId: 'crit-3',
+      note: 'Refus déclenché, e-mail reçu.',
+      accountId: TESTER,
+      role: 'Administrators', // rôle déclaré : ignoré, seul le rôle réel compte
+    })) as { ok: boolean };
+    expect(res.ok).toBe(true);
+    const attestations: Attestation[] = await sc.store.listAttestations('crit-3');
+    expect(attestations[0]?.role).toBe('Developers');
+  });
+});
+
+describe('waive-criterion — dérogation contrôlée (SPEC §12.4)', () => {
+  it('refuse une dérogation sans motif et n’écrit rien', async () => {
+    const { sc, resolver } = await setup();
+    const res = (await resolver.call('waive-criterion', {
+      issueId: ISSUE_ID,
+      criterionId: 'crit-4',
+      reason: '   ',
+      accountId: OWNER,
+    })) as { ok: boolean; reason: string };
+    expect(res.ok).toBe(false);
+    expect(await sc.store.listWaiversByCriterion('crit-4')).toHaveLength(0);
+  });
+
+  it('refuse une dérogation accordée hors rôle habilité', async () => {
+    const { sc, resolver } = await setup();
+    const res = (await resolver.call('waive-criterion', {
+      issueId: ISSUE_ID,
+      criterionId: 'crit-4',
+      reason: 'Reporté dans PAY-140',
+      accountId: DEVELOPER,
+    })) as { ok: boolean; reason: string };
+    expect(res.ok).toBe(false);
+    expect(await sc.store.listWaiversByCriterion('crit-4')).toHaveLength(0);
+  });
+
+  it('refuse une dérogation demandée par un agent', async () => {
+    const { sc, resolver } = await setup();
+    const res = (await resolver.call('waive-criterion', {
+      issueId: ISSUE_ID,
+      criterionId: 'crit-4',
+      reason: 'Reporté dans PAY-140',
+      accountId: AGENT,
+    })) as { ok: boolean };
+    expect(res.ok).toBe(false);
+    expect(await sc.store.listWaiversByCriterion('crit-4')).toHaveLength(0);
+  });
+});
+
+/** Deux critères non prouvés, dont un exige une attestation (§7.1). */
+const MATRIX_ROWS = [
+  aCriterionState({ criterionId: 'crit-3', code: 'AC-3', proven: false, type: 'functional' }),
+  aCriterionState({ criterionId: 'crit-4', code: 'AC-4', proven: false, type: 'functional' }),
+];
+
+describe('get-issue-matrix — droits de geste (SPEC §9.4, §12.4)', () => {
+  it('n’offre pas l’attestation à l’assigné, ni la dérogation', async () => {
+    const { sc, resolver } = await setup();
+    await sc.store.saveCoverage(aCoverage({ issueId: ISSUE_ID, total: 4, proven: 2, criteria: MATRIX_ROWS }));
+    const vm = (await resolver.call('get-issue-matrix', {
+      issueId: ISSUE_ID,
+      accountId: DEVELOPER,
+    })) as MatrixViewModel;
+    expect(vm.rows.length).toBeGreaterThan(0);
+    expect(vm.rows.every((row) => row.canAttest === false)).toBe(true);
+    expect(vm.rows.every((row) => row.canWaive === false)).toBe(true);
+  });
+
+  it('offre l’attestation à un tiers et la dérogation au rôle habilité', async () => {
+    const { sc, resolver } = await setup();
+    await sc.store.saveCoverage(aCoverage({ issueId: ISSUE_ID, total: 4, proven: 2, criteria: MATRIX_ROWS }));
+    const tiers = (await resolver.call('get-issue-matrix', {
+      issueId: ISSUE_ID,
+      accountId: TESTER,
+    })) as MatrixViewModel;
+    expect(tiers.rows.some((row) => row.canAttest)).toBe(true);
+
+    const po = (await resolver.call('get-issue-matrix', {
+      issueId: ISSUE_ID,
+      accountId: OWNER,
+    })) as MatrixViewModel;
+    expect(po.rows.some((row) => row.canWaive)).toBe(true);
   });
 });
