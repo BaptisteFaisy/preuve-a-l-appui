@@ -86,6 +86,9 @@ jobs:
       - name: Garde de taille des fichiers (< 500 lignes)
         run: python3 tools/check-file-limits.py
 
+      - name: Workflows GitHub valides (YAML)
+        run: python3 tools/check-workflows-yaml.py
+
       # Même règle, au niveau des fonctions : moins de 50 lignes de code.
       - name: Garde de taille des fonctions (< 50 lignes)
         # Le site public est du code comme le reste : mêmes limites.
