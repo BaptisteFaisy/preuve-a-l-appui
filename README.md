@@ -1,5 +1,9 @@
 # Fait, preuve à l'appui
 
+**Public site & live demo → <https://baptistefaisy.github.io/preuve-a-l-appui/>**
+(the demo runs this repository’s real decision engine in your browser — no Jira,
+no server, nothing installed)
+
 **A ticket only reaches “Done” when every acceptance criterion carries evidence
 of sufficient strength.** Otherwise the app names the missing criterion and
 explains what proof it expects.
@@ -130,6 +134,24 @@ node tools/check-manifest.mjs         # manifest matches Forge CLI schema
 
 The CI verdict fits in **5 minutes maximum** (project rule): persistent
 self-hosted runners, no reinstallation when `package-lock.json` is unchanged.
+
+## Public site
+
+The site lives in this repository, under [`site/`](site/), and is published on
+GitHub Pages by [`.github/workflows/site.yml`](.github/workflows/site.yml) on
+every push to `main` that touches `site/`, `src/` or `tests/helpers/`:
+
+- **URL**: <https://baptistefaisy.github.io/preuve-a-l-appui/>
+- **Build**: Vite (no server, no tracking, no external runtime asset), output in
+  `site/dist/` — never committed.
+- **Local preview**: `npm run site:dev` (development) or
+  `npm run site:build && npm run site:preview`.
+- **Live demo**: the `#demo` section drives the real modules — `src/domain/*`,
+  `src/handlers/*`, `src/viewmodel/*` — over the PAY-123 dataset
+  (`src/sample/pay-123.ts`) with the in-memory fakes of `tests/helpers/`. Attach
+  a test, run the pipeline, try to attest as the assignee (refused), attest as
+  the tester, waive as the product owner, then attempt the transition and read
+  the validator’s own message. English and French, like the app.
 
 ## Documentation
 
