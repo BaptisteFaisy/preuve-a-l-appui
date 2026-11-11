@@ -42,20 +42,20 @@ describe('recette §22 — indépendance de l’attestation (point 4)', () => {
     expect(robot.allowed).toBe(false); // un agent, jamais
   });
 
-  // ÉCART d'intégration (SPEC §9.4) : `canAttest` n'est câblé ni dans le geste
-  // humain `attest-criterion` (src/handlers/resolver.ts, lot L6) ni dans la
-  // vue matricielle (`canAttest: !crit.proven`). Le résolveur écrit donc
-  // l'attestation de l'assigné sans la refuser. Test attendu en échec tant que
-  // le geste n'applique pas le domaine ; il redeviendra rouge une fois corrigé.
-  it.fails('recette-04 ÉCART : le geste « attest-criterion » devrait refuser l’assigné', async () => {
+  // Le geste humain `attest-criterion` applique désormais `canAttest`
+  // (src/handlers/resolver.ts) : l'attestation de l'assigné est refusée et
+  // rien n'est écrit en base (SPEC §9.4, recette §22 point 4).
+  it('recette-04 : le geste « attest-criterion » refuse l’assigné sans rien écrire', async () => {
     const h = await createAcceptanceHarness();
     const res = (await h.gesture('attest-criterion', {
       issueId: ISSUE_ID,
       criterionId: 'crit-3',
       note: 'auto-attestation de l’assignée',
       accountId: DEVELOPER,
-    })) as { ok: boolean };
+    })) as { ok: boolean; reason: string };
     expect(res.ok).toBe(false);
+    expect(res.reason.length).toBeGreaterThan(0);
+    expect(await h.deps.store.listAttestations('crit-3')).toHaveLength(0);
   });
 });
 
