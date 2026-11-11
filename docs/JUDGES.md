@@ -1,5 +1,15 @@
 # Guide for the judges
 
+## 0. Try it right now, without installing anything
+
+**<https://baptistefaisy.github.io/preuve-a-l-appui/>** — the public site, with a
+live demo of ticket `PAY-123` that runs this repository's real decision engine
+in your browser (criteria, strengths, coverage, independence rules, gate
+message). Attach a test, run the pipeline, try to attest as the assignee, then
+waive as the product owner and close the ticket. English and French.
+
+The rest of this guide is for the real app, installed on a Jira site.
+
 Ten minutes, no repository and no CI tooling required (SPEC §24). The demo
 project `PAY` and its ticket `PAY-123` come preloaded; the dataset is described
 in [DEMO-DATA.md](DEMO-DATA.md) and lives in
