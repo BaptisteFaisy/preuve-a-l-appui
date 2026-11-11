@@ -17,18 +17,26 @@
  */
 import { defaultProjectSettings } from '../defaults.js';
 import type { AppDeps } from '../deps.js';
+import { canAttest } from '../domain/independence.js';
+import { isRoleAllowedToWaive, validateWaiverCandidate } from '../domain/waivers.js';
 import type {
+  Actor,
   Attestation,
   Coverage,
+  Criterion,
   Evidence,
   EvidenceType,
+  IssueRef,
   Language,
   ProjectSettings,
   Strength,
   Waiver,
 } from '../types.js';
+import { text } from '../i18n/index.js';
+import { UI_MESSAGES } from '../i18n/ui.js';
 import { buildCoverageFieldViewModel } from '../viewmodel/coverage.js';
 import { buildMatrixViewModel, formatRevisionItem } from '../viewmodel/matrix.js';
+import type { MatrixRights } from '../viewmodel/matrix.js';
 import { buildProjectPageViewModel } from '../viewmodel/project.js';
 import { buildSettingsViewModel } from '../viewmodel/settings.js';
 
@@ -96,9 +104,33 @@ async function readStoredCoverage(deps: AppDeps, issueId: string, issueKey: stri
 /* --------------------------------------------------------------- requêtes */
 
 async function handleGetMatrix(req: ResolverRequest, deps: AppDeps): Promise<unknown> {
-  const { issueId, issueKey, language } = extractContext(req);
+  const ctx = extractContext(req);
+  const { issueId, issueKey, language } = ctx;
   const coverage = await readStoredCoverage(deps, issueId, issueKey);
-  return buildMatrixViewModel(coverage, language, issueKey || issueId);
+  const rights = await computeMatrixRights(deps, ctx, coverage);
+  return buildMatrixViewModel(coverage, language, issueKey || issueId, rights);
+}
+
+/**
+ * Droits de geste de l'acteur courant pour la matrice : ce qu'il peut attester
+ * (indépendance, SPEC §9.4) et s'il peut déroger (SPEC §12.4). La vue affiche,
+ * le domaine décide.
+ */
+async function computeMatrixRights(
+  deps: AppDeps,
+  ctx: CallContext,
+  coverage: Coverage | null,
+): Promise<MatrixRights> {
+  const actor = await actorOfGesture(deps, ctx);
+  const { issue, settings } = await loadGestureContext(deps, ctx);
+  const waivable = !actor.agent && isRoleAllowedToWaive(actor.roles, settings.roles);
+  const attestable = new Set<string>();
+  if (!issue || !coverage) return { attestable, waivable };
+  const criteria = await deps.store.listCriteriaByIssue(issue.id);
+  for (const criterion of criteria) {
+    if (canAttest(actor, issue, criterion, settings).allowed) attestable.add(criterion.id);
+  }
+  return { attestable, waivable };
 }
 
 async function handleListHistory(req: ResolverRequest, deps: AppDeps): Promise<unknown> {
@@ -116,6 +148,74 @@ async function handleGetCoverageField(req: ResolverRequest, deps: AppDeps): Prom
 }
 
 /* ------------------------------------------------------------ gestes (§7.3) */
+
+/**
+ * Acteur d'un geste d'écran : jamais un agent (SPEC §19), et son rôle vient
+ * du projet, jamais de la charge utile (SPEC §9.4).
+ */
+async function actorOfGesture(deps: AppDeps, ctx: CallContext): Promise<Actor> {
+  return deps.identity.actorOf({
+    accountId: ctx.accountId,
+    moduleId: 'jira:issuePanel',
+    fromMcp: false,
+    cloudId: '',
+  });
+}
+
+/** Ticket et réglages du projet utiles à un geste (SPEC §9.4, §12.4). */
+async function loadGestureContext(
+  deps: AppDeps,
+  ctx: CallContext,
+): Promise<{ issue: IssueRef | null; settings: ProjectSettings }> {
+  const issue = await deps.jira.getIssue(ctx.issueId || ctx.issueKey);
+  const projectId = ctx.projectId || issue?.projectId || 'DEFAULT';
+  const settings = (await deps.store.getSettings(projectId)) ?? defaultProjectSettings(projectId);
+  return { issue, settings };
+}
+
+/** Rôle porté par l'acteur qui autorise le geste — jamais un rôle déclaré. */
+function roleAuthorizing(
+  actor: Actor,
+  allowed: readonly string[],
+): string {
+  return actor.roles.find((role) => allowed.includes(role)) ?? actor.roles[0] ?? '';
+}
+
+/**
+ * Vérifie le droit d'attester avant toute écriture (SPEC §9.4). Sans ticket ou
+ * sans critère lisible, on refuse : mieux vaut un geste refusé qu'une
+ * attestation non indépendante enregistrée.
+ */
+function checkAttestRight(
+  actor: Actor,
+  issue: IssueRef | null,
+  criterion: Criterion | null,
+  settings: ProjectSettings,
+): { allowed: boolean; reason: string } {
+  if (!criterion) {
+    return { allowed: false, reason: text(UI_MESSAGES, 'ui.gesture.unknownCriterion', settings.language) };
+  }
+  if (!issue) {
+    return { allowed: false, reason: text(UI_MESSAGES, 'ui.gesture.unknownIssue', settings.language) };
+  }
+  const verdict = canAttest(actor, issue, criterion, settings);
+  return verdict.allowed ? { allowed: true, reason: '' } : { allowed: false, reason: verdict.reason };
+}
+
+/** Traduit le refus du domaine des dérogations (SPEC §20). */
+function translateWaiverError(error: string | undefined, language: Language): string {
+  const key = (error && WAIVER_ERROR_KEYS[error]) || 'ui.waiver.refused';
+  return text(UI_MESSAGES, key, language, { reason: error ?? '' });
+}
+
+/** Messages du domaine de dérogation traduits (SPEC §20). */
+const WAIVER_ERROR_KEYS: Record<string, string> = {
+  'An agent can never grant a waiver': 'ui.waiver.refusedAgent',
+  'Criterion ID is required': 'ui.waiver.refusedCriterion',
+  'Reason is required for a waiver': 'ui.waiver.reasonRequired',
+  'Actor does not possess an authorized role to grant waivers': 'ui.waiver.roleRequired',
+};
+
 
 function strengthForEvidenceType(type: EvidenceType): Strength {
   if (type === 'test' || type === 'documentation') return 'machine-verified';
@@ -152,14 +252,24 @@ async function handleAttachEvidence(req: ResolverRequest, deps: AppDeps): Promis
 }
 
 async function handleAttestCriterion(req: ResolverRequest, deps: AppDeps): Promise<unknown> {
-  const { issueId, accountId } = extractContext(req);
+  const ctx = extractContext(req);
+  const { issueId } = ctx;
   const p = req.payload;
   const criterionId = str(p, 'criterionId');
   const note = str(p, 'note') || str(p, 'value');
   const attachmentRef = str(p, 'attachmentRef');
   const criterion = await deps.store.getCriterion(criterionId);
   const now = deps.clock.now();
-  const actor = accountId || 'user';
+  const actorContext = await actorOfGesture(deps, ctx);
+  const { issue, settings } = await loadGestureContext(deps, ctx);
+
+  // SPEC §9.4 : l'assigné n'atteste pas son propre travail, un agent jamais.
+  const verdict = checkAttestRight(actorContext, issue, criterion, settings);
+  if (!verdict.allowed) {
+    return { ok: false, reason: verdict.reason };
+  }
+  const actor = actorContext.accountId || 'user';
+  const role = roleAuthorizing(actorContext, settings.roles.attest);
 
   const evidenceId = deps.ids.next('ev');
   const evidence: Evidence = {
@@ -185,7 +295,7 @@ async function handleAttestCriterion(req: ResolverRequest, deps: AppDeps): Promi
     criterionId,
     evidenceId,
     attesterAccountId: actor,
-    role: str(p, 'role') || 'Developers',
+    role: role || str(p, 'role'),
     note,
     attachmentRef,
     at: now,
@@ -198,16 +308,36 @@ async function handleAttestCriterion(req: ResolverRequest, deps: AppDeps): Promi
 }
 
 async function handleWaiveCriterion(req: ResolverRequest, deps: AppDeps): Promise<unknown> {
-  const { issueId, accountId } = extractContext(req);
+  const ctx = extractContext(req);
+  const { issueId, language } = ctx;
   const p = req.payload;
   const criterionId = str(p, 'criterionId');
   const criterion = await deps.store.getCriterion(criterionId);
+  const actor = await actorOfGesture(deps, ctx);
+  const { settings } = await loadGestureContext(deps, ctx);
+  const reason = str(p, 'reason') || str(p, 'value');
+  const role = roleAuthorizing(actor, settings.roles.waive);
+
+  // SPEC §12.4 : dérogation motivée, par un rôle habilité, jamais par un agent.
+  const check = validateWaiverCandidate({
+    criterionId,
+    grantedBy: actor.accountId || 'user',
+    role,
+    reason,
+    actorIsAgent: actor.agent,
+    actorRoles: actor.roles,
+    rolesPolicy: settings.roles,
+  });
+  if (!check.valid) {
+    return { ok: false, reason: translateWaiverError(check.error, language) };
+  }
+
   const waiver: Waiver = {
     id: deps.ids.next('wv'),
     criterionId,
-    grantedBy: accountId || 'user',
-    role: str(p, 'role') || 'Product Owner',
-    reason: str(p, 'reason') || str(p, 'value'),
+    grantedBy: actor.accountId || 'user',
+    role,
+    reason,
     at: deps.clock.now(),
     expiresAt: '',
     revokedAt: '',
