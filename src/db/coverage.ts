@@ -67,16 +67,29 @@ export function createCoverageStore(sql: SqlClient): CoverageStore {
 
     async listClosedWithoutCoverage(projectId: string, limit: number): Promise<string[]> {
       const boundedLimit = Math.max(1, Math.min(limit, 500));
-      const statement = `
-        SELECT c.issue_id
-        FROM ${TABLE} c
-        WHERE (c.issue_key LIKE ? OR c.issue_id LIKE ?)
-          AND c.passes = 0
-        ORDER BY c.updated_at DESC
+      // projectId vide = tous les projets (contrôle nocturne global, SPEC §20).
+      // Limite annoncée : sans table des clôtures côté SQL, seules les lignes
+      // de couverture non passées sont visibles (best-effort documenté).
+      const statement =
+        projectId.length === 0
+          ? `
+        SELECT issue_id
+        FROM ${TABLE}
+        WHERE passes = 0
+        ORDER BY updated_at DESC
+        LIMIT ${boundedLimit}
+      `
+          : `
+        SELECT issue_id
+        FROM ${TABLE}
+        WHERE (issue_key LIKE ? OR issue_id LIKE ?)
+          AND passes = 0
+        ORDER BY updated_at DESC
         LIMIT ${boundedLimit}
       `;
       const prefix = `${projectId}-%`;
-      const rows = await sql.query<{ issue_id: string }>(statement, [prefix, prefix]);
+      const params = projectId.length === 0 ? [] : [prefix, prefix];
+      const rows = await sql.query<{ issue_id: string }>(statement, params);
       return rows.map((r) => r.issue_id);
     },
   };

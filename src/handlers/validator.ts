@@ -7,10 +7,13 @@
  * Elle ne reçoit pas l'identité de celui qui fait la transition (SPEC §12.1) :
  * les dérogations se donnent avant, dans le panneau du ticket.
  *
+ * Le doute bloque (SPEC §20) : ticket illisible ou couverture absente →
+ * `result: false` avec un message dédié, jamais « tout est prouvé ».
+ *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import type { AppDeps } from '../deps.js';
-import type { Coverage, GateMode, GateVerdict, Language } from '../types.js';
+import type { Coverage, GateMode, GateVerdict, IssueRef, Language } from '../types.js';
 import { GATE_MODES } from '../db/mapping-common.js';
 import { evaluateGate } from '../domain/gate.js';
 import { text } from '../i18n/index.js';
@@ -30,12 +33,13 @@ export function createValidator(deps: AppDeps): Validator {
   return async (input: ValidatorInput): Promise<GateVerdict> => {
     const issueKey = input.issueKey.trim();
     if (issueKey.length === 0) {
-      return { result: true, errorMessage: '' };
+      // Appel sans ticket : le doute bloque, jamais de laissez-passer (SPEC §20).
+      return { result: false, errorMessage: text(GATE_MESSAGES, 'gate.unknownIssue', 'en') };
     }
-    const coverage = await readCoverage(deps, issueKey);
-    const language = await resolveLanguage(deps, issueKey);
+    const issue = await resolveIssue(deps, issueKey);
+    const language = await resolveLanguage(deps, issue?.projectId ?? '');
+    const coverage = await readCoverage(deps, issueKey, issue?.id ?? '');
     if (!coverage) {
-      // Le doute bloque (SPEC §20) : message dédié, jamais « tout est prouvé ».
       return {
         result: false,
         errorMessage: text(GATE_MESSAGES, 'gate.coverageUnavailable', language),
@@ -48,20 +52,33 @@ export function createValidator(deps: AppDeps): Validator {
   };
 }
 
-/** Lecture rapide : d'abord par la clé fournie, sinon par l'id résolu via Jira. */
-async function readCoverage(deps: AppDeps, issueKey: string): Promise<Coverage | null> {
-  const direct = await deps.coverage.read(issueKey);
-  if (direct) return direct;
-  const issue = await deps.jira.getIssue(issueKey);
-  if (!issue) return null;
-  return deps.coverage.read(issue.id);
+/** Résolution du ticket : un appel Jira, pour l'id réel et le projet (langue). */
+async function resolveIssue(deps: AppDeps, issueKey: string): Promise<IssueRef | null> {
+  try {
+    return await deps.jira.getIssue(issueKey);
+  } catch (error) {
+    deps.logger.log('warn', `Ticket illisible pour le validateur : ${issueKey}`, error);
+    return null;
+  }
+}
+
+/** Lecture rapide de la couverture : par id résolu d'abord, puis par la clé. */
+async function readCoverage(
+  deps: AppDeps,
+  issueKey: string,
+  issueId: string,
+): Promise<Coverage | null> {
+  if (issueId.length > 0) {
+    const byId = await deps.coverage.read(issueId);
+    if (byId) return byId;
+  }
+  return deps.coverage.read(issueKey);
 }
 
 /** Langue du projet pour le message (SPEC §20) ; `en` par défaut. */
-async function resolveLanguage(deps: AppDeps, issueKey: string): Promise<Language> {
-  const dash = issueKey.indexOf('-');
-  const projectKey = dash > 0 ? issueKey.slice(0, dash) : issueKey;
-  const settings = await deps.store.getSettings(projectKey);
+async function resolveLanguage(deps: AppDeps, projectId: string): Promise<Language> {
+  if (projectId.length === 0) return 'en';
+  const settings = await deps.store.getSettings(projectId);
   return settings?.language ?? 'en';
 }
 

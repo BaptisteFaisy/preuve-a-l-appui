@@ -57,9 +57,14 @@ export function validateWaiverCandidate(params: {
   grantedBy: string;
   role: string;
   reason: string;
+  /** Un agent ne peut jamais déroger (SPEC §15, §22 point 11). */
+  actorIsAgent?: boolean;
   actorRoles: readonly string[];
   rolesPolicy: RolePolicy;
 }): { valid: boolean; error?: string } {
+  if (params.actorIsAgent === true) {
+    return { valid: false, error: 'An agent can never grant a waiver' };
+  }
   if (params.criterionId.trim().length === 0) {
     return { valid: false, error: 'Criterion ID is required' };
   }
