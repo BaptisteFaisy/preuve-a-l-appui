@@ -1,0 +1,401 @@
+# Fait, preuve à l'appui — manifest Forge
+#
+# App Atlassian Forge (UI Kit 2 / React) installée sur Jira (requis) et
+# Confluence (optionnel, pour le dossier de preuve — SPEC §16, §17).
+#
+# Formes vérifiées le 11/11/2026 contre :
+#   - le schéma local `node_modules/@forge/manifest/out/schema/manifest-schema.json` ;
+#   - la documentation Atlassian Developer (docs/research/R1-modules-forge.md).
+#
+# Garde hors ligne : `node tools/check-manifest.mjs` (exit 0 = conforme).
+# Chaque module renvoie à la section du cahier des charges qui le motive.
+
+app:
+  # Identifiant provisoire : la valeur définitive est fournie par `forge create`
+  # (elle change à la première installation). À remplacer avant le premier
+  # déploiement — le garde ne contrôle que le format ARI.
+  id: ari:cloud:ecosystem::app/00000000-0000-0000-0000-000000000000
+  name: Fait, preuve à l'appui
+  description: >-
+    Proof-gated delivery for Jira: a ticket only reaches Done when every
+    acceptance criterion is backed by evidence of sufficient strength. A
+    workflow validator names the missing criterion instead of letting the
+    ticket close, and the proofs keep being checked after delivery.
+  runtime:
+    name: nodejs22.x
+    architecture: x86_64
+    memoryMB: 512
+  compatibility:
+    jira:
+      required: true
+    confluence:
+      required: false
+
+modules:
+  # ------------------------------------------------ validateur de workflow (§12.1)
+  # Preview : posé par l'administrateur sur la transition vers « Terminé ».
+  # La fonction ne calcule rien, elle lit la ligne de couverture du ticket.
+  jira:workflowValidator:
+    - key: proof-gate
+      name: Fait, preuve à l'appui
+      description: Blocks the transition while a criterion has no evidence of sufficient strength.
+      function: validateProof
+      projectTypes:
+        - company-managed
+        - team-managed
+
+  # ----------------------------------------------------- panneau du ticket (§16.1)
+  # Matrice critères x preuves : une ligne par critère, sa force exigée, ses
+  # preuves, son état. Boutons attacher / attester / demander / déroger.
+  jira:issuePanel:
+    - key: proof-matrix-panel
+      title: Proofs
+      resource: main
+      resolver:
+        function: resolver
+      render: native
+      icon: resource:icon;icon.svg
+
+  # ------------------------------------------------- champ de couverture (§12.3)
+  # « 3 / 4 », lecture seule, affiché dans les tableaux du ticket et
+  # exploitable en JQL. La valeur vient d'une propriété de ticket indexée
+  # (§19, solution de repli), écrite par l'app — jamais par un humain.
+  jira:customField:
+    - key: proof-coverage-field
+      name: Proofs
+      description: Read-only proof coverage of the ticket, for example "3 / 4".
+      type: string
+      readOnly: true
+      formatter:
+        expression: 'issue.properties["proof-coverage-label"]'
+
+  # ------------------------------------------- réglages du projet (§16.3, §9.2)
+  # Grille des exigences par type de critère, rôles qui attestent et dérogent,
+  # mode du validateur, clé du point d'entrée de CI et commande à copier.
+  jira:projectSettingsPage:
+    - key: proof-project-settings
+      title: Proof requirements
+      resource: main
+      resolver:
+        function: resolver
+      render: native
+      icon: resource:icon;icon.svg
+
+  # ------------------------------------------------- page projet (§16.4, §13)
+  # Tickets en cours et leur couverture, dérogations, critères livrés non
+  # prouvés, statistiques.
+  jira:projectPage:
+    - key: proof-project-page
+      title: Proofs
+      resource: main
+      resolver:
+        function: resolver
+      render: native
+      icon: resource:icon;icon.svg
+
+  # ------------------------------------------- entrée des résultats de CI (§10)
+  # Résumé (noms et états des tests) envoyé en fin de pipeline ; signature
+  # vérifiée, corps mis en file, réponse immédiate (§17).
+  webtrigger:
+    - key: ci-results
+      function: ingestResults
+      urlFormat: v2
+      response:
+        type: dynamic
+
+  # ------------------------------------------ file de vérification des preuves (§17)
+  # Le consommateur retrouve le ticket par la branche, met à jour les preuves
+  # de type test et leur fraîcheur, recalcule la couverture et le champ.
+  consumer:
+    - key: proof-ci-consumer
+      queue: proof-ci
+      function: onMessage
+
+  # ------------------------------------------------- ticket mis à jour (§8.2, §8.4)
+  # Critères ajoutés ou modifiés dans la description : nouvelle version de
+  # critère, preuves passées « à revoir ».
+  trigger:
+    - key: issue-updated
+      function: onEvent
+      events:
+        - avi:jira:updated:issue
+
+  # ------------------------------------------------- contrôle nocturne (§13, §20)
+  # Tickets clos sans couverture, dérogations accordées, preuves living.
+  scheduledTrigger:
+    - key: nightly-audit
+      function: onScheduled
+      interval: day
+
+  # --------------------------------------------------------- stockage (§18)
+  # Le schéma des tables vit en DDL dans src/db/schema.ts ; le manifest ne
+  # déclare que lENGINE et la clé du module.
+  sql:
+    - key: main
+      engine: mysql
+
+  # ------------------------------------------------------ modèle de texte (§11)
+  # Import des critères depuis la description et rapprochement tests x critères.
+  # Forge LLMs ne traitent que du texte (§19).
+  llm:
+    - key: main-llm
+      model:
+        - claude
+
+  # ------------------------------------------------------ fonctions Forge
+  # Les sept points d'entrée du contrat (docs/CONTRACTS.md §3) plus une
+  # fonction par action : une action est une fonction Forge ordinaire
+  # signature (payload, context), pas un resolver.
+  function:
+    - key: resolver
+      handler: index.handler
+    - key: validateProof
+      handler: index.validateProof
+    - key: ingestResults
+      handler: index.ingestResults
+    - key: onEvent
+      handler: index.onEvent
+    - key: onScheduled
+      handler: index.onScheduled
+      timeoutSeconds: 600
+    - key: onMessage
+      handler: index.onMessage
+      timeoutSeconds: 900
+    - key: dispatch
+      handler: index.dispatch
+    - key: fn-list-criteria
+      handler: index.dispatch
+    - key: fn-get-proof-status
+      handler: index.dispatch
+    - key: fn-attach-evidence
+      handler: index.dispatch
+    - key: fn-propose-criteria
+      handler: index.dispatch
+    - key: fn-request-attestation
+      handler: index.dispatch
+    - key: fn-suggest-evidence
+      handler: index.dispatch
+    - key: fn-get-release-proof
+      handler: index.dispatch
+
+  # ------------------------------------------------ actions Rovo / MCP (§15)
+  # Sept outils exactement. Aucun outil n'atteste, ne déroge ni ne valide :
+  # ces gestes restent dans l'interface, pour un humain (§15, §22 point 11).
+  # Entrées limitées à string / integer / number / boolean (§19).
+  action:
+    - key: list-criteria
+      name: List acceptance criteria
+      function: fn-list-criteria
+      actionVerb: GET
+      description: >-
+        Lists the acceptance criteria of a Jira issue with their code, type,
+        required strength and current state.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Key of the Jira issue, for example PAY-123.
+    - key: get-proof-status
+      name: Get proof status
+      function: fn-get-proof-status
+      actionVerb: GET
+      description: >-
+        Returns the proof coverage of a Jira issue: proven and total criteria,
+        the criteria still in default and the proof expected for each of them.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Key of the Jira issue, for example PAY-123.
+    - key: attach-evidence
+      name: Attach evidence
+      function: fn-attach-evidence
+      actionVerb: CREATE
+      description: >-
+        Attaches one piece of evidence to one acceptance criterion of a Jira
+        issue and returns the strength the app computed for it. An agent can
+        only declare evidence, never attest it.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Key of the Jira issue, for example PAY-123.
+        criterionId:
+          title: Criterion id
+          type: string
+          required: true
+          description: Identifier of the acceptance criterion, for example AC-1.
+        type:
+          title: Evidence type
+          type: string
+          required: true
+          description: >-
+            One of test, documentation, attestation, attachment, agent-report,
+            link.
+        reference:
+          title: Reference
+          type: string
+          required: true
+          description: >-
+            What the evidence points to: full test name, Confluence page URL,
+            attachment id, report anchor or free link.
+        note:
+          title: Note
+          type: string
+          required: false
+          description: Optional free note kept with the evidence.
+    - key: propose-criteria
+      name: Propose acceptance criteria
+      function: fn-propose-criteria
+      actionVerb: CREATE
+      description: >-
+        Proposes acceptance criteria for a Jira issue. Proposals stay pending
+        until a human validates them; an agent never validates criteria.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Key of the Jira issue, for example PAY-123.
+        criteria:
+          title: Proposed criteria
+          type: string
+          required: true
+          description: >-
+            Comma separated acceptance criteria, one per entry, for example
+            "The refusal email is sent,The limit is configurable".
+    - key: request-attestation
+      name: Request attestation
+      function: fn-request-attestation
+      actionVerb: CREATE
+      description: >-
+        Asks the competent role to attest one acceptance criterion of a Jira
+        issue. The assignee of the ticket can never attest its own work.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Key of the Jira issue, for example PAY-123.
+        criterionId:
+          title: Criterion id
+          type: string
+          required: true
+          description: Identifier of the acceptance criterion, for example AC-3.
+        what:
+          title: What to check
+          type: string
+          required: true
+          description: What the attester has to verify, in one sentence.
+    - key: suggest-evidence
+      name: Suggest evidence
+      function: fn-suggest-evidence
+      actionVerb: GET
+      description: >-
+        Suggests pairs between test names and acceptance criteria of a Jira
+        issue, with a confidence and a one sentence rationale. A suggested pair
+        never counts as proof until a human confirms it.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Key of the Jira issue, for example PAY-123.
+        testNames:
+          title: Test names
+          type: string
+          required: true
+          description: >-
+            Comma separated full test names, for example
+            "PayMailTests.testRefusal,PayLimitsTests.testLimit".
+    - key: get-release-proof
+      name: Get release proof
+      function: fn-get-release-proof
+      actionVerb: GET
+      description: >-
+        Returns the proof coverage of a Jira version: per issue totals, waivers
+        granted and criteria that are delivered but no longer proven.
+      inputs:
+        versionId:
+          title: Version id
+          type: string
+          required: true
+          description: Identifier of the project version, for example 10042.
+
+  # ------------------------------------------------------ agent Rovo (§15)
+  # L'agent lit, déclare et propose ; il n'atteste pas et ne déroge pas.
+  rovo:agent:
+    - key: proof-agent
+      name: Proof at hand
+      description: >-
+        Answers the proof questions of a Jira issue: what is missing to close
+        it, which criteria were waived, which delivered criteria are no longer
+        proven, and drafts acceptance criteria for human validation.
+      prompt: resource:agent-prompt;prompt.md
+      conversationStarters:
+        - What is missing to close PAY-123?
+        - Which tickets of version 2.4 were closed by waiver?
+        - Which delivered criteria are no longer proven?
+        - Draft the acceptance criteria of this ticket.
+      actions:
+        - list-criteria
+        - get-proof-status
+        - attach-evidence
+        - propose-criteria
+        - request-attestation
+        - suggest-evidence
+        - get-release-proof
+      followUpPrompt: Suggest the next useful question about the proof of this ticket.
+
+  # ----------------------------------------------------------- serveur MCP (§15)
+  # Un seul module rovo:mcp par app, 50 outils au plus, accès externe activé
+  # par un administrateur (§19).
+  rovo:mcp:
+    - key: proof-mcp
+      name: Proof at hand
+      tools:
+        - list-criteria
+        - get-proof-status
+        - attach-evidence
+        - propose-criteria
+        - request-attestation
+        - suggest-evidence
+        - get-release-proof
+
+# ------------------------------------------------------------------ ressources
+resources:
+  # Point d'entrée UI Kit 2 : panneau du ticket, champ, réglages, page projet.
+  - key: main
+    path: src/ui/frontend/index.tsx
+  # Prompt système de l'agent Rovo (fichier : static/agent/prompt.md).
+  - key: agent-prompt
+    path: static/agent
+  # Icône des modules Jira (panneau, réglages, page projet).
+  - key: icon
+    path: static/icon.svg
+
+# --------------------------------------------------------------------- scopes
+# Le strict nécessaire, chaque scope commenté avec sa raison (§14, §20).
+permissions:
+  scopes:
+    # Lire les tickets, versions, champs et changelog : matrice des critères,
+    # ticket retrouvé par la branche de CI (§8, §10).
+    - read:jira-work
+    # Écrire ce que l'app possède : réécriture de la section « Critères » de la
+    # description (§8.2), propriété de ticket pour le champ de couverture
+    # (§12.3, §19), commentaire de notification (§9.4, §14 FP-15).
+    - write:jira-work
+    # Vérifier une preuve de type « page de documentation » : la page existe
+    # et a changé après l'ouverture du ticket (§9.1). Confluence est une app
+    # optionnelle ; la variante légère `read:confluence-content.summary`
+    # suffirait si la preuve ne portait que sur la date de modification.
+    - read:confluence-content.all
+    # Volontairement absents :
+    #   - manage:jira-configuration : l'app ne crée ni ne modifie la
+    #     configuration Jira ; le validateur est posé par l'administrateur
+    #     dans l'éditeur de workflow (§12.1, §16.5).
+    #   - read:graph:* : Teamwork Graph n'est utile que pour l'option
+    #     Marketplace (§6) ; aucun appel Graph dans le périmètre MVP.

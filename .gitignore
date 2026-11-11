@@ -1,2 +1,9 @@
+node_modules/
+dist/
+build/
+.npm-state/
+.forge/
+*.log
+.DS_Store
 __pycache__/
-*.py[cod]
+*.pyc
