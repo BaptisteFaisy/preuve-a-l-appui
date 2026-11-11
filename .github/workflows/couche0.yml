@@ -42,7 +42,7 @@ concurrency:
   # déclenchement annule le premier — jamais un saut, qui publierait un check
   # `skipped` que la file lirait comme un échec.
   group: couche0-${{ (startsWith(github.ref_name, 'mergify/merge-queue/') || startsWith(github.event.pull_request.head.ref || '', 'mergify/merge-queue/')) && (github.event.pull_request.head.sha || github.sha) || github.event.pull_request.number || inputs.pr || github.ref_name }}
-  cancel-in-progress: true
+  cancel-in-progress: false  # un check requis annulé bloque la file (leçon du 11 nov.)
 
 jobs:
   couche0:
