@@ -80,7 +80,7 @@ jobs:
       - name: Construction du site (vite build)
         run: npm run site:build
 
-      - name: Garde : aucune ressource absolue hors base Pages
+      - name: "Garde — aucune ressource absolue hors base Pages"
         shell: bash
         run: |
           # Pages sert le site sous /preuve-a-l-appui/ : une URL absolue en
