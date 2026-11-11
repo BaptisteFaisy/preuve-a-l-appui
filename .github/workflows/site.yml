@@ -80,17 +80,31 @@ jobs:
       - name: Construction du site (vite build)
         run: npm run site:build
 
-      - name: "Garde — aucune ressource absolue hors base Pages"
+      - name: "Garde — ressources du site servies sous la base Pages"
         shell: bash
         run: |
-          # Pages sert le site sous /preuve-a-l-appui/ : une URL absolue en
-          # racine (/assets/…) casserait la page. On vérifie le build.
-          if grep -rlE '(href|src)="/[^/]' site/dist --include='*.html' >/dev/null 2>&1; then
-            echo "::error::référence absolue racine dans site/dist (base Pages incorrecte)"
-            grep -rnE '(href|src)="/[^/]' site/dist --include='*.html' | head -5
-            exit 1
-          fi
-          echo "OK : aucune référence absolue racine"
+          # Pages sert le site sous /preuve-a-l-appui/ : une URL absolue qui
+          # part de la racine (/assets/…) casserait la page. On n'accepte que
+          # les URL relatives ou préfixées par la base.
+          python3 - <<'PY'
+          import pathlib
+          import re
+          import sys
+
+          BASE = "/preuve-a-l-appui/"
+          mauvaises = []
+          for fichier in sorted(pathlib.Path("site/dist").rglob("*.html")):
+              texte = fichier.read_text(encoding="utf-8")
+              for trouve in re.finditer(r'(?:href|src)="(/[^"]*)"', texte):
+                  url = trouve.group(1)
+                  if not url.startswith(BASE):
+                      mauvaises.append(f"{fichier}: {url}")
+          if mauvaises:
+              for ligne in mauvaises[:10]:
+                  print(f"::error::URL absolue hors base Pages — {ligne}")
+              sys.exit(1)
+          print(f"OK : toutes les URL absolues du build portent la base {BASE}")
+          PY
 
       - name: Artefact Pages
         uses: actions/upload-pages-artifact@v3
