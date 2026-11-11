@@ -67,7 +67,7 @@ jobs:
       - name: Tests unitaires (vitest)
         run: npx vitest run --passWithNoTests
 
-      # Garde user 2026-10-24 : aucun fichier de code au-delà de 500 lignes.
+      # Garde user (règle de fin octobre) : aucun fichier au-delà de 500 lignes.
       - name: Garde de taille des fichiers (< 500 lignes)
         run: python3 tools/check-file-limits.py
 
