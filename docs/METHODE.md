@@ -92,3 +92,25 @@ Le plan semaine par semaine jusqu'à la soumission est dans le SPEC §25 :
 validations plateforme d'abord, critères et preuves, puis CI et MCP, gel des
 fonctionnalités à la mi-décembre, recette et vidéo dans la dernière semaine.
 L'avancement réel se lit sur la file Mergify et les checks `ci` des PR.
+
+## Preuve de la chaîne de fusion automatique (mesurée le 11 novembre 2026)
+
+La chaîne « PR verte → file Mergify → merge » et la résolution automatique des
+conflits ont été éprouvées sur ce dépôt avec deux sondes volontairement en
+conflit sur le même fichier et la même ligne (`docs/PROBE-CONFLIT.md`, supprimé
+depuis) :
+
+| Heure (UTC) | Fait |
+|---|---|
+| 13:15 | PR #20 (sonde A) mergée par la file Mergify |
+| 13:18:42 | PR #21 (sonde B) **déqueue** : `CONFLICT_WITH_BASE_BRANCH` |
+| 13:19:04 | le balayeur `pr-auto-merge` classe la PR #21 `DIRTY` |
+| 13:19:46 | l'agent de conflit (`.github/fireworks/conflict_agent.py`, modèle
+`combo/cheap` servi par InferHub) **réconcilie** le fichier, pousse le rebase et
+commente la PR |
+| 13:22:43 | PR #21 **mergée** par la file, sans intervention humaine |
+
+Le contenu final était l'union sémantique des deux variantes : la réconciliation
+est bien le fait du modèle, pas d'un rebase mécanique. Aucune des neuf PR de
+lots n'a eu besoin de ce chemin — leurs fichiers étaient disjoints par
+construction (`docs/CONTRACTS.md`), ce qui reste la première défense.
