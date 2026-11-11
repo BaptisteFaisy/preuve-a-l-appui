@@ -82,3 +82,21 @@ Quand un prototype tranche un point : passer l'état à « validé » ou « repl
 activé », dater en toutes lettres, et reporter la conséquence dans
 [ARCHITECTURE.md](ARCHITECTURE.md) si le design change. Ce fichier reste en
 français ; le résumé pour les juges est dans [JUDGES.md](JUDGES.md).
+
+## Contrôle du manifest par le CLI Forge (mesuré le 11 novembre 2026)
+
+`forge lint` (CLI 15.1.0, Node 26.12.1) a été exécuté sur l'arbre du dépôt :
+
+- avec `app.id: ari:cloud:ecosystem::app/00000000-0000-0000-0000-000000000000`
+  le CLI **refuse l'ARI** : `appId` doit vérifier
+  `^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$`
+  (UUID v4). Un identifiant provisoire tout en zéros casse donc le lint ;
+- avec un UUID v4 de forme valide, le contrôle de l'ARI passe et le CLI
+  s'arrête sur `Your app could not be found` : le lint interroge le compte
+  Atlassian pour résoudre le propriétaire de l'app. **`forge lint` complet
+  suppose une app enregistrée** (`forge create`), ce qui reste un geste humain
+  côté compte développeur ;
+- en attendant, le manifest est validé hors ligne par `node
+  tools/check-manifest.mjs`, qui le confronte au schéma JSON publié par
+  `@forge/manifest` et contrôle les 7 actions, leurs verbes, leurs types
+  d'entrée (SPEC §19), les fonctions référencées et les outils MCP déclarés.
