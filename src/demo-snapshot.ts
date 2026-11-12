@@ -165,7 +165,7 @@ export async function buildDemoSnapshot(
     deps.store.listWaiversByIssue(issue.id),
     deps.store.getCoverage(issue.id),
     deps.store.listLivingByProject(issue.projectId),
-    deps.store.computeStats(issue.projectId, SNAPSHOT_EPOCH),
+    deps.store.computeStats(issue.projectKey, SNAPSHOT_EPOCH),
     readDossier(deps, issue.fixVersions[0]),
     readCi(deps, input),
   ]);

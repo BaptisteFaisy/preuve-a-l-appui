@@ -66,6 +66,10 @@ export function createJiraWriter(state: FakeJiraState) {
         roles: [...roles],
       }));
     },
+    async projectKey(projectId: string): Promise<string> {
+      state.journal.calls.push({ method: 'projectKey', args: [projectId] });
+      return state.known.find((issue) => matchesProject(issue, projectId))?.projectKey ?? '';
+    },
     async writeSnapshot(issueId: string, snapshot: unknown): Promise<boolean> {
       state.journal.calls.push({ method: 'writeSnapshot', args: [issueId] });
       state.snapshots.set(issueId, snapshot);

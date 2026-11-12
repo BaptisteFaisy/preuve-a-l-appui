@@ -387,11 +387,15 @@ async function handleSaveSettings(req: ResolverRequest, deps: AppDeps): Promise<
 async function handleGetProjectPage(req: ResolverRequest, deps: AppDeps): Promise<unknown> {
   const { projectId, language } = extractContext(req);
   const id = projectId || 'DEFAULT';
+  // Les statistiques se calculent par CLÉ de projet : les lignes de couverture
+  // sont rangées par clé de ticket (`PAY-1`), dont le préfixe est la clé du
+  // projet. Passer l'id numérique donnait des statistiques vides.
+  const projectKey = await deps.jira.projectKey(id);
   const [settings, waivers, living, stats, closedIds] = await Promise.all([
     deps.store.getSettings(id),
     deps.store.listWaiversByProject(id, EPOCH),
     deps.store.listLivingByProject(id),
-    deps.store.computeStats(id, EPOCH),
+    deps.store.computeStats(projectKey, EPOCH),
     deps.store.listClosedWithoutCoverage(id, 20),
   ]);
   const rows = await Promise.all(closedIds.map((cid) => deps.store.getCoverage(cid)));
