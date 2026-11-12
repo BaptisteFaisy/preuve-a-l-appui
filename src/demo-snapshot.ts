@@ -32,6 +32,7 @@ import type {
   Waiver,
 } from './types';
 import type { AppDeps } from './deps';
+import { defaultProjectSettings } from './defaults';
 
 /** Époque de référence pour les lectures « tout l'historique ». */
 export const SNAPSHOT_EPOCH = '1970-01-01T00:00:00.000Z';
@@ -256,8 +257,12 @@ async function finalize(deps: AppDeps, raw: RawSnapshot): Promise<DemoSnapshotDa
       components: clean.issue.components,
       fixVersions: clean.issue.fixVersions,
     },
-    // La clé de CI ne sort jamais : le site n'en a aucun usage.
-    settings: { ...(clean.settings ?? ({} as ProjectSettings)), ciKeyHash: '' },
+    // Un projet jamais réglé part de la grille par défaut : le site doit
+    // toujours recevoir des réglages complets. La clé de CI ne sort jamais.
+    settings: {
+      ...(clean.settings ?? defaultProjectSettings(clean.issue.projectId)),
+      ciKeyHash: '',
+    },
     criteria: clean.criteria,
     evidences: clean.evidences,
     attestations: clean.attestations,

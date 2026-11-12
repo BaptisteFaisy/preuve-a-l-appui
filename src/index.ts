@@ -26,7 +26,8 @@ import { registerResolvers } from './handlers/resolver';
 import { createValidator } from './handlers/validator';
 import { handleCiResults } from './handlers/ingest';
 import { handleDemoData } from './handlers/demo-data';
-import type { CiWebRequest, CiWebResponse } from './handlers/ingest';
+import { toForgeResponse, toWebRequest } from './webtrigger-adapter';
+import type { ForgeWebRequest, ForgeWebResponse } from './webtrigger-adapter';
 import { onJiraEvent } from './handlers/events';
 import { onScheduledTick } from './handlers/scheduled';
 import { onCiMessage } from './handlers/consumer';
@@ -97,36 +98,18 @@ export async function validateProof(payload: ValidatorPayload): Promise<GateVerd
 
 /* -------------------------------------------------------- entrée de CI (L4) */
 
-/** Requête web trigger (urlFormat v2) : corps brut, pour la signature. */
-export interface ForgeWebRequest {
-  method: string;
-  path: string;
-  headers: Record<string, string>;
-  body?: string;
-  query?: Record<string, string>;
-}
-
-/** Normalise la requête Forge : le web trigger n'envoie pas toujours tous les champs. */
-function toWebRequest(request: ForgeWebRequest): CiWebRequest {
-  return {
-    method: request.method,
-    path: request.path,
-    headers: request.headers ?? {},
-    body: request.body ?? '',
-    query: request.query ?? {},
-  };
-}
-
 /**
  * Web trigger `demo-data` : GET = instantané réel pseudonymisé pour le site
  * public ; POST = amorçage du scénario de démonstration, protégé par jeton.
+ * L'adaptation de la forme Forge (en-têtes en tableaux, `queryParameters`) vit
+ * dans `src/webtrigger-adapter.ts`, testée par `tests/webtrigger-adapter.test.ts`.
  */
-export async function serveDemoData(request: ForgeWebRequest): Promise<CiWebResponse> {
-  return handleDemoData(toWebRequest(request), deps);
+export async function serveDemoData(request: ForgeWebRequest): Promise<ForgeWebResponse> {
+  return toForgeResponse(await handleDemoData(toWebRequest(request), deps));
 }
 
-export async function ingestResults(request: ForgeWebRequest): Promise<CiWebResponse> {
-  return handleCiResults(toWebRequest(request), deps);
+export async function ingestResults(request: ForgeWebRequest): Promise<ForgeWebResponse> {
+  return toForgeResponse(await handleCiResults(toWebRequest(request), deps));
 }
 
 /* ------------------------------------------------- événements et file (L4) */

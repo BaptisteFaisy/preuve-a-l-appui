@@ -9,6 +9,11 @@
  *          moteur sur des données vivantes au lieu du jeu embarqué.
  *          Lecture seule, aucun secret, aucun identifiant de compte ne sort.
  *
+ *   POST { action: "migrate" }
+ *        → applique le schéma SQL (12 tables, `CREATE TABLE IF NOT EXISTS`,
+ *          idempotent). Une seule fois par environnement : rien d'autre dans
+ *          l'app ne le fait, et Forge SQL est isolé par environnement.
+ *
  *   POST { action: "bootstrap", issueKey, ciKey, cast }
  *        → amorce le scénario du SPEC §7 sur un ticket réel. Écriture protégée
  *          par le jeton de la variable d'app `FORGE_USER_VAR_DEMO_BOOTSTRAP_TOKEN`
@@ -19,6 +24,9 @@
  */
 import type { AppDeps } from '../deps';
 import { buildDemoSnapshot } from '../demo-snapshot';
+import { applySchema } from '../db/schema';
+import { forgeDdlRunner } from '../db/sql-client';
+import type { DdlRunner } from '../db/sql-client';
 import { safeCompareHex } from '../ingest/signature';
 import { bootstrapDemoData } from '../sample/bootstrap';
 import type { BootstrapCast } from '../sample/bootstrap';
@@ -109,13 +117,34 @@ export function parseBootstrapBody(raw: string): {
   return { issueKey, ciKey, cast: { developer, tester, owner } };
 }
 
-/** POST : amorçage protégé par jeton. */
-async function bootstrap(request: CiWebRequest, deps: AppDeps): Promise<CiWebResponse> {
+/** L'action demandée dans le corps ; chaîne vide si le JSON est invalide. */
+export function actionOf(raw: string): string {
+  try {
+    const body = JSON.parse(raw) as unknown;
+    if (typeof body !== 'object' || body === null) return '';
+    return asString((body as Record<string, unknown>)['action']);
+  } catch {
+    return '';
+  }
+}
+
+/** POST : écritures protégées par jeton (schéma, amorçage). */
+async function write(
+  request: CiWebRequest,
+  deps: AppDeps,
+  ddl: DdlRunner,
+): Promise<CiWebResponse> {
   const expected = bootstrapToken();
   if (expected === '') return demoJson(403, { error: 'bootstrap-disabled' });
   if (!safeCompareHex(headerOf(request.headers, 'x-bootstrap-token'), expected)) {
     return demoJson(403, { error: 'invalid-token' });
   }
+  const action = actionOf(request.body);
+  if (action === 'migrate') {
+    const applied = await applySchema(ddl);
+    return demoJson(200, { action: 'migrate', tables: applied.length, applied });
+  }
+  if (action !== 'bootstrap') return demoJson(400, { error: 'invalid-payload' });
   const input = parseBootstrapBody(request.body);
   if (input === null) return demoJson(400, { error: 'invalid-payload' });
   const result = await bootstrapDemoData(deps, input);
@@ -123,14 +152,26 @@ async function bootstrap(request: CiWebRequest, deps: AppDeps): Promise<CiWebRes
   return demoJson(200, result);
 }
 
-/** Aiguillage du web trigger : lecture publique, écriture jetonnée. */
+/**
+ * Aiguillage du web trigger : lecture publique, écritures jetonnées. Le runner
+ * de DDL est injectable pour les tests ; en production c'est celui de Forge SQL.
+ */
 export async function handleDemoData(
   request: CiWebRequest,
   deps: AppDeps,
+  ddl: DdlRunner = forgeDdlRunner,
 ): Promise<CiWebResponse> {
   const method = request.method.toUpperCase();
-  if (method === 'OPTIONS') return { statusCode: 204, headers: { ...CORS_HEADERS }, body: '' };
-  if (method === 'GET') return serveSnapshot(request, deps);
-  if (method === 'POST') return bootstrap(request, deps);
-  return demoJson(405, { error: 'method-not-allowed' });
+  try {
+    if (method === 'OPTIONS') return { statusCode: 204, headers: { ...CORS_HEADERS }, body: '' };
+    if (method === 'GET') return await serveSnapshot(request, deps);
+    if (method === 'POST') return await write(request, deps, ddl);
+    return demoJson(405, { error: 'method-not-allowed' });
+  } catch (error) {
+    // Sans ce filet, Forge répond `424 Failed Dependency` et ne journalise rien :
+    // la panne devient invisible. Le message remonte à l'appelant et aux logs.
+    const message = error instanceof Error ? error.message : String(error);
+    deps.logger.log('error', 'demo-data.failed', { method, message });
+    return demoJson(500, { error: 'internal', message });
+  }
 }

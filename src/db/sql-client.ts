@@ -10,13 +10,16 @@
  *   raw SQL with positional `?` parameters bound through `sql.prepare(...).bindParams(...)`;
  * - schema changes go through `migrationRunner.enqueue(name, ddl).run()`.
  *
- * `@forge/sql` is not in `package.json` (a shared file this module may not edit),
- * so the runtime binding is loaded lazily through a non-literal specifier: no
- * static import, no compile-time dependency, one single place to swap when the
- * dependency lands.
+ * L'import de `@forge/sql` est STATIQUE et littéral : le bundler de Forge
+ * (webpack) ne sait pas empaqueter un spécificateur calculé — avec un import
+ * non littéral, le module manque au runtime et chaque accès SQL fait répondre
+ * `424 Failed Dependency` au web trigger, sans aucun log. Vérifié en réel le
+ * 12/11/2026 sur one-atlas-cndz. La dépendance est dans `package.json`.
  *
  * Rule: files < 500 lines, functions < 50 lines.
  */
+
+import * as forgeSql from '@forge/sql';
 
 /** Values Forge SQL accepts as a bound `?` parameter. */
 export type SqlParam = string | number | boolean | null;
@@ -67,14 +70,11 @@ interface ForgeSqlModule {
   migrationRunner?: ForgeMigrationRunner;
 }
 
-/** Kept as a plain `string` so TypeScript never tries to resolve the module. */
-const FORGE_SQL_MODULE: string = '@forge/sql';
-
 let loaded: Promise<ForgeSqlModule> | null = null;
 
-/** Loads `@forge/sql` once per warm runtime; throws a clear error if absent. */
+/** Le paquet Forge SQL, lié une fois pour toutes (spécificateur littéral). */
 export function loadForgeSql(): Promise<ForgeSqlModule> {
-  loaded ??= import(FORGE_SQL_MODULE).then((mod: unknown) => mod as ForgeSqlModule);
+  loaded ??= Promise.resolve(forgeSql as unknown as ForgeSqlModule);
   return loaded;
 }
 
