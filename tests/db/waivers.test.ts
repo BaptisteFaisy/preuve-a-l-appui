@@ -33,14 +33,17 @@ describe('db/waivers — lecture des dérogations', () => {
     expect(sql.calls[0]?.params).toEqual(['10001']);
   });
 
-  it('borne les listes par projet avec LIMIT', async () => {
+  it('borne les listes par projet avec LIMIT, en cherchant par clé de projet', async () => {
     const sql = createFakeSqlClient();
     sql.scriptRows([]);
-    await createWaiverStore(sql).listWaiversByProject('PAY', '2026-11-01T00:00:00.000Z');
+    await createWaiverStore(sql).listWaiversByProject('PAY', '2026-11-01 00:00:00');
 
     const call = sql.calls[0];
     expect(call?.statement).toContain('LIMIT 500');
-    expect(call?.params).toEqual(['PAY-%', 'PAY', '2026-11-01T00:00:00.000Z']);
+    // Les tickets du projet sont ceux dont la couverture commence par la clé :
+    // un id de ticket Jira ('66653') ne porte aucun préfixe de projet.
+    expect(call?.statement).toContain("cov.issue_key LIKE ?");
+    expect(call?.params).toEqual(['PAY-%', '2026-11-01 00:00:00']);
   });
 });
 
