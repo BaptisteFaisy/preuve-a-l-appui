@@ -118,8 +118,16 @@ export async function onEvent(payload: Record<string, unknown>): Promise<void> {
   await onJiraEvent(payload, deps);
 }
 
+/**
+ * Consommateur de la file `proof-ci` : Forge livre l'enveloppe de l'événement
+ * (`queueName`, `jobId`, `eventId`, `body`, `context`…), la charge utile est
+ * dans `body`. Sans ce déballage, le message était illisible et le consommateur
+ * ne faisait rien — vérifié en réel le 12/11/2026 (`ci.consumer.unreadable_message`).
+ */
 export async function onMessage(payload: Record<string, unknown>): Promise<void> {
-  await onCiMessage(payload as unknown as CiIngestMessage, deps);
+  const body = payload['body'];
+  const message = typeof body === 'object' && body !== null ? body : payload;
+  await onCiMessage(message as unknown as CiIngestMessage, deps);
 }
 
 /* --------------------------------------------- contrôle nocturne (L3, §20) */

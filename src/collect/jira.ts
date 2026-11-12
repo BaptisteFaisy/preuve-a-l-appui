@@ -15,6 +15,7 @@
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import { route } from '@forge/api';
+import type { ProjectMember } from '../types';
 import type { Route } from '@forge/api';
 import type { JiraGateway } from '../ports';
 import type { IssueRef } from '../types';
@@ -93,9 +94,14 @@ interface RawSearchPage {
   issues?: RawIssue[];
 }
 
+/** Le nom affiché vit sur l'acteur, l'identifiant dans `actorUser` (API Jira v3). */
 interface RawProjectRole {
   name?: string;
-  actors?: { actorUser?: { accountId?: string } }[];
+  actors?: {
+    displayName?: string;
+    type?: string;
+    actorUser?: { accountId?: string };
+  }[];
 }
 
 interface RawUser {
@@ -312,6 +318,63 @@ async function rolesOfAccount(state: JiraState, projectId: string, accountId: st
   return roles;
 }
 
+/**
+ * Rôles Jira qui ne sont pas des rôles de projet au sens de l'app : accès des
+ * extensions, files de service desk, invités. Les énumérer ramènerait des
+ * centaines de comptes sans rapport avec les preuves (SPEC §9.4).
+ */
+const SYSTEM_ROLE_NAMES = new Set([
+  'atlassian-addons-project-access',
+  'jira-guest-member',
+  'Service Desk Team',
+  'Service Desk Customers',
+  'Customer Service Team',
+]);
+
+/**
+ * Les personnes du projet : mêmes appels que les rôles d'un compte (carte des
+ * rôles puis chaque rôle), mais cette fois on garde les membres. Le site
+ * public s'en sert pour nommer les acteurs qu'il affiche — l'app ne fabrique
+ * jamais de personne.
+ */
+async function membersOfProject(
+  state: JiraState,
+  projectId: string,
+): Promise<readonly ProjectMember[]> {
+  if (!projectId) return [];
+  const roleUrls = await state.transport.getJson<Record<string, string>>(
+    route`/rest/api/3/project/${projectId}/role`,
+  );
+  if (!roleUrls) return [];
+  const members = new Map<string, { displayName: string; roles: string[] }>();
+  for (const [key, url] of Object.entries(roleUrls).slice(0, MAX_ROLE_LOOKUPS)) {
+    // Rôles système et files de clients : des centaines de comptes, aucun sens
+    // pour l'app (SPEC §9.4 ne parle que des rôles qui attestent et dérogent).
+    if (SYSTEM_ROLE_NAMES.has(key)) continue;
+    const roleId = roleIdFromUrl(url);
+    if (!roleId) continue;
+    const role = await state.transport.getJson<RawProjectRole>(
+      route`/rest/api/3/project/${projectId}/role/${roleId}`,
+    );
+    const name = role?.name?.trim() || key;
+    for (const actor of role?.actors ?? []) {
+      const accountId = actor.actorUser?.accountId ?? '';
+      if (accountId === '') continue;
+      const entry = members.get(accountId) ?? {
+        displayName: actor.displayName ?? '',
+        roles: [] as string[],
+      };
+      entry.roles.push(name);
+      members.set(accountId, entry);
+    }
+  }
+  return [...members.entries()].map(([accountId, entry]) => ({
+    accountId,
+    displayName: entry.displayName,
+    roles: entry.roles,
+  }));
+}
+
 /** Repli de notification : un commentaire qui mentionne le compte (SPEC §9.4). */
 async function notifyByComment(
   state: JiraState,
@@ -332,6 +395,9 @@ function createJiraPeopleWrites(state: JiraState) {
     async projectRoles(projectId: string, accountId: string): Promise<string[]> {
       if (!projectId || !accountId) return [];
       return rolesOfAccount(state, projectId, accountId);
+    },
+    async projectMembers(projectId: string): Promise<readonly ProjectMember[]> {
+      return membersOfProject(state, projectId);
     },
     async notify(
       accountId: string,

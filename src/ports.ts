@@ -21,6 +21,7 @@ import type {
   IssueRef,
   LivingProof,
   ParsedCriterion,
+  ProjectMember,
   ProjectSettings,
   ProofStats,
   ReleaseDossier,
@@ -72,6 +73,8 @@ export interface JiraGateway {
   /** The `Preuves n / m` field, or an indexed issue property as a fallback. */
   setCoverageField(issueId: string, label: string, proven: number, total: number): Promise<boolean>;
   projectRoles(projectId: string, accountId: string): Promise<string[]>;
+  /** The people who hold a role on the project, with that role (SPEC §9.4). */
+  projectMembers(projectId: string): Promise<readonly ProjectMember[]>;
   notify(accountId: string, subjectKey: string, bodyKey: string, issueKey: string): Promise<boolean>;
   displayName(accountId: string): Promise<string>;
 }

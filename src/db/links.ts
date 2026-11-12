@@ -44,7 +44,6 @@ function testLinkValues(row: TestLinkRow): SqlParam[] {
     row.rationale,
     row.confirmed_by,
     row.at,
-    ...TEST_LINK_UPSERT_COLUMNS.map((col) => row[col]),
   ];
 }
 

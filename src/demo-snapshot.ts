@@ -287,13 +287,20 @@ async function readActors(
   refs: ActorRefs,
   projectId: string,
 ): Promise<readonly SnapshotActor[]> {
+  // Les personnes du projet ET celles rencontrées dans les données : le site
+  // peut ainsi nommer les acteurs qu'il affiche, sans jamais en inventer.
+  const members = await deps.jira.projectMembers(projectId);
+  for (const member of members) refs.of(member.accountId);
   const actors: SnapshotActor[] = [];
   for (const accountId of refs.accounts()) {
     const ref = refs.of(accountId);
-    const [resolved, roles] = await Promise.all([
-      deps.jira.displayName(accountId),
-      deps.jira.projectRoles(projectId, accountId),
-    ]);
+    const member = members.find((one) => one.accountId === accountId);
+    const [resolved, roles] = member
+      ? [member.displayName, member.roles]
+      : await Promise.all([
+          deps.jira.displayName(accountId),
+          deps.jira.projectRoles(projectId, accountId),
+        ]);
     actors.push({
       ref,
       displayName: resolved === accountId || resolved === '' ? ref : resolved,

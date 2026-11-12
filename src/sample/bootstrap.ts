@@ -29,6 +29,8 @@ export interface BootstrapCast {
   readonly tester: string;
   /** Product owner : peut déroger (SPEC §12.4). */
   readonly owner: string;
+  /** Compte de l'agent qui attache les preuves ; à défaut, celui du développeur. */
+  readonly agent?: string;
 }
 
 export interface BootstrapInput {
@@ -57,12 +59,12 @@ function rekey(issueId: string, sampleId: string): string {
 }
 
 /** Les quatre critères du scénario, rattachés au ticket réel. */
-function criteriaFor(issue: IssueRef, developer: string, at: string): Criterion[] {
+function criteriaFor(issue: IssueRef, author: string, at: string): Criterion[] {
   return createDemoCriteria().map((criterion) => ({
     ...criterion,
     id: rekey(issue.id, criterion.id),
     issueId: issue.id,
-    createdBy: developer,
+    createdBy: author,
     createdAt: at,
     updatedAt: at,
   }));
@@ -74,7 +76,7 @@ function criteriaFor(issue: IssueRef, developer: string, at: string): Criterion[
  * `machine-verified` (SPEC §9.1). Le critère visé suit la même règle de
  * ré-indexation que `criteriaFor` : aucune table de correspondance à tenir.
  */
-function evidencesFor(issue: IssueRef, developer: string, at: string): Evidence[] {
+function evidencesFor(issue: IssueRef, author: string, at: string): Evidence[] {
   return createDemoEvidences().map((evidence) => ({
     ...evidence,
     id: rekey(issue.id, evidence.id),
@@ -82,7 +84,7 @@ function evidencesFor(issue: IssueRef, developer: string, at: string): Evidence[
     strength: 'declared' as const,
     verified: false,
     commit: '',
-    addedBy: developer,
+    addedBy: author,
     addedByAgent: true,
     at,
   }));
@@ -133,9 +135,12 @@ export async function bootstrapDemoData(
   }
 
   const now = deps.clock.now();
-  const criteria = criteriaFor(issue, input.cast.developer, now);
+  // Les critères et leurs preuves viennent de l'agent : c'est son compte qui
+  // porte la trace (SPEC §19), pas celui du développeur assigné.
+  const author = input.cast.agent ?? input.cast.developer;
+  const criteria = criteriaFor(issue, author, now);
   for (const criterion of criteria) await deps.store.saveCriterion(criterion);
-  const evidences = evidencesFor(issue, input.cast.developer, now);
+  const evidences = evidencesFor(issue, author, now);
   for (const evidence of evidences) await deps.store.saveEvidence(evidence);
   const descriptionRewritten = await deps.jira.rewriteDescriptionSection(
     issue.id,

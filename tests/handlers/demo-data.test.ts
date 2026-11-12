@@ -86,6 +86,18 @@ describe('demo-data — lecture publique', () => {
     expect(snapshot.issue.assigneeRef).toMatch(/^actor-\d+$/);
   });
 
+  it('nomme les personnes du projet, pas seulement celles citées par les données', async () => {
+    const h = await createAcceptanceHarness();
+    await h.recompute();
+    const response = await handleDemoData(request({ query: { issueKey: ISSUE_KEY } }), h.deps);
+    const snapshot = JSON.parse(response.body) as DemoSnapshotData;
+    const noms = snapshot.actors.map((actor) => actor.displayName);
+    expect(noms).toContain('Camille Dev');
+    expect(noms).toContain('Nora QA');
+    // Aucun identifiant de compte ne sort, même pour les membres du projet.
+    for (const actor of snapshot.actors) expect(actor.ref).toMatch(/^actor-\d+$/);
+  });
+
   it('verrouille la forme du contrat consommé par le site', async () => {
     const h = await createAcceptanceHarness();
     await h.recompute();

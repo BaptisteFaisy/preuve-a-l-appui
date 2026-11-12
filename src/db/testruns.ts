@@ -54,7 +54,6 @@ function runValues(row: TestRunRow): SqlParam[] {
     row.commit,
     row.main_branch,
     row.received_at,
-    ...RUN_UPSERT_COLUMNS.map((column) => row[column]),
   ];
 }
 

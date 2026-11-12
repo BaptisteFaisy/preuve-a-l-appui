@@ -114,7 +114,9 @@ export function parseBootstrapBody(raw: string): {
   if (issueKey === '' || ciKey === '' || developer === '' || tester === '' || owner === '') {
     return null;
   }
-  return { issueKey, ciKey, cast: { developer, tester, owner } };
+  // Le compte de l'agent est optionnel : à défaut, c'est celui du développeur.
+  const agent = asString(cast['agent']);
+  return { issueKey, ciKey, cast: { developer, tester, owner, ...(agent ? { agent } : {}) } };
 }
 
 /** L'action demandée dans le corps ; chaîne vide si le JSON est invalide. */

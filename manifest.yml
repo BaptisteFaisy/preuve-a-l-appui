@@ -399,6 +399,10 @@ permissions:
     # Lire les tickets, versions, champs et changelog : matrice des critères,
     # ticket retrouvé par la branche de CI (§8, §10).
     - read:jira-work
+    # Lire le nom affiché des personnes (assignée, rapporteur, rôles projet) :
+    # sans ce scope, l'API `user` refuse et la démo ne peut pas nommer ses
+    # acteurs. Lecture seule, aucun accès aux données personnelles.
+    - read:jira-user
     # Écrire ce que l'app possède : réécriture de la section « Critères » de la
     # description (§8.2), propriété de ticket pour le champ de couverture
     # (§12.3, §19), commentaire de notification (§9.4, §14 FP-15).

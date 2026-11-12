@@ -45,7 +45,6 @@ function livingValues(row: LivingProofRow): SqlParam[] {
     row.component,
     row.commit,
     row.since,
-    ...LIVING_UPSERT_COLUMNS.map((column) => row[column]),
   ];
 }
 
