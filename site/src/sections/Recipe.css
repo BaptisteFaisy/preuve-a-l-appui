@@ -1,0 +1,87 @@
+/* Section « Recipe » — les onze points, en liste numérotée à deux colonnes.
+   Sélecteurs préfixés `.recipe-…` uniquement (lot `site/sections-c`). */
+
+.recipe-head {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--colour-border);
+  color: var(--colour-text-subtle);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.recipe-head-point {
+  grid-column: 1 / 3;
+}
+
+.recipe-head-test {
+  grid-column: 3;
+}
+
+.recipe-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.recipe-item {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--colour-border);
+}
+
+.recipe-num {
+  grid-column: 1;
+  color: var(--colour-brand);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.recipe-point {
+  grid-column: 2;
+  margin: 0;
+}
+
+.recipe-test {
+  grid-column: 3;
+  white-space: nowrap;
+}
+
+.recipe-test code {
+  color: var(--colour-text-subtle);
+  font-size: 0.85rem;
+}
+
+.recipe-test:hover code {
+  color: var(--colour-brand);
+}
+
+.recipe-howto {
+  margin-top: var(--space-6);
+}
+
+@media (max-width: 720px) {
+  .recipe-head {
+    display: none;
+  }
+
+  .recipe-item {
+    grid-template-columns: 2rem 1fr;
+  }
+
+  .recipe-point {
+    grid-column: 2;
+  }
+
+  .recipe-test {
+    grid-column: 2;
+    white-space: normal;
+  }
+}
