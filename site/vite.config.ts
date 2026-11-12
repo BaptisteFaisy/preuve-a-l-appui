@@ -8,7 +8,7 @@
  * hors ligne une fois chargé.
  *
  * `base` porte le nom du dépôt : Pages sert le site sous
- * https://baptistefaisy.github.io/preuve-a-l-appui/.
+ * https://tradoooo.github.io/preuve-a-l-appui/.
  */
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';

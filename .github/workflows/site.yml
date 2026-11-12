@@ -1,6 +1,6 @@
 name: Site (GitHub Pages)
 
-# Publie le site public sur GitHub Pages : https://baptistefaisy.github.io/preuve-a-l-appui/
+# Publie le site public sur GitHub Pages : https://tradoooo.github.io/preuve-a-l-appui/
 #
 # Le site est construit par Vite depuis `site/` ; il embarque le VRAI moteur de
 # l'app (`src/domain`, `src/handlers`) et le jeu de démonstration PAY-123, donc

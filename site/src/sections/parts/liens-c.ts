@@ -8,7 +8,7 @@
  */
 
 /** Adresse du dépôt sur GitHub. */
-export const REPO_URL = 'https://github.com/BaptisteFaisy/preuve-a-l-appui';
+export const REPO_URL = 'https://github.com/Tradoooo/preuve-a-l-appui';
 
 /** Adresse d'un fichier du dépôt, sur la branche `main`. */
 export const REPO_FILE_URL = `${REPO_URL}/blob/main/`;
