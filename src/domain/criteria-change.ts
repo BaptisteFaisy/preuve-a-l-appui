@@ -13,7 +13,7 @@
  * via un port minimal que le `EvidenceStore` de `src/ports.ts` satisfait.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Clock, JiraGateway } from '../ports.js';
+import type { Clock, JiraGateway } from '../ports';
 import type {
   Actor,
   Criterion,
@@ -21,9 +21,9 @@ import type {
   Evidence,
   Freshness,
   Language,
-} from '../types.js';
-import { criteriaMessage } from '../i18n/criteria.js';
-import { isSameCriterionText, renderCriteriaSection } from './criteria.js';
+} from '../types';
+import { criteriaMessage } from '../i18n/criteria';
+import { isSameCriterionText, renderCriteriaSection } from './criteria';
 
 /**
  * Port minimal pour passer les preuves en « à revoir » (SPEC §8.4) : le

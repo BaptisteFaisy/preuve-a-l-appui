@@ -9,7 +9,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Messages } from './index.js';
+import type { Messages } from './index';
 
 export const ADAPTATEURS_MESSAGES: Messages = {
   /** Nom affiché d'un agent dont le compte est connu (SPEC §19). */

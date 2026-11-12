@@ -15,10 +15,10 @@
  * Aucun import `@forge/*` ici : le resolver ne voit que `AppDeps`.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import { defaultProjectSettings } from '../defaults.js';
-import type { AppDeps } from '../deps.js';
-import { canAttest } from '../domain/independence.js';
-import { isRoleAllowedToWaive, validateWaiverCandidate } from '../domain/waivers.js';
+import { defaultProjectSettings } from '../defaults';
+import type { AppDeps } from '../deps';
+import { canAttest } from '../domain/independence';
+import { isRoleAllowedToWaive, validateWaiverCandidate } from '../domain/waivers';
 import type {
   Actor,
   Attestation,
@@ -31,14 +31,14 @@ import type {
   ProjectSettings,
   Strength,
   Waiver,
-} from '../types.js';
-import { text } from '../i18n/index.js';
-import { UI_MESSAGES } from '../i18n/ui.js';
-import { buildCoverageFieldViewModel } from '../viewmodel/coverage.js';
-import { buildMatrixViewModel, formatRevisionItem } from '../viewmodel/matrix.js';
-import type { MatrixRights } from '../viewmodel/matrix.js';
-import { buildProjectPageViewModel } from '../viewmodel/project.js';
-import { buildSettingsViewModel } from '../viewmodel/settings.js';
+} from '../types';
+import { text } from '../i18n/index';
+import { UI_MESSAGES } from '../i18n/ui';
+import { buildCoverageFieldViewModel } from '../viewmodel/coverage';
+import { buildMatrixViewModel, formatRevisionItem } from '../viewmodel/matrix';
+import type { MatrixRights } from '../viewmodel/matrix';
+import { buildProjectPageViewModel } from '../viewmodel/project';
+import { buildSettingsViewModel } from '../viewmodel/settings';
 
 /** Ce que `@forge/resolver` passe au callback : la charge utile et le contexte. */
 export interface ResolverRequest {

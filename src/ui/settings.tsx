@@ -23,10 +23,10 @@ import {
   Text,
 } from '@forge/react';
 import { invoke } from '@forge/bridge';
-import { text } from '../i18n/index.js';
-import { UI_MESSAGES } from '../i18n/ui.js';
-import type { GateMode, Language } from '../types.js';
-import type { SettingsViewModel } from '../viewmodel/settings.js';
+import { text } from '../i18n/index';
+import { UI_MESSAGES } from '../i18n/ui';
+import type { GateMode, Language } from '../types';
+import type { SettingsViewModel } from '../viewmodel/settings';
 
 export interface ProjectSettingsProps {
   readonly vm: SettingsViewModel;

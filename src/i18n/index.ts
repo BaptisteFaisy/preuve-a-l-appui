@@ -7,7 +7,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Language } from '../types.js';
+import type { Language } from '../types';
 
 /** Un dictionnaire : une clé, ses deux langues. */
 export type Messages = Readonly<Record<string, Readonly<Record<Language, string>>>>;

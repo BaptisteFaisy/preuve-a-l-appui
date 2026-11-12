@@ -6,16 +6,16 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { SqlClient } from './sql-client.js';
-import type { CoverageStore } from '../ports.js';
-import type { Coverage } from '../types.js';
+import type { SqlClient } from './sql-client';
+import type { CoverageStore } from '../ports';
+import type { Coverage } from '../types';
 import {
   type CoverageRow,
   coverageToRow,
   insertPlaceholders,
   rowToCoverage,
   selectColumns,
-} from './mapping.js';
+} from './mapping';
 
 const TABLE = 'coverage';
 

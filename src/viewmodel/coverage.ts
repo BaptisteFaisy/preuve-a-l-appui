@@ -8,9 +8,9 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import { text } from '../i18n/index.js';
-import { UI_MESSAGES } from '../i18n/ui.js';
-import type { Coverage, Language } from '../types.js';
+import { text } from '../i18n/index';
+import { UI_MESSAGES } from '../i18n/ui';
+import type { Coverage, Language } from '../types';
 
 export type CoverageColorTone = 'green' | 'orange' | 'red';
 

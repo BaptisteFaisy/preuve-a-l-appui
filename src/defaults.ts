@@ -3,7 +3,7 @@
  *
  * Rule: files < 500 lines, functions < 50 lines.
  */
-import type { CriterionType, ProjectSettings, RequirementGrid, RolePolicy } from './types.js';
+import type { CriterionType, ProjectSettings, RequirementGrid, RolePolicy } from './types';
 
 export const DEFAULT_REQUIREMENTS: RequirementGrid = {
   functional: {

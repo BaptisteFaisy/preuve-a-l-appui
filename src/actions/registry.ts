@@ -7,15 +7,15 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { ActorContext } from '../ports.js';
-import { attachEvidence } from './attach-evidence.js';
-import { getProofStatus } from './get-proof-status.js';
-import { getReleaseProof } from './get-release-proof.js';
-import { listCriteria } from './list-criteria.js';
-import { proposeCriteria } from './propose-criteria.js';
-import { requestAttestation } from './request-attestation.js';
-import { suggestEvidence } from './suggest-evidence.js';
+import type { AppDeps } from '../deps';
+import type { ActorContext } from '../ports';
+import { attachEvidence } from './attach-evidence';
+import { getProofStatus } from './get-proof-status';
+import { getReleaseProof } from './get-release-proof';
+import { listCriteria } from './list-criteria';
+import { proposeCriteria } from './propose-criteria';
+import { requestAttestation } from './request-attestation';
+import { suggestEvidence } from './suggest-evidence';
 
 /** Les sept clés du SPEC §15, dans l'ordre du tableau. */
 export const ACTION_KEYS = [

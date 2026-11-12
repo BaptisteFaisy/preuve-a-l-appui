@@ -7,14 +7,14 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { SqlClient } from './db/sql-client.js';
-import { createForgeSqlClient } from './db/sql-client.js';
-import { createStore } from './db/repo.js';
-import { createJiraGateway } from './collect/jira.js';
-import { createEvidenceChecker } from './collect/checker.js';
-import { createLlmGateway } from './collect/llm.js';
-import { createIdentityGateway } from './collect/identity.js';
-import { createCoverageEngine } from './domain/coverage-engine.js';
+import type { SqlClient } from './db/sql-client';
+import { createForgeSqlClient } from './db/sql-client';
+import { createStore } from './db/repo';
+import { createJiraGateway } from './collect/jira';
+import { createEvidenceChecker } from './collect/checker';
+import { createLlmGateway } from './collect/llm';
+import { createIdentityGateway } from './collect/identity';
+import { createCoverageEngine } from './domain/coverage-engine';
 import type {
   Clock,
   CoverageEngine,
@@ -26,7 +26,7 @@ import type {
   LlmGateway,
   Logger,
   ProofStore,
-} from './ports.js';
+} from './ports';
 
 /** Tout ce dont un handler a besoin, injecté, jamais global. */
 export interface AppDeps {

@@ -13,7 +13,7 @@
  * d'affichage passent par les ports (`ProofStore`, `JiraGateway`).
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Clock, JiraGateway, ProofStore } from '../ports.js';
+import type { Clock, JiraGateway, ProofStore } from '../ports';
 import type {
   Coverage,
   GranterCount,
@@ -21,7 +21,7 @@ import type {
   ReopeningRate,
   Strength,
   Waiver,
-} from '../types.js';
+} from '../types';
 
 /** Les trois forces, de la plus forte à la plus faible, pour l'affichage. */
 export const STRENGTHS_DISPLAY_ORDER: readonly Strength[] = [

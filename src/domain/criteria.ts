@@ -12,13 +12,13 @@
  * Domaine pur : aucun import `@forge/*`, horloge et générateur d'ids injectés.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import { defaultStrengthForType } from '../defaults.js';
+import { defaultStrengthForType } from '../defaults';
 import {
   criteriaMessage,
   criterionStatusLabel,
   criterionTypeLabel,
-} from '../i18n/criteria.js';
-import type { Clock, IdGenerator, LlmGateway } from '../ports.js';
+} from '../i18n/criteria';
+import type { Clock, IdGenerator, LlmGateway } from '../ports';
 import type {
   Actor,
   Criterion,
@@ -27,7 +27,7 @@ import type {
   Language,
   ProjectSettings,
   Strength,
-} from '../types.js';
+} from '../types';
 
 /* --------------------------------------------------------------- codes AC-n */
 

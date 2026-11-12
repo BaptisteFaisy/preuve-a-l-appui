@@ -8,11 +8,11 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { ActorContext } from '../ports.js';
-import type { BlockingItem, Coverage } from '../types.js';
-import { actionText, loadIssue, requireText, resolveLanguage } from './common.js';
-import type { GetProofStatusResult } from './types.js';
+import type { AppDeps } from '../deps';
+import type { ActorContext } from '../ports';
+import type { BlockingItem, Coverage } from '../types';
+import { actionText, loadIssue, requireText, resolveLanguage } from './common';
+import type { GetProofStatusResult } from './types';
 
 /** Les lignes du blocage, formatées comme le message du validateur (§7.2). */
 function formatBlocking(blocking: readonly BlockingItem[], lang: 'en' | 'fr'): string {

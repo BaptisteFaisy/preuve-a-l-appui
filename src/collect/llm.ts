@@ -17,12 +17,12 @@
  * Seul `src/collect/` importe `@forge/llm` (docs/CONTRACTS.md §4bis).
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Criterion, CriterionType, Language, ParsedCriterion } from '../types.js';
-import { CRITERION_TYPES } from '../types.js';
-import type { LlmGateway, SuggestedPair } from '../ports.js';
-import { DEFAULT_TIMEOUT_MS, withTimeout } from './http.js';
-import { text as translateText } from '../i18n/index.js';
-import { ADAPTATEURS_MESSAGES } from '../i18n/adaptateurs.js';
+import type { Criterion, CriterionType, Language, ParsedCriterion } from '../types';
+import { CRITERION_TYPES } from '../types';
+import type { LlmGateway, SuggestedPair } from '../ports';
+import { DEFAULT_TIMEOUT_MS, withTimeout } from './http';
+import { text as translateText } from '../i18n/index';
+import { ADAPTATEURS_MESSAGES } from '../i18n/adaptateurs';
 
 export const DEFAULT_LLM_MODEL = 'claude-sonnet-4-5';
 

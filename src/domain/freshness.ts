@@ -4,8 +4,8 @@
  * Domaine pur : aucun import `@forge/*`.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { IdGenerator } from '../ports.js';
-import type { CiSummary, Evidence, TestOutcome, TestState } from '../types.js';
+import type { IdGenerator } from '../ports';
+import type { CiSummary, Evidence, TestOutcome, TestState } from '../types';
 
 /** Extrait la clé de ticket Jira d'un nom de branche (`feature/PAY-123-limit` → `PAY-123`). */
 export function extractIssueKeyFromBranch(branch: string): string | null {

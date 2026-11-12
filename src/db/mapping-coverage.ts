@@ -26,8 +26,8 @@ import type {
   RequirementGrid,
   RolePolicy,
   Strength,
-} from '../types.js';
-import { DEFAULT_REQUIREMENTS, DEFAULT_ROLES } from '../defaults.js';
+} from '../types';
+import { DEFAULT_REQUIREMENTS, DEFAULT_ROLES } from '../defaults';
 import {
   CRITERION_TYPES,
   DEFECTS,
@@ -48,8 +48,8 @@ import {
   toNumber,
   toSqlBoolean,
   toTimestamp,
-} from './mapping-common.js';
-import { parseEvidenceValue } from './mapping-evidence.js';
+} from './mapping-common';
+import { parseEvidenceValue } from './mapping-evidence';
 
 /* ---------------------------------------------------------------- coverage */
 

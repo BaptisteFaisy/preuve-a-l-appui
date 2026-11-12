@@ -11,10 +11,10 @@
 # Chaque module renvoie à la section du cahier des charges qui le motive.
 
 app:
-  # Identifiant de forme valide (UUID v4) : `forge lint` refuse un ARI dont
-  # l'appId n'a pas la forme d'un UUID v4. `forge create` le remplace par
-  # l'identifiant réel lors de l'enregistrement de l'app (docs/VALIDATION-PLAN.md).
-  id: ari:cloud:ecosystem::app/8f21da22-e1da-4f7f-b094-9c901007be62
+  # Identifiant réel, écrit par `forge create` le 12/11/2026 (app « fait-preuve »,
+  # Developer Space « laddition »). L'ancien UUID provisoire a servi au lint hors
+  # ligne (docs/VALIDATION-PLAN.md, §« Contrôle du manifest par le CLI Forge »).
+  id: ari:cloud:ecosystem::app/9dd72e3f-ab3a-45aa-91a3-76ea25ec0513
   name: Fait, preuve à l'appui
   description: >-
     Proof-gated delivery for Jira: a ticket only reaches Done when every
@@ -102,6 +102,17 @@ modules:
       urlFormat: v2
       response:
         type: dynamic
+    # Lecture publique de l'état réel d'un ticket pour le site public : le site
+    # rejoue le vrai moteur sur des données vivantes (lot `app-donnees-reelles`).
+    # GET sans secret (instantané pseudonymisé, aucun identifiant de compte ne
+    # sort) ; POST `bootstrap` protégé par la variable d'app
+    # FORGE_USER_VAR_DEMO_BOOTSTRAP_TOKEN. Réponses dynamiques + en-têtes CORS
+    # posés par le handler (`src/handlers/demo-data.ts`).
+    - key: demo-data
+      function: serveDemoData
+      urlFormat: v2
+      response:
+        type: dynamic
 
   # ------------------------------------------ file de vérification des preuves (§17)
   # Le consommateur retrouve le ticket par la branche, met à jour les preuves
@@ -153,6 +164,8 @@ modules:
       handler: index.validateProof
     - key: ingestResults
       handler: index.ingestResults
+    - key: serveDemoData
+      handler: index.serveDemoData
     - key: onEvent
       handler: index.onEvent
     - key: onScheduled
@@ -373,9 +386,11 @@ resources:
   # Prompt système de l'agent Rovo (fichier : static/agent/prompt.md).
   - key: agent-prompt
     path: static/agent
-  # Icône des modules Jira (panneau, réglages, page projet).
+  # Icône des modules Jira (panneau, réglages, page projet). Le CLI Forge
+  # empaquette une RESSOURCE comme un dossier : le fichier doit vivre dedans,
+  # d'où `static/icon/icon.svg` et la référence `resource:icon;icon.svg`.
   - key: icon
-    path: static/icon.svg
+    path: static/icon
 
 # --------------------------------------------------------------------- scopes
 # Le strict nécessaire, chaque scope commenté avec sa raison (§14, §20).

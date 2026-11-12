@@ -20,9 +20,9 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Actor, Criterion, IssueRef, Language, ProjectSettings, Requirement } from '../types.js';
-import { text } from '../i18n/index.js';
-import { EVIDENCE_MESSAGES } from '../i18n/evidence.js';
+import type { Actor, Criterion, IssueRef, Language, ProjectSettings, Requirement } from '../types';
+import { text } from '../i18n/index';
+import { EVIDENCE_MESSAGES } from '../i18n/evidence';
 
 /** Verdict d'indépendance : autorisé ou non, avec la raison traduite. */
 export interface AttestVerdict {

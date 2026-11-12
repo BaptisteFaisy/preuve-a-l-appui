@@ -9,7 +9,7 @@
  * Format compact (une clé par ligne) pour rester sous la limite de 500 lignes.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Messages } from './index.js';
+import type { Messages } from './index';
 
 export const UI_MESSAGES: Messages = {
   // Générique

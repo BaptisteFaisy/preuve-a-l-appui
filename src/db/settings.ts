@@ -5,16 +5,16 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { SqlClient } from './sql-client.js';
-import type { SettingsStore } from '../ports.js';
-import type { ProjectSettings } from '../types.js';
+import type { SqlClient } from './sql-client';
+import type { SettingsStore } from '../ports';
+import type { ProjectSettings } from '../types';
 import {
   insertPlaceholders,
   type ProjectSettingsRow,
   projectSettingsToRow,
   rowToProjectSettings,
   selectColumns,
-} from './mapping.js';
+} from './mapping';
 
 const TABLE = 'settings';
 

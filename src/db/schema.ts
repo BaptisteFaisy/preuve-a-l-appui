@@ -29,8 +29,8 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { DdlMigration, DdlRunner } from './sql-client.js';
-import { forgeDdlRunner } from './sql-client.js';
+import type { DdlMigration, DdlRunner } from './sql-client';
+import { forgeDdlRunner } from './sql-client';
 
 /** Les douze tables de l'app : dix au SPEC §18, plus §13 et §17. */
 export const TABLES = [

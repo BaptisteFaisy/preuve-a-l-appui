@@ -12,8 +12,8 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { TestRunStore } from '../ports.js';
-import type { TestOutcome, TestRun } from '../types.js';
+import type { TestRunStore } from '../ports';
+import type { TestOutcome, TestRun } from '../types';
 import {
   TEST_RESULT_COLUMNS,
   TEST_RUN_COLUMNS,
@@ -23,9 +23,9 @@ import {
   testRunToRow,
   type TestResultRow,
   type TestRunRow,
-} from './mapping-ci.js';
-import { selectColumns } from './mapping.js';
-import type { SqlClient, SqlParam } from './sql-client.js';
+} from './mapping-ci';
+import { selectColumns } from './mapping';
+import type { SqlClient, SqlParam } from './sql-client';
 
 /** Borne de toute liste de résultats rendue à l'appelant (SPEC §20). */
 export const TEST_RESULTS_LIMIT = 2000;

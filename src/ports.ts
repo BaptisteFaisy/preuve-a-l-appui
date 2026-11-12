@@ -29,7 +29,7 @@ import type {
   TestOutcome,
   TestRun,
   Waiver,
-} from './types.js';
+} from './types';
 
 /* --------------------------------------------------------------- primitives */
 

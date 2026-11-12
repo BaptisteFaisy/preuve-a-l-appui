@@ -17,7 +17,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { TestLink, TestOutcome, TestRun } from '../types.js';
+import type { TestLink, TestOutcome, TestRun } from '../types';
 import {
   LINK_STATUSES,
   TEST_STATES,
@@ -29,7 +29,7 @@ import {
   toNumber,
   toSqlBoolean,
   toTimestamp,
-} from './mapping-common.js';
+} from './mapping-common';
 
 /* ----------------------------------------------------------------- test run */
 

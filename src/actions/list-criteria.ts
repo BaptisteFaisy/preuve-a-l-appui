@@ -7,11 +7,11 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { ActorContext } from '../ports.js';
-import type { Criterion } from '../types.js';
-import { actionText, loadIssue, requireText, resolveLanguage } from './common.js';
-import type { CriterionSummary, ListCriteriaResult } from './types.js';
+import type { AppDeps } from '../deps';
+import type { ActorContext } from '../ports';
+import type { Criterion } from '../types';
+import { actionText, loadIssue, requireText, resolveLanguage } from './common';
+import type { CriterionSummary, ListCriteriaResult } from './types';
 
 function toSummary(criterion: Criterion): CriterionSummary {
   return {

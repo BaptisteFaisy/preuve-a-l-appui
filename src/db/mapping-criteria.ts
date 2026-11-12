@@ -12,7 +12,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Criterion, CriterionRevision } from '../types.js';
+import type { Criterion, CriterionRevision } from '../types';
 import {
   CRITERION_STATUSES,
   CRITERION_TYPES,
@@ -22,8 +22,8 @@ import {
   text,
   toNumber,
   toTimestamp,
-} from './mapping-common.js';
-import { isObject } from './mapping-common.js';
+} from './mapping-common';
+import { isObject } from './mapping-common';
 
 /** Une ligne de `criterion`, telle que Forge la rend. */
 export interface CriterionRow {

@@ -14,11 +14,11 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Criterion, CriterionRevision } from '../types.js';
-import type { CriterionStore } from '../ports.js';
-import type { SqlClient, SqlParam } from './sql-client.js';
-import { selectColumns } from './mapping.js';
-import { nextCode } from '../domain/criteria.js';
+import type { Criterion, CriterionRevision } from '../types';
+import type { CriterionStore } from '../ports';
+import type { SqlClient, SqlParam } from './sql-client';
+import { selectColumns } from './mapping';
+import { nextCode } from '../domain/criteria';
 import {
   CRITERION_COLUMNS,
   CRITERION_HISTORY_COLUMNS,
@@ -28,7 +28,7 @@ import {
   rowToCriterionRevision,
   type CriterionRevisionRow,
   type CriterionRow,
-} from './mapping-criteria.js';
+} from './mapping-criteria';
 
 /** Borne de toute liste de critères ou de révisions (SPEC §20 : rien d'infini). */
 export const CRITERIA_LIST_LIMIT = 500;

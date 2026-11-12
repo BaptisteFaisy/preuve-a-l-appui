@@ -16,8 +16,8 @@
  */
 import { route } from '@forge/api';
 import type { Route } from '@forge/api';
-import type { JiraGateway } from '../ports.js';
-import type { IssueRef } from '../types.js';
+import type { JiraGateway } from '../ports';
+import type { IssueRef } from '../types';
 import {
   DEFAULT_TIMEOUT_MS,
   defaultJiraRequest,
@@ -26,13 +26,13 @@ import {
   withTimeout,
   type HttpResponse,
   type ProductRequest,
-} from './http.js';
+} from './http';
 import {
   adfToPlainText,
   replaceCriteriaInAdf,
   replaceCriteriaInText,
   textToAdf,
-} from './jira-adf.js';
+} from './jira-adf';
 
 /** Champs Jira strictement nécessaires pour construire `IssueRef` (SPEC §8.2). */
 export const ISSUE_FIELDS = [

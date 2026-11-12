@@ -10,16 +10,16 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { SqlClient, SqlParam } from './sql-client.js';
-import type { TestLinkStore } from '../ports.js';
-import type { TestLink } from '../types.js';
-import { selectColumns } from './mapping.js';
+import type { SqlClient, SqlParam } from './sql-client';
+import type { TestLinkStore } from '../ports';
+import type { TestLink } from '../types';
+import { selectColumns } from './mapping';
 import {
   TEST_LINK_COLUMNS,
   testLinkToRow,
   rowToTestLink,
   type TestLinkRow,
-} from './mapping-ci.js';
+} from './mapping-ci';
 
 export const TEST_LINK_LIST_LIMIT = 500;
 

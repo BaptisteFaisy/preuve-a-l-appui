@@ -9,11 +9,11 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { ActorContext } from '../ports.js';
-import type { Criterion, IssueRef, ProjectSettings } from '../types.js';
-import { actionText, loadIssue, loadSettings, requireText, resolveCriterion, resolveLanguage } from './common.js';
-import type { RequestAttestationResult } from './types.js';
+import type { AppDeps } from '../deps';
+import type { ActorContext } from '../ports';
+import type { Criterion, IssueRef, ProjectSettings } from '../types';
+import { actionText, loadIssue, loadSettings, requireText, resolveCriterion, resolveLanguage } from './common';
+import type { RequestAttestationResult } from './types';
 
 /** Rôle compétent pour ce critère : rôle exigé par la grille, sinon le premier rôle qui atteste. */
 export function competentRole(settings: ProjectSettings, criterion: Criterion): string {

@@ -17,20 +17,20 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { SqlClient, SqlParam } from './sql-client.js';
-import type { ReportingStore } from '../ports.js';
-import type { Coverage, ProofStats, ReleaseDossier, Waiver } from '../types.js';
-import { selectColumns } from './mapping.js';
+import type { SqlClient, SqlParam } from './sql-client';
+import type { ReportingStore } from '../ports';
+import type { Coverage, ProofStats, ReleaseDossier, Waiver } from '../types';
+import { selectColumns } from './mapping';
 import {
   RELEASE_DOSSIER_COLUMNS,
   releaseDossierToRow,
   rowToReleaseDossier,
   type ReleaseDossierRow,
-} from './mapping-living.js';
-import { rowToCoverage, type CoverageRow } from './mapping-coverage.js';
-import { rowToWaiver, type WaiverRow } from './mapping-evidence.js';
-import { toTimestamp } from './mapping-common.js';
-import { aggregateCoverageByStrength, aggregateWaiversByGranter } from '../domain/stats.js';
+} from './mapping-living';
+import { rowToCoverage, type CoverageRow } from './mapping-coverage';
+import { rowToWaiver, type WaiverRow } from './mapping-evidence';
+import { toTimestamp } from './mapping-common';
+import { aggregateCoverageByStrength, aggregateWaiversByGranter } from '../domain/stats';
 
 /** Borne de toute liste d'agrégats (SPEC §18 : aucune liste infinie). */
 export const REPORTING_LIST_LIMIT = 500;

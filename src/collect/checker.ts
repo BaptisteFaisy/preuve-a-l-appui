@@ -13,7 +13,7 @@
  */
 import { route } from '@forge/api';
 import type { Route } from '@forge/api';
-import type { EvidenceChecker } from '../ports.js';
+import type { EvidenceChecker } from '../ports';
 import {
   DEFAULT_TIMEOUT_MS,
   defaultConfluenceRequest,
@@ -26,7 +26,7 @@ import {
   type ExternalFetch,
   type HttpResponse,
   type ProductRequest,
-} from './http.js';
+} from './http';
 
 export interface EvidenceCheckerOptions {
   /** Transport Confluence injecté (défaut : `api.asApp().requestConfluence`). */

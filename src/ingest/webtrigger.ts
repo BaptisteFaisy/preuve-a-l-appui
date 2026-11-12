@@ -14,13 +14,13 @@
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import { createHash } from 'node:crypto';
-import type { AppDeps } from '../deps.js';
-import type { CiWebRequest, CiWebResponse } from '../handlers/ingest.js';
-import { ciText } from '../i18n/ci.js';
-import { TEST_STATES, isObject, parseEnum, toNumber } from '../db/mapping-common.js';
-import type { CiBatch, CiSummary, Language, TestOutcome, TestState } from '../types.js';
-import { BatchReassembler } from './batching.js';
-import { extractCiHeaders, verifyCiSignature } from './signature.js';
+import type { AppDeps } from '../deps';
+import type { CiWebRequest, CiWebResponse } from '../handlers/ingest';
+import { ciText } from '../i18n/ci';
+import { TEST_STATES, isObject, parseEnum, toNumber } from '../db/mapping-common';
+import type { CiBatch, CiSummary, Language, TestOutcome, TestState } from '../types';
+import { BatchReassembler } from './batching';
+import { extractCiHeaders, verifyCiSignature } from './signature';
 
 /** Charge utile maximale acceptée : la limite du web trigger Forge (SPEC §19). */
 export const MAX_BODY_BYTES = 5 * 1024 * 1024;

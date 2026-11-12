@@ -175,6 +175,7 @@ every push to `main` that touches `site/`, `src/` or `tests/helpers/`:
 - [Judges' guide](docs/JUDGES.md) — test the app on a demo site in 5-10 minutes.
 - [Video demo script](docs/VIDEO-SCRIPT.md) — narration and storyboard (< 5 min).
 - [Demo dataset](docs/DEMO-DATA.md) — PAY-123 numbers, criteria, and outcomes.
+- [Live demo](docs/LIVE-DEMO.md) — how the public site reads the real app state (contract, privacy, bootstrap).
 - [Methodology](docs/METHODE.md) (French) — autonomous lots, contracts, CI 5 min, Mergify queue.
 - [Validation plan](docs/VALIDATION-PLAN.md) (French) — the 6 prototype validation points of SPEC §19.
 

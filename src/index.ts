@@ -8,6 +8,7 @@
  *                    `jira:projectSettingsPage`, `jira:projectPage`
  *   validateProof  → `jira:workflowValidator`
  *   ingestResults  → `webtrigger` ci-results
+ *   serveDemoData  → `webtrigger` demo-data (lecture publique + bootstrap jetonné)
  *   onEvent        → `trigger` avi:jira:updated:issue
  *   onScheduled    → `scheduledTrigger` (contrôle nocturne, SPEC §20)
  *   onMessage      → `consumer` proof-ci
@@ -18,18 +19,19 @@
  */
 import Resolver from '@forge/resolver';
 import { Queue } from '@forge/events';
-import { createAppDeps } from './deps.js';
-import type { AppDeps } from './deps.js';
-import type { ActorContext, CiIngestMessage, JobQueue } from './ports.js';
-import { registerResolvers } from './handlers/resolver.js';
-import { createValidator } from './handlers/validator.js';
-import { handleCiResults } from './handlers/ingest.js';
-import type { CiWebRequest, CiWebResponse } from './handlers/ingest.js';
-import { onJiraEvent } from './handlers/events.js';
-import { onScheduledTick } from './handlers/scheduled.js';
-import { onCiMessage } from './handlers/consumer.js';
-import { ACTION_KEYS, runAction } from './handlers/dispatch.js';
-import type { GateVerdict } from './types.js';
+import { createAppDeps } from './deps';
+import type { AppDeps } from './deps';
+import type { ActorContext, CiIngestMessage, JobQueue } from './ports';
+import { registerResolvers } from './handlers/resolver';
+import { createValidator } from './handlers/validator';
+import { handleCiResults } from './handlers/ingest';
+import { handleDemoData } from './handlers/demo-data';
+import type { CiWebRequest, CiWebResponse } from './handlers/ingest';
+import { onJiraEvent } from './handlers/events';
+import { onScheduledTick } from './handlers/scheduled';
+import { onCiMessage } from './handlers/consumer';
+import { ACTION_KEYS, runAction } from './handlers/dispatch';
+import type { GateVerdict } from './types';
 
 /** La clé de file doit être celle du module `consumer` du manifest. */
 export const QUEUE_KEY = 'proof-ci';
@@ -104,15 +106,27 @@ export interface ForgeWebRequest {
   query?: Record<string, string>;
 }
 
-export async function ingestResults(request: ForgeWebRequest): Promise<CiWebResponse> {
-  const raw: CiWebRequest = {
+/** Normalise la requête Forge : le web trigger n'envoie pas toujours tous les champs. */
+function toWebRequest(request: ForgeWebRequest): CiWebRequest {
+  return {
     method: request.method,
     path: request.path,
     headers: request.headers ?? {},
     body: request.body ?? '',
     query: request.query ?? {},
   };
-  return handleCiResults(raw, deps);
+}
+
+/**
+ * Web trigger `demo-data` : GET = instantané réel pseudonymisé pour le site
+ * public ; POST = amorçage du scénario de démonstration, protégé par jeton.
+ */
+export async function serveDemoData(request: ForgeWebRequest): Promise<CiWebResponse> {
+  return handleDemoData(toWebRequest(request), deps);
+}
+
+export async function ingestResults(request: ForgeWebRequest): Promise<CiWebResponse> {
+  return handleCiResults(toWebRequest(request), deps);
 }
 
 /* ------------------------------------------------- événements et file (L4) */

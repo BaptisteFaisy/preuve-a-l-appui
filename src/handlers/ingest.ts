@@ -4,8 +4,8 @@
  * Propriétaire : lot L4. Signature gelée : remplace le corps sans la changer.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import { processCiWebRequest } from '../ingest/webtrigger.js';
+import type { AppDeps } from '../deps';
+import { processCiWebRequest } from '../ingest/webtrigger';
 
 /** Requête du web trigger : le corps reste brut, la signature en dépend. */
 export interface CiWebRequest {

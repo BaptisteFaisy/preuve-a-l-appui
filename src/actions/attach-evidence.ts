@@ -11,11 +11,11 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { ActorContext } from '../ports.js';
-import { EVIDENCE_TYPES, type Evidence, type EvidenceType } from '../types.js';
-import { actionText, loadIssue, requireText, resolveCriterion, resolveLanguage } from './common.js';
-import { ActionError, type AttachEvidenceResult } from './types.js';
+import type { AppDeps } from '../deps';
+import type { ActorContext } from '../ports';
+import { EVIDENCE_TYPES, type Evidence, type EvidenceType } from '../types';
+import { actionText, loadIssue, requireText, resolveCriterion, resolveLanguage } from './common';
+import { ActionError, type AttachEvidenceResult } from './types';
 
 /** Type de preuve validé contre les six types du SPEC §9.1. */
 function parseEvidenceType(raw: unknown): EvidenceType {

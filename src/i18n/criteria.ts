@@ -7,9 +7,9 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { CriterionStatus, CriterionType, Language } from '../types.js';
-import type { MessageVars, Messages } from './index.js';
-import { translate } from './index.js';
+import type { CriterionStatus, CriterionType, Language } from '../types';
+import type { MessageVars, Messages } from './index';
+import { translate } from './index';
 
 /** Dictionnaire du lot L1 : aucun autre lot n'y écrit. */
 export const CRITERIA_MESSAGES: Messages = {

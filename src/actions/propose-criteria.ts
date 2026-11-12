@@ -10,12 +10,12 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import { defaultStrengthForType } from '../defaults.js';
-import type { AppDeps } from '../deps.js';
-import type { ActorContext } from '../ports.js';
-import type { Criterion, CriterionType } from '../types.js';
-import { actionText, loadIssue, requireText, resolveLanguage, splitCsv } from './common.js';
-import { ActionError, type ProposedCriterionItem, type ProposeCriteriaResult } from './types.js';
+import { defaultStrengthForType } from '../defaults';
+import type { AppDeps } from '../deps';
+import type { ActorContext } from '../ports';
+import type { Criterion, CriterionType } from '../types';
+import { actionText, loadIssue, requireText, resolveLanguage, splitCsv } from './common';
+import { ActionError, type ProposedCriterionItem, type ProposeCriteriaResult } from './types';
 
 /** Type deviné par le modèle ; une panne du modèle retombe sur `functional`. */
 async function classifyOrFallback(deps: AppDeps, text: string): Promise<CriterionType> {

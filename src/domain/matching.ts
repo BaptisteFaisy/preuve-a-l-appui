@@ -15,9 +15,9 @@
  * Domaine pur : aucun import `@forge/*`, horloge et identifiants injectés.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Clock, IdGenerator, LlmGateway, Logger, ProofStore, SuggestedPair } from '../ports.js';
-import type { Criterion, Evidence, Language, TestLink, TestOutcome } from '../types.js';
-import { reportMessage } from '../i18n/reports.js';
+import type { Clock, IdGenerator, LlmGateway, Logger, ProofStore, SuggestedPair } from '../ports';
+import type { Criterion, Evidence, Language, TestLink, TestOutcome } from '../types';
+import { reportMessage } from '../i18n/reports';
 
 /** Ce dont le rapprochement a besoin, injecté. */
 export interface MatchingDeps {

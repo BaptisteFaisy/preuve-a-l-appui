@@ -22,19 +22,19 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { TableName } from './schema.js';
-import { CRITERION_COLUMNS, CRITERION_HISTORY_COLUMNS } from './mapping-criteria.js';
-import { ATTESTATION_COLUMNS, EVIDENCE_COLUMNS, WAIVER_COLUMNS } from './mapping-evidence.js';
-import { COVERAGE_COLUMNS, SETTINGS_COLUMNS } from './mapping-coverage.js';
-import { TEST_LINK_COLUMNS, TEST_RESULT_COLUMNS, TEST_RUN_COLUMNS } from './mapping-ci.js';
-import { LIVING_PROOF_COLUMNS, RELEASE_DOSSIER_COLUMNS } from './mapping-living.js';
+import type { TableName } from './schema';
+import { CRITERION_COLUMNS, CRITERION_HISTORY_COLUMNS } from './mapping-criteria';
+import { ATTESTATION_COLUMNS, EVIDENCE_COLUMNS, WAIVER_COLUMNS } from './mapping-evidence';
+import { COVERAGE_COLUMNS, SETTINGS_COLUMNS } from './mapping-coverage';
+import { TEST_LINK_COLUMNS, TEST_RESULT_COLUMNS, TEST_RUN_COLUMNS } from './mapping-ci';
+import { LIVING_PROOF_COLUMNS, RELEASE_DOSSIER_COLUMNS } from './mapping-living';
 
-export * from './mapping-common.js';
-export * from './mapping-criteria.js';
-export * from './mapping-evidence.js';
-export * from './mapping-coverage.js';
-export * from './mapping-ci.js';
-export * from './mapping-living.js';
+export * from './mapping-common';
+export * from './mapping-criteria';
+export * from './mapping-evidence';
+export * from './mapping-coverage';
+export * from './mapping-ci';
+export * from './mapping-living';
 
 /**
  * Colonnes par table, typées contre leur interface de ligne : une colonne

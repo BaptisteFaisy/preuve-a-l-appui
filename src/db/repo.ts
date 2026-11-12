@@ -6,17 +6,17 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { SqlClient } from './sql-client.js';
-import type { ProofStore } from '../ports.js';
-import { createCriterionStore } from './criteria.js';
-import { createEvidenceStore } from './evidence.js';
-import { createWaiverStore } from './waivers.js';
-import { createCoverageStore } from './coverage.js';
-import { createSettingsStore } from './settings.js';
-import { createTestRunStore } from './testruns.js';
-import { createLivingStore } from './living.js';
-import { createTestLinkStore } from './links.js';
-import { createReportingStore } from './reporting.js';
+import type { SqlClient } from './sql-client';
+import type { ProofStore } from '../ports';
+import { createCriterionStore } from './criteria';
+import { createEvidenceStore } from './evidence';
+import { createWaiverStore } from './waivers';
+import { createCoverageStore } from './coverage';
+import { createSettingsStore } from './settings';
+import { createTestRunStore } from './testruns';
+import { createLivingStore } from './living';
+import { createTestLinkStore } from './links';
+import { createReportingStore } from './reporting';
 
 /** Le magasin complet de l'app, tel que le voit `createAppDeps`. */
 export function createStore(sql: SqlClient): ProofStore {

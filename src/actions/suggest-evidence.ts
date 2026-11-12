@@ -10,11 +10,11 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { ActorContext } from '../ports.js';
-import type { SuggestedPair } from '../ports.js';
-import { actionText, loadIssue, requireText, resolveLanguage, splitCsv } from './common.js';
-import { ActionError, type SuggestEvidenceResult } from './types.js';
+import type { AppDeps } from '../deps';
+import type { ActorContext } from '../ports';
+import type { SuggestedPair } from '../ports';
+import { actionText, loadIssue, requireText, resolveLanguage, splitCsv } from './common';
+import { ActionError, type SuggestEvidenceResult } from './types';
 
 function formatPairs(pairs: readonly SuggestedPair[]): string {
   return pairs

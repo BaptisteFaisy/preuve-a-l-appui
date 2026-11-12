@@ -26,9 +26,9 @@ import {
   TextArea,
 } from '@forge/react';
 import { invoke } from '@forge/bridge';
-import { text } from '../i18n/index.js';
-import { UI_MESSAGES } from '../i18n/ui.js';
-import type { Language } from '../types.js';
+import { text } from '../i18n/index';
+import { UI_MESSAGES } from '../i18n/ui';
+import type { Language } from '../types';
 import {
   dialogLabelKey,
   dialogTitleKey,
@@ -36,7 +36,7 @@ import {
   type MatrixDialogMode,
   type MatrixRowViewModel,
   type MatrixViewModel,
-} from '../viewmodel/matrix.js';
+} from '../viewmodel/matrix';
 
 export interface MatrixPanelProps {
   readonly vm: MatrixViewModel;

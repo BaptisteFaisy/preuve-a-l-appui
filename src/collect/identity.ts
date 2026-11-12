@@ -12,11 +12,11 @@
  * Seul `src/collect/` importe `@forge/api` (docs/CONTRACTS.md §4bis).
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { ActorContext, IdentityGateway, JiraGateway } from '../ports.js';
-import type { Actor, Language } from '../types.js';
-import { createJiraGateway } from './jira.js';
-import { text as translateText } from '../i18n/index.js';
-import { ADAPTATEURS_MESSAGES } from '../i18n/adaptateurs.js';
+import type { ActorContext, IdentityGateway, JiraGateway } from '../ports';
+import type { Actor, Language } from '../types';
+import { createJiraGateway } from './jira';
+import { text as translateText } from '../i18n/index';
+import { ADAPTATEURS_MESSAGES } from '../i18n/adaptateurs';
 
 export interface IdentityGatewayOptions {
   /** Façade Jira injectée pour résoudre noms et rôles (défaut : `createJiraGateway()`). */

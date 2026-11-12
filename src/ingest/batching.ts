@@ -8,7 +8,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { CiBatch, CiSummary, TestOutcome } from '../types.js';
+import type { CiBatch, CiSummary, TestOutcome } from '../types';
 
 /** Seuil de découpage : 4 Mo, sous la limite Forge de 5 Mo (SPEC §19). */
 export const BATCH_BYTE_LIMIT = 4 * 1024 * 1024;

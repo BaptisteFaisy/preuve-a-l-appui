@@ -12,12 +12,12 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { LivingStore } from '../ports.js';
-import type { LivingProof } from '../types.js';
-import { LIVING_STATES, parseEnum } from './mapping-common.js';
-import { LIVING_PROOF_COLUMNS, livingProofToRow, rowToLivingProof, type LivingProofRow } from './mapping-living.js';
-import { selectColumns } from './mapping.js';
-import type { SqlClient, SqlParam } from './sql-client.js';
+import type { LivingStore } from '../ports';
+import type { LivingProof } from '../types';
+import { LIVING_STATES, parseEnum } from './mapping-common';
+import { LIVING_PROOF_COLUMNS, livingProofToRow, rowToLivingProof, type LivingProofRow } from './mapping-living';
+import { selectColumns } from './mapping';
+import type { SqlClient, SqlParam } from './sql-client';
 
 /** Borne de toute liste de preuves vivantes (SPEC §20 : rien d'infini). */
 export const LIVING_LIST_LIMIT = 500;

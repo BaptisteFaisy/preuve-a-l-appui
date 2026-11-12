@@ -9,16 +9,16 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { ActorContext } from '../ports.js';
-import type { DossierIssue, ReleaseDossier } from '../types.js';
-import { actionText, requireText } from './common.js';
+import type { AppDeps } from '../deps';
+import type { ActorContext } from '../ports';
+import type { DossierIssue, ReleaseDossier } from '../types';
+import { actionText, requireText } from './common';
 import {
   ActionError,
   type ReleaseIssueItem,
   type ReleaseProofResult,
   type UnprovenDeliveredItem,
-} from './types.js';
+} from './types';
 
 /** Critères livrés non prouvés d'un ticket : ni prouvés, ni dérogés (SPEC §13). */
 function unprovenOf(issue: DossierIssue): UnprovenDeliveredItem[] {

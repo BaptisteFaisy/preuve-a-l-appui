@@ -14,7 +14,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes. Domaine pur.
  */
-import type { Clock, CoverageEngine, JiraGateway, ProofStore } from '../ports.js';
+import type { Clock, CoverageEngine, JiraGateway, ProofStore } from '../ports';
 import type {
   Coverage,
   CriterionState,
@@ -25,8 +25,8 @@ import type {
   Language,
   ReleaseDossier,
   Waiver,
-} from '../types.js';
-import { reportMessage } from '../i18n/reports.js';
+} from '../types';
+import { reportMessage } from '../i18n/reports';
 
 /** Ce dont le dossier a besoin, injecté. */
 export interface DossierDeps {
