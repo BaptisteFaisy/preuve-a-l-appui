@@ -2,7 +2,7 @@
 
 ## 0. Try it right now, without installing anything
 
-**<https://baptistefaisy.github.io/preuve-a-l-appui/>** — the public site, with a
+**<https://tradoooo.github.io/preuve-a-l-appui/>** — the public site, with a
 live demo that runs this repository's real decision engine in your browser
 (criteria, strengths, coverage, independence rules, gate message). The demo
 reads the **real** state of the app installed on the demo Jira site — the ticket,

@@ -19,7 +19,7 @@ import { createDemoCriteria, DEMO_ISSUE_KEY } from '../../../src/sample/pay-123.
 import { stringsFor } from '../i18n/index.js';
 import './Hero.css';
 
-const REPO = 'https://github.com/BaptisteFaisy/preuve-a-l-appui';
+const REPO = 'https://github.com/Tradoooo/preuve-a-l-appui';
 
 /** Une ligne de la maquette : critère réel + état illustratif du §7.2. */
 interface MockRow {

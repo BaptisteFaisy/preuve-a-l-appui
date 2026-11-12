@@ -19,7 +19,7 @@ export interface NavProps {
   onToggleLang: () => void;
 }
 
-const REPO = 'https://github.com/BaptisteFaisy/preuve-a-l-appui';
+const REPO = 'https://github.com/Tradoooo/preuve-a-l-appui';
 
 /** Les ancres, dans l'ordre de lecture de la page. */
 function anchors(t: ReturnType<typeof stringsFor>['nav']): { href: string; label: string }[] {

@@ -1,6 +1,6 @@
 # Fait, preuve à l'appui
 
-**Public site & live demo → <https://baptistefaisy.github.io/preuve-a-l-appui/>**
+**Public site & live demo → <https://tradoooo.github.io/preuve-a-l-appui/>**
 (the demo runs this repository’s real decision engine in your browser — no Jira,
 no server, nothing installed)
 
@@ -141,7 +141,7 @@ The site lives in this repository, under [`site/`](site/), and is published on
 GitHub Pages by [`.github/workflows/site.yml`](.github/workflows/site.yml) on
 every push to `main` that touches `site/`, `src/` or `tests/helpers/`:
 
-- **URL**: <https://baptistefaisy.github.io/preuve-a-l-appui/>
+- **URL**: <https://tradoooo.github.io/preuve-a-l-appui/>
 - **Build**: Vite (no server, no tracking, no external runtime asset), output in
   `site/dist/` — never committed.
 - **Local preview**: `npm run site:dev` (development) or

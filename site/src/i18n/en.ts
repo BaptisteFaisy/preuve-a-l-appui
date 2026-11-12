@@ -351,27 +351,27 @@ export const EN: SiteStrings = {
     links: [
       {
         label: "Judges’ guide (docs/JUDGES.md)",
-        href: "https://github.com/BaptisteFaisy/preuve-a-l-appui/blob/main/docs/JUDGES.md",
+        href: "https://github.com/Tradoooo/preuve-a-l-appui/blob/main/docs/JUDGES.md",
       },
       {
         label: "The acceptance recipe (docs/RECETTE.md)",
-        href: "https://github.com/BaptisteFaisy/preuve-a-l-appui/blob/main/docs/RECETTE.md",
+        href: "https://github.com/Tradoooo/preuve-a-l-appui/blob/main/docs/RECETTE.md",
       },
       {
         label: "Architecture (docs/ARCHITECTURE.md)",
-        href: "https://github.com/BaptisteFaisy/preuve-a-l-appui/blob/main/docs/ARCHITECTURE.md",
+        href: "https://github.com/Tradoooo/preuve-a-l-appui/blob/main/docs/ARCHITECTURE.md",
       },
       {
         label: "The full brief, in French",
-        href: "https://github.com/BaptisteFaisy/preuve-a-l-appui/blob/main/docs/CAHIER-DES-CHARGES.md",
+        href: "https://github.com/Tradoooo/preuve-a-l-appui/blob/main/docs/CAHIER-DES-CHARGES.md",
       },
       {
         label: "Video script (docs/VIDEO-SCRIPT.md)",
-        href: "https://github.com/BaptisteFaisy/preuve-a-l-appui/blob/main/docs/VIDEO-SCRIPT.md",
+        href: "https://github.com/Tradoooo/preuve-a-l-appui/blob/main/docs/VIDEO-SCRIPT.md",
       },
       {
         label: "Source code",
-        href: "https://github.com/BaptisteFaisy/preuve-a-l-appui",
+        href: "https://github.com/Tradoooo/preuve-a-l-appui",
       },
     ],
   },
