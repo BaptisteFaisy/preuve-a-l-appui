@@ -243,3 +243,39 @@
   }
   .demo-buttons { margin-left: 0; }
 }
+
+/* Bandeau de provenance : d'où viennent les données affichées. */
+.demo-source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  font-size: 0.82rem;
+  color: var(--colour-text-subtle);
+}
+
+.demo-source-tag {
+  flex: none;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.demo-source[data-kind='live'] .demo-source-tag {
+  background: var(--colour-ok-bg);
+  color: var(--colour-ok);
+}
+
+.demo-source[data-kind='embedded'] .demo-source-tag {
+  background: var(--colour-warn-bg);
+  color: var(--colour-warn);
+}
+
+.demo-source-body {
+  flex: 1 1 18rem;
+  max-width: var(--measure);
+}

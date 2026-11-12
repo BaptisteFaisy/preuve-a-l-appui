@@ -27,10 +27,14 @@ import type {
   ProofStats,
   ProjectSettings,
   ReleaseDossier,
-  TestOutcome,
-  TestRun,
   Waiver,
 } from './types';
+import type {
+  DemoSnapshotData,
+  SnapshotActor,
+  SnapshotCi,
+  SnapshotInput,
+} from './demo-contract';
 import type { AppDeps } from './deps';
 import { defaultProjectSettings } from './defaults';
 
@@ -52,65 +56,6 @@ export const ACCOUNT_FIELDS: readonly string[] = [
   'grantedBy',
   'reporterAccountId',
 ];
-
-/** Une personne, pseudonymisée : le site n'a que ça. */
-export interface SnapshotActor {
-  /** Référence stable, sans lien avec l'identifiant Atlassian. */
-  readonly ref: string;
-  readonly displayName: string;
-  readonly agent: boolean;
-  readonly roles: readonly string[];
-}
-
-/** Le ticket, tel que Jira le renvoie, avec des références au lieu des comptes. */
-export interface SnapshotIssue {
-  readonly id: string;
-  readonly key: string;
-  readonly projectId: string;
-  readonly projectKey: string;
-  readonly summary: string;
-  readonly description: string;
-  readonly status: string;
-  readonly assigneeRef: string;
-  readonly reporterRef: string;
-  readonly components: readonly string[];
-  readonly fixVersions: readonly string[];
-}
-
-/** Le dernier passage de CI retrouvé, pour rejouer un vrai résumé côté site. */
-export interface SnapshotCi {
-  readonly run: TestRun;
-  readonly results: readonly TestOutcome[];
-}
-
-/** Tout ce que le site doit recevoir pour rejouer l'app sur des données réelles. */
-export interface DemoSnapshotData {
-  readonly generatedAt: string;
-  /** Site Jira d'où viennent les données ; affiché comme provenance. */
-  readonly site: string;
-  readonly project: { readonly id: string; readonly key: string };
-  readonly issue: SnapshotIssue;
-  readonly settings: ProjectSettings;
-  readonly criteria: readonly Criterion[];
-  readonly evidences: readonly Evidence[];
-  readonly attestations: readonly Attestation[];
-  readonly waivers: readonly Waiver[];
-  readonly coverage: Coverage | null;
-  readonly living: readonly LivingProof[];
-  readonly stats: ProofStats | null;
-  readonly dossier: ReleaseDossier | null;
-  readonly ci: SnapshotCi | null;
-  readonly actors: readonly SnapshotActor[];
-}
-
-/** Ce que le handler doit savoir pour construire un instantané. */
-export interface SnapshotInput {
-  readonly issueKey: string;
-  readonly site: string;
-  /** Dépôt et branche du dernier run de CI ; absents = instantané sans CI. */
-  readonly repo?: string;
-  readonly branch?: string;
-}
 
 /** Remplace les identifiants de compte par des références stables. */
 export class ActorRefs {
@@ -303,3 +248,10 @@ async function readActors(
   }
   return actors;
 }
+
+export type {
+  DemoSnapshotData,
+  SnapshotActor,
+  SnapshotCi,
+  SnapshotIssue,
+} from './demo-contract';

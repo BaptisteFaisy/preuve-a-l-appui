@@ -17,13 +17,22 @@ import { buildApi, type DemoApi } from './api.js';
 import type { DemoSnapshot, RunContext } from './state.js';
 import { snapshotOf } from './state.js';
 import { useAdvanced } from './useAdvanced.js';
-import { createDemoWorld, type DemoWorld } from './world.js';
+import { createDemoWorld, createWorld, type DemoWorld } from './world.js';
+import { createLiveScenario } from './live-world.js';
+import { readLiveSnapshot } from './remote.js';
 
 export type { DemoApi };
 
-/** Un monde neuf, réglé sur la langue demandée, avec son premier instantané. */
+/**
+ * Un monde neuf : l'état RÉEL de l'app installée s'il est joignable, sinon le
+ * jeu PAY-123 embarqué. Les deux mondes câblent les mêmes modules de l'app —
+ * seule la provenance change, et le bandeau de la démo la dit.
+ */
 async function freshWorld(lang: Language): Promise<{ world: DemoWorld; snapshot: DemoSnapshot }> {
-  const world = await createDemoWorld();
+  const live = await readLiveSnapshot();
+  const world = live.snapshot
+    ? await createWorld(await createLiveScenario(live.snapshot, lang))
+    : await createDemoWorld();
   await setLanguage(world, lang);
   const actor = world.scenario.actors.tester;
   const snapshot = await snapshotOf(world, actor, 'strict', lang, null, [], false);
