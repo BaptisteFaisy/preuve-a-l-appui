@@ -11,7 +11,6 @@
  */
 import type { GateMode, GateVerdict, Language } from '../../../src/types.js';
 import type { DemoWorld } from './world.js';
-import { ISSUE_ID, ISSUE_KEY, PROJECT_ID } from './world.js';
 
 /** Une ligne du journal de la démo : ce que l'app a fait, et pourquoi. */
 export interface DemoLogEntry {
@@ -56,8 +55,8 @@ export async function attachTest(
   actorId: string,
 ): Promise<GestureResult> {
   const response = await world.resolver.call('attach-evidence', {
-    issueId: ISSUE_ID,
-    projectId: PROJECT_ID,
+    issueId: world.scenario.issue.id,
+    projectId: world.scenario.project.projectId,
     accountId: actorId,
     criterionId,
     type: 'test',
@@ -73,8 +72,8 @@ export async function attest(
   actorId: string,
 ): Promise<GestureResult> {
   const response = await world.resolver.call('attest-criterion', {
-    issueId: ISSUE_ID,
-    projectId: PROJECT_ID,
+    issueId: world.scenario.issue.id,
+    projectId: world.scenario.project.projectId,
     accountId: actorId,
     criterionId,
     note: 'Vérifié à la main sur l’environnement de démo.',
@@ -90,8 +89,8 @@ export async function waive(
   actorId: string,
 ): Promise<GestureResult> {
   const response = await world.resolver.call('waive-criterion', {
-    issueId: ISSUE_ID,
-    projectId: PROJECT_ID,
+    issueId: world.scenario.issue.id,
+    projectId: world.scenario.project.projectId,
     accountId: actorId,
     criterionId,
     reason,
@@ -102,7 +101,7 @@ export async function waive(
 /** Fait arriver un résumé de CI : le consommateur réel met à jour les preuves. */
 export async function runPipeline(world: DemoWorld, mainBranch: boolean): Promise<GestureResult> {
   const summary = { ...world.scenario.ciSummary, mainBranch };
-  await world.ci({ runId: `run-demo-${Date.now()}`, projectId: PROJECT_ID, summary });
+  await world.ci({ runId: `run-demo-${Date.now()}`, projectId: world.scenario.project.projectId, summary });
   const coverage = await world.recompute();
   const detail = coverage
     ? `pipeline traité : ${coverage.proven} / ${coverage.total} critères prouvés`
@@ -117,19 +116,19 @@ export async function tryDone(world: DemoWorld, mode?: GateMode): Promise<GateVe
 
 /** Change le mode du projet (strict / souple / observation) via le panneau. */
 export async function setMode(world: DemoWorld, mode: GateMode): Promise<GestureResult> {
-  await world.resolver.call('save-project-settings', { projectId: PROJECT_ID, mode });
+  await world.resolver.call('save-project-settings', { projectId: world.scenario.project.projectId, mode });
   return info(`mode du projet : ${mode}`);
 }
 
 /** Change la langue du projet : les messages de l'app suivent (§20). */
 export async function setLanguage(world: DemoWorld, language: Language): Promise<void> {
-  await world.resolver.call('save-project-settings', { projectId: PROJECT_ID, language });
+  await world.resolver.call('save-project-settings', { projectId: world.scenario.project.projectId, language });
 }
 
 /** Interroge l'agent : `get-proof-status` via MCP, marqué agent (§15, §19). */
 export async function askAgent(world: DemoWorld, actorId: string): Promise<GestureResult> {
   const context = world.agentContext(actorId);
-  const answer = (await world.tool('get-proof-status', { issueKey: ISSUE_KEY }, context)) as {
+  const answer = (await world.tool('get-proof-status', { issueKey: world.scenario.issue.key }, context)) as {
     proven?: number;
     total?: number;
     failing?: readonly { code?: string; expected?: string }[];
@@ -151,7 +150,7 @@ export async function agentTriesToAttest(
   try {
     await world.tool(
       'attach-evidence',
-      { issueKey: ISSUE_KEY, criterionId, type: 'attestation', reference: 'self-attested' },
+      { issueKey: world.scenario.issue.key, criterionId, type: 'attestation', reference: 'self-attested' },
       context,
     );
     return ok('accepté (inattendu)');

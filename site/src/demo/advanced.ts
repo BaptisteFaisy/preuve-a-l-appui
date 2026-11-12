@@ -23,7 +23,6 @@ import { getOrGenerateDossier } from '../../../src/domain/dossier.js';
 import { DEMO_EXTRA, fill } from '../i18n/demo-extra.js';
 import type { GestureResult } from './actions.js';
 import type { DemoWorld } from './world.js';
-import { ISSUE_ID, ISSUE_KEY, PROJECT_ID } from './world.js';
 
 /** Un geste avancé : son identifiant et les fonctionnalités qu'il montre. */
 export interface AdvancedAction {
@@ -76,7 +75,7 @@ function people(world: DemoWorld): { human: Actor; agentId: string } {
 
 /** Le critère visé par un geste, cherché par son code stable. */
 async function criterionByCode(world: DemoWorld, code: string): Promise<Criterion | undefined> {
-  const criteria = await world.deps.store.listCriteriaByIssue(ISSUE_ID);
+  const criteria = await world.deps.store.listCriteriaByIssue(world.scenario.issue.id);
   return criteria.find((criterion) => criterion.code === code);
 }
 
@@ -86,7 +85,7 @@ async function importCriteria(world: DemoWorld, language: Language): Promise<Ges
   const answer = asText(
     await world.tool(
       'propose-criteria',
-      { issueKey: ISSUE_KEY, criteria: 'Le motif du refus est journalisé,Un e-mail de refus est envoyé' },
+      { issueKey: world.scenario.issue.key, criteria: 'Le motif du refus est journalisé,Un e-mail de refus est envoyé' },
       world.agentContext(agentId),
     ),
   );
@@ -137,14 +136,14 @@ async function suggestPairs(world: DemoWorld, language: Language): Promise<Gestu
   const testNames = PAIR_TEST_NAMES.split(',');
   const answer = await world.tool(
     'suggest-evidence',
-    { issueKey: ISSUE_KEY, testNames: PAIR_TEST_NAMES },
+    { issueKey: world.scenario.issue.key, testNames: PAIR_TEST_NAMES },
     world.agentContext(agentId),
   );
   const suggested = (answer as { suggestions?: readonly unknown[] }).suggestions ?? [];
   if (suggested.length > 0) return note(asText(answer).text ?? '');
   // Le modèle de la démo ne propose rien : l'app a un repli déterministe,
   // sans réseau (SPEC §19) — c'est lui qui parle ici.
-  const criteria = await world.deps.store.listCriteriaByIssue(ISSUE_ID, ['active']);
+  const criteria = await world.deps.store.listCriteriaByIssue(world.scenario.issue.id, ['active']);
   const pairs = deterministicPairs(criteria, testNames, language);
   const codes = new Map(criteria.map((criterion) => [criterion.id, criterion.code]));
   const listed = pairs
@@ -164,7 +163,9 @@ function competentRecipient(
   criterion: Criterion,
 ): { actor: Actor; role: string } | null {
   const issue = world.scenario.issue;
-  for (const actor of Object.values(world.scenario.actors)) {
+  const cast = world.scenario.actors;
+  const candidates: readonly Actor[] = [cast.agent, cast.developer, cast.tester, cast.owner];
+  for (const actor of candidates) {
     if (actor.agent) continue;
     if (!canAttest(actor, issue, criterion, settings).allowed) continue;
     const designated = designatedRoles(settings, criterion);
@@ -179,7 +180,7 @@ function competentRecipient(
 
 /** FP-15 — demande d'attestation au rôle compétent, avec notification (§9.4). */
 async function requestAttestation(world: DemoWorld, language: Language): Promise<GestureResult> {
-  const settings = await world.deps.store.getSettings(PROJECT_ID);
+  const settings = await world.deps.store.getSettings(world.scenario.project.projectId);
   const criterion = await criterionByCode(world, 'AC-3');
   if (settings === null || criterion === undefined) {
     return fail(language, 'unavailable', { what: 'AC-3' });
@@ -190,9 +191,9 @@ async function requestAttestation(world: DemoWorld, language: Language): Promise
   }
   const before = world.scenario.jira.notifications.length;
   await world.resolver.call('request-attestation', {
-    issueId: ISSUE_ID,
-    issueKey: ISSUE_KEY,
-    projectId: PROJECT_ID,
+    issueId: world.scenario.issue.id,
+    issueKey: world.scenario.issue.key,
+    projectId: world.scenario.project.projectId,
     accountId: recipient.actor.accountId,
     criterionId: criterion.id,
     targetAccount: recipient.actor.accountId,
@@ -218,7 +219,7 @@ async function releaseProof(world: DemoWorld): Promise<GestureResult> {
       clock: world.deps.clock,
       coverage: world.deps.coverage,
     },
-    { projectId: PROJECT_ID, projectKey: 'PAY', versionId: version, versionName: version },
+    { projectId: world.scenario.project.projectId, projectKey: 'PAY', versionId: version, versionName: version },
   );
   const answer = asText(
     await world.tool('get-release-proof', { versionId: version }, world.agentContext(agentId)),
@@ -234,7 +235,7 @@ async function otherEvidenceTypes(world: DemoWorld, language: Language): Promise
   const answer = asText(
     await world.tool(
       'attach-evidence',
-      { issueKey: ISSUE_KEY, criterionId: target.code, type: 'documentation', reference: DOC_REFERENCE },
+      { issueKey: world.scenario.issue.key, criterionId: target.code, type: 'documentation', reference: DOC_REFERENCE },
       world.panelContext(human.accountId),
     ),
   );
@@ -246,11 +247,11 @@ async function otherEvidenceTypes(world: DemoWorld, language: Language): Promise
 
 /** FP-21 — preuve croisée : deux types distincts exigés pour un type (§9.2). */
 async function crossEvidence(world: DemoWorld, language: Language): Promise<GestureResult> {
-  const settings = await world.deps.store.getSettings(PROJECT_ID);
+  const settings = await world.deps.store.getSettings(world.scenario.project.projectId);
   if (settings === null) return fail(language, 'unavailable', { what: 'settings' });
   const raised = { ...settings.requirements.functional, minDistinctTypes: 2 };
   await world.resolver.call('save-project-settings', {
-    projectId: PROJECT_ID,
+    projectId: world.scenario.project.projectId,
     requirements: { ...settings.requirements, functional: raised },
   });
   await world.recompute();

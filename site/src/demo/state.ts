@@ -16,8 +16,7 @@ import { buildMatrixViewModel, type MatrixRights } from '../../../src/viewmodel/
 import { canAttest } from '../../../src/domain/independence.js';
 import { isRoleAllowedToWaive } from '../../../src/domain/waivers.js';
 import type { DemoLogEntry, GestureResult } from './actions.js';
-import type { DemoWorld } from './world.js';
-import { ISSUE_ID, ISSUE_KEY, PROJECT_ID } from './world.js';
+import type { DemoSource, DemoWorld } from './world.js';
 
 /** Instantané rendu par la démo. */
 export interface DemoSnapshot {
@@ -30,13 +29,17 @@ export interface DemoSnapshot {
   readonly mode: GateMode;
   readonly language: Language;
   readonly busy: boolean;
+  /** D'où viennent les données affichées : lues en direct ou jeu embarqué. */
+  readonly source: DemoSource;
+  /** La clé du ticket affiché (PAY-123 en embarqué, la vraie en direct). */
+  readonly issueKey: string;
 }
 
 /** Droits de geste de l'acteur courant, calculés par le domaine (§9.4, §12.4). */
 async function rightsOf(world: DemoWorld, actor: Actor): Promise<MatrixRights> {
   const issue = world.scenario.issue;
-  const settings = (await world.deps.store.getSettings(PROJECT_ID)) ?? world.scenario.project;
-  const criteria = await world.deps.store.listCriteriaByIssue(ISSUE_ID);
+  const settings = (await world.deps.store.getSettings(world.scenario.project.projectId)) ?? world.scenario.project;
+  const criteria = await world.deps.store.listCriteriaByIssue(world.scenario.issue.id);
   const attestable = new Set<string>();
   for (const criterion of criteria) {
     if (canAttest(actor, issue, criterion, settings).allowed) attestable.add(criterion.id);
@@ -57,7 +60,7 @@ export async function snapshotOf(
   const coverage = await world.coverage();
   const rights = await rightsOf(world, actor);
   return {
-    matrix: buildMatrixViewModel(coverage, language, ISSUE_KEY, rights),
+    matrix: buildMatrixViewModel(coverage, language, world.scenario.issue.key, rights),
     field: buildCoverageFieldViewModel(coverage, language),
     verdict,
     log,
@@ -66,6 +69,8 @@ export async function snapshotOf(
     mode,
     language,
     busy,
+    source: world.source,
+    issueKey: world.scenario.issue.key,
   };
 }
 
