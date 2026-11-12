@@ -27,6 +27,7 @@ import type {
   Waiver,
 } from '../types';
 import { canAttest } from '../domain/independence';
+import { confirmLink } from '../domain/matching';
 import { validateWaiverCandidate } from '../domain/waivers';
 import { renderCriteriaSection } from '../domain/criteria';
 import { hashCiKey } from '../ingest/webtrigger';
@@ -80,6 +81,8 @@ export interface BootstrapResult {
   readonly criteria: readonly string[];
   readonly evidences: number;
   /** Dérogations accordées pendant l'amorçage. */
+  /** Paires test ↔ critère confirmées (preuve vivante). */
+  readonly links: number;
   readonly waivers: number;
   readonly descriptionRewritten: boolean;
   readonly coverage: { readonly proven: number; readonly total: number } | null;
@@ -241,6 +244,42 @@ async function applyWaivers(
   return count;
 }
 
+/**
+ * Les paires test ↔ critère **confirmées** : c'est ce qui fait vivre une
+ * preuve après la clôture (SPEC §13). L'agent propose, un humain confirme —
+ * l'amorçage joue le rôle de l'agent qui rattache chaque preuve de test au
+ * critère qu'elle prouve.
+ */
+async function applyTestLinks(
+  deps: AppDeps,
+  criteria: readonly Criterion[],
+  evidences: readonly Evidence[],
+): Promise<number> {
+  let count = 0;
+  for (const evidence of evidences) {
+    if (evidence.type !== 'test') continue;
+    const criterion = criteria.find((one) => one.id === evidence.criterionId);
+    if (criterion === undefined) continue;
+    const link = confirmLink(
+      {
+        id: deps.ids.next('lnk'),
+        criterionId: criterion.id,
+        testName: evidence.reference,
+        status: 'proposed',
+        confidence: 0.9,
+        rationale: 'Rattachement proposé par l’agent, confirmé par l’opérateur.',
+        confirmedBy: '',
+        at: deps.clock.now(),
+      },
+      evidence.addedBy,
+      deps.clock.now(),
+    );
+    await deps.store.saveLink(link);
+    count += 1;
+  }
+  return count;
+}
+
 export async function bootstrapDemoData(
   deps: AppDeps,
   input: BootstrapInput,
@@ -260,6 +299,7 @@ export async function bootstrapDemoData(
       created: false,
       criteria: existing.map((criterion) => criterion.code),
       evidences: (await deps.store.listEvidencesByIssue(issue.id)).length,
+      links: (await deps.store.listProposedLinks(issue.id)).length,
       waivers: (await deps.store.listWaiversByIssue(issue.id)).length,
       descriptionRewritten: false,
       coverage: coverage === null ? null : { proven: coverage.proven, total: coverage.total },
@@ -280,6 +320,7 @@ export async function bootstrapDemoData(
   );
   const settings =
     (await deps.store.getSettings(issue.projectId)) ?? createDemoSettings(issue.projectId);
+  const linked = await applyTestLinks(deps, criteria, evidences);
   const attested = await applyAttestations(deps, issue, criteria, settings, input.flow ?? {});
   const waived = await applyWaivers(deps, issue, criteria, settings, input.flow ?? {});
   const coverage = await deps.coverage.recompute(issue.id);
@@ -290,6 +331,7 @@ export async function bootstrapDemoData(
     created: true,
     criteria: criteria.map((criterion) => criterion.code),
     evidences: evidences.length + attested,
+    links: linked,
     waivers: waived,
     descriptionRewritten,
     coverage: coverage === null ? null : { proven: coverage.proven, total: coverage.total },
