@@ -1,0 +1,37 @@
+/* --- Problem --- (lot site/sections-a) */
+
+.problem-grid {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  margin-block: var(--space-6);
+}
+
+.problem-card {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.problem-card p {
+  margin: 0;
+  color: var(--colour-text-subtle);
+  font-size: 0.95rem;
+}
+
+.problem-glyph {
+  font-size: 1.4rem;
+  color: var(--colour-brand);
+  line-height: 1;
+}
+
+.problem-agents {
+  margin: 0;
+  padding: var(--space-4) var(--space-6);
+  border-left: 4px solid var(--colour-brand);
+  background: var(--colour-surface);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  max-width: var(--measure);
+}
+
+.problem-agents p {
+  margin: 0;
+}

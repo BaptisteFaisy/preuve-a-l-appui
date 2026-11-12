@@ -1,0 +1,98 @@
+/* --- Rule --- (lot site/sections-a) */
+
+.rule-strengths {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-block: var(--space-4) var(--space-8);
+}
+
+.rule-strength {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+}
+
+.rule-strength .tag {
+  justify-self: start;
+  font-variant-numeric: tabular-nums;
+}
+
+.rule-meaning {
+  margin: 0;
+  font-weight: 600;
+}
+
+.rule-example {
+  margin: 0;
+  color: var(--colour-text-subtle);
+  font-size: 0.92rem;
+}
+
+.rule-table-wrap {
+  margin-bottom: var(--space-8);
+}
+
+.rule-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.rule-table caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: var(--space-2);
+}
+
+.rule-table th,
+.rule-table td {
+  border-bottom: 1px solid var(--colour-border);
+  padding: var(--space-3) var(--space-2);
+  text-align: left;
+  vertical-align: top;
+}
+
+.rule-table thead th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--colour-text-subtle);
+}
+
+.rule-note {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--colour-surface);
+  border-radius: var(--radius);
+  color: var(--colour-text-subtle);
+  font-size: 0.9rem;
+  max-width: var(--measure);
+}
+
+.rule-principles {
+  margin: 0;
+  padding-left: var(--space-6);
+  display: grid;
+  gap: var(--space-2);
+  max-width: var(--measure);
+}
+
+@media (max-width: 720px) {
+  .rule-table thead {
+    display: none;
+  }
+
+  .rule-table,
+  .rule-table tbody,
+  .rule-table tr,
+  .rule-table td,
+  .rule-table th {
+    display: block;
+    width: 100%;
+  }
+
+  .rule-table tbody tr {
+    border-bottom: 2px solid var(--colour-border);
+    padding-bottom: var(--space-2);
+  }
+}
