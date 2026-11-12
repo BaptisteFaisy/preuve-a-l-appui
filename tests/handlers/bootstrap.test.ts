@@ -124,6 +124,37 @@ describe('amorçage — écritures', () => {
     expect(outcome).toEqual({ statusCode: 400, outputKey: 'invalid-payload' });
   });
 
+  it('rejoue les gestes humains : attestation et dérogation, si le domaine les accepte', async () => {
+    process.env[BOOTSTRAP_TOKEN_VAR] = TOKEN;
+    const h = await createAcceptanceHarness();
+    h.scenario.jira.addIssue(anIssue({ id: FRESH_ISSUE.id, key: FRESH_ISSUE.key, projectId: PROJECT_ID }));
+    const body = JSON.stringify({
+      action: 'bootstrap',
+      issueKey: FRESH_ISSUE.key,
+      ciKey: 'cle-ci-reelle',
+      cast: { developer: 'user-dev', tester: 'user-tester', owner: 'user-po' },
+      flow: {
+        attest: [{ code: 'AC-3', accountId: 'user-tester' }],
+        waive: [
+          { code: 'AC-4', accountId: 'user-po', role: 'Product Owner', reason: 'Reporté à la version suivante.' },
+        ],
+      },
+    });
+    const outcome = await handleBootstrap(
+      { method: 'POST', headers: { 'x-bootstrap-token': TOKEN }, body },
+      h.deps,
+      recordingDdl(),
+    );
+    expect(outcome.outputKey).toBe('ok');
+    const attestations = await h.deps.store.listAttestations(
+      (await h.deps.store.listCriteriaByIssue(FRESH_ISSUE.id)).find((c) => c.code === 'AC-3')?.id ?? '',
+    );
+    expect(attestations).toHaveLength(1);
+    const waivers = await h.deps.store.listWaiversByIssue(FRESH_ISSUE.id);
+    expect(waivers).toHaveLength(1);
+    expect(waivers[0]?.reason).toContain('Reporté');
+  });
+
   it('lit l’action et le corps avant d’écrire', () => {
     expect(actionOf('{"action":"migrate"}')).toBe('migrate');
     expect(actionOf('{')).toBe('');

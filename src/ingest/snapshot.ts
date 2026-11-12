@@ -13,6 +13,7 @@
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import { buildDemoSnapshot, type SnapshotDeps } from '../demo-snapshot';
+import { getOrGenerateDossier } from '../domain/dossier';
 import type { Logger } from '../ports';
 
 /** Variable d'app : le site Jira d'origine, affiché comme provenance. */
@@ -30,6 +31,40 @@ export function siteOf(): string {
 }
 
 /**
+ * Le dossier de preuve de la version du ticket : figé au premier passage, il
+ * ne se réécrit pas tout seul (SPEC §17). Le dossier lit la couverture rangée
+ * en base — jamais un second calcul.
+ */
+async function generateDossier(
+  deps: PublishDeps,
+  issue: { id: string; projectId: string; projectKey: string; fixVersions: readonly string[] },
+): Promise<void> {
+  const versionId = issue.fixVersions[0];
+  if (versionId === undefined || versionId === '') return;
+  try {
+    await getOrGenerateDossier(
+      {
+        store: deps.store,
+        jira: deps.jira,
+        clock: deps.clock,
+        coverage: {
+          read: (issueId: string) => deps.store.getCoverage(issueId),
+          recompute: async () => deps.store.getCoverage(''),
+        },
+      },
+      {
+        projectId: issue.projectId,
+        projectKey: issue.projectKey,
+        versionId,
+        versionName: versionId,
+      },
+    );
+  } catch {
+    deps.logger.log('warn', 'snapshot.dossier_failed', { issueKey: issue.id });
+  }
+}
+
+/**
  * Construit l'instantané du ticket et l'écrit dans ses propriétés.
  * Renvoie `false` quand le ticket est inconnu ou l'écriture refusée.
  */
@@ -39,6 +74,7 @@ export async function publishSnapshot(
 ): Promise<boolean> {
   const issue = await deps.jira.getIssue(issueIdOrKey);
   if (issue === null) return false;
+  await generateDossier(deps, issue);
   const snapshot = await buildDemoSnapshot(deps, { issueKey: issue.key, site: siteOf() });
   if (snapshot === null) return false;
   const written = await deps.jira.writeSnapshot(issue.id, snapshot);

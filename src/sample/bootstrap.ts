@@ -16,7 +16,18 @@
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import type { AppDeps } from '../deps';
-import type { Criterion, Evidence, IssueRef, Language, ProjectSettings } from '../types';
+import type {
+  Actor,
+  Attestation,
+  Criterion,
+  Evidence,
+  IssueRef,
+  Language,
+  ProjectSettings,
+  Waiver,
+} from '../types';
+import { canAttest } from '../domain/independence';
+import { validateWaiverCandidate } from '../domain/waivers';
 import { renderCriteriaSection } from '../domain/criteria';
 import { hashCiKey } from '../ingest/webtrigger';
 import { createDemoCriteria, createDemoEvidences, createDemoSettings } from './pay-123';
@@ -33,12 +44,31 @@ export interface BootstrapCast {
   readonly agent?: string;
 }
 
+/**
+ * Les gestes humains de la démo : des attestations et des dérogations, avec la
+ * personne qui les a faites. Le domaine décide (SPEC §9.4, §12.4) : si la
+ * personne n'a pas le droit, l'amorçage le dit au lieu d'écrire.
+ */
+export interface BootstrapFlow {
+  /** Attestations : le code du critère et le compte qui atteste. */
+  readonly attest?: readonly { readonly code: string; readonly accountId: string }[];
+  /** Dérogations : le code du critère, le compte, son rôle et le motif. */
+  readonly waive?: readonly {
+    readonly code: string;
+    readonly accountId: string;
+    readonly role: string;
+    readonly reason: string;
+  }[];
+}
+
 export interface BootstrapInput {
   readonly issueKey: string;
   /** Clé de CI du projet : seule son empreinte SHA-256 est rangée en base. */
   readonly ciKey: string;
   readonly cast: BootstrapCast;
   readonly language?: Language;
+  /** Gestes humains à rejouer (attestation, dérogation). */
+  readonly flow?: BootstrapFlow;
 }
 
 export interface BootstrapResult {
@@ -49,6 +79,8 @@ export interface BootstrapResult {
   readonly created: boolean;
   readonly criteria: readonly string[];
   readonly evidences: number;
+  /** Dérogations accordées pendant l'amorçage. */
+  readonly waivers: number;
   readonly descriptionRewritten: boolean;
   readonly coverage: { readonly proven: number; readonly total: number } | null;
 }
@@ -110,6 +142,105 @@ async function writeSettings(
 }
 
 /** Amorce le jeu de démonstration sur un ticket réel ; `null` si ticket inconnu. */
+/**
+ * Les attestations demandées : le domaine tranche (l'assigné et l'agent ne
+ * peuvent pas attester), puis l'app écrit la preuve et l'attestation.
+ */
+async function applyAttestations(
+  deps: AppDeps,
+  issue: IssueRef,
+  criteria: readonly Criterion[],
+  settings: ProjectSettings,
+  flow: BootstrapFlow,
+): Promise<number> {
+  let count = 0;
+  for (const wanted of flow.attest ?? []) {
+    const criterion = criteria.find((one) => one.code === wanted.code);
+    if (criterion === undefined) continue;
+    const roles = await deps.jira.projectRoles(issue.projectId, wanted.accountId);
+    const actor: Actor = {
+      accountId: wanted.accountId,
+      displayName: wanted.accountId,
+      agent: false,
+      roles,
+    };
+    if (!canAttest(actor, issue, criterion, settings).allowed) continue;
+    const evidenceId = deps.ids.next('ev');
+    const evidence: Evidence = {
+      id: evidenceId,
+      criterionId: criterion.id,
+      criterionVersion: criterion.version,
+      type: 'attestation',
+      reference: 'manual-check',
+      note: 'Attestation verifiee manuellement.',
+      strength: 'attested',
+      commit: '',
+      freshness: 'fresh',
+      verified: true,
+      addedBy: wanted.accountId,
+      addedByAgent: false,
+      at: deps.clock.now(),
+      replacedBy: '',
+    };
+    await deps.store.saveEvidence(evidence);
+    const attestation: Attestation = {
+      id: deps.ids.next('att'),
+      criterionId: criterion.id,
+      evidenceId,
+      attesterAccountId: wanted.accountId,
+      role: roles[0] ?? '',
+      note: 'Attestation verifiee manuellement.',
+      attachmentRef: '',
+      at: deps.clock.now(),
+    };
+    await deps.store.addAttestation(attestation);
+    count += 1;
+  }
+  return count;
+}
+
+/**
+ * Les dérogations demandées : le domaine tranche (rôle autorisé, motif
+ * obligatoire), puis l'app écrit la dérogation.
+ */
+async function applyWaivers(
+  deps: AppDeps,
+  issue: IssueRef,
+  criteria: readonly Criterion[],
+  settings: ProjectSettings,
+  flow: BootstrapFlow,
+): Promise<number> {
+  let count = 0;
+  for (const wanted of flow.waive ?? []) {
+    const criterion = criteria.find((one) => one.code === wanted.code);
+    if (criterion === undefined) continue;
+    const roles = await deps.jira.projectRoles(issue.projectId, wanted.accountId);
+    const verdict = validateWaiverCandidate({
+      criterionId: criterion.id,
+      grantedBy: wanted.accountId,
+      role: wanted.role,
+      reason: wanted.reason,
+      actorIsAgent: false,
+      actorRoles: roles,
+      rolesPolicy: settings.roles,
+    });
+    if (!verdict.valid) continue;
+    const waiver: Waiver = {
+      id: deps.ids.next('wv'),
+      criterionId: criterion.id,
+      grantedBy: wanted.accountId,
+      role: wanted.role,
+      reason: wanted.reason,
+      at: deps.clock.now(),
+      expiresAt: '',
+      revokedAt: '',
+    };
+    await deps.store.saveWaiver(waiver);
+    count += 1;
+  }
+  return count;
+}
+
 export async function bootstrapDemoData(
   deps: AppDeps,
   input: BootstrapInput,
@@ -129,6 +260,7 @@ export async function bootstrapDemoData(
       created: false,
       criteria: existing.map((criterion) => criterion.code),
       evidences: (await deps.store.listEvidencesByIssue(issue.id)).length,
+      waivers: (await deps.store.listWaiversByIssue(issue.id)).length,
       descriptionRewritten: false,
       coverage: coverage === null ? null : { proven: coverage.proven, total: coverage.total },
     };
@@ -146,6 +278,10 @@ export async function bootstrapDemoData(
     issue.id,
     renderCriteriaSection(criteria, language),
   );
+  const settings =
+    (await deps.store.getSettings(issue.projectId)) ?? createDemoSettings(issue.projectId);
+  const attested = await applyAttestations(deps, issue, criteria, settings, input.flow ?? {});
+  const waived = await applyWaivers(deps, issue, criteria, settings, input.flow ?? {});
   const coverage = await deps.coverage.recompute(issue.id);
   return {
     projectId: issue.projectId,
@@ -153,7 +289,8 @@ export async function bootstrapDemoData(
     issueKey: issue.key,
     created: true,
     criteria: criteria.map((criterion) => criterion.code),
-    evidences: evidences.length,
+    evidences: evidences.length + attested,
+    waivers: waived,
     descriptionRewritten,
     coverage: coverage === null ? null : { proven: coverage.proven, total: coverage.total },
   };

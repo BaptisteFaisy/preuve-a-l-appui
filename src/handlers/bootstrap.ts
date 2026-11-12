@@ -22,7 +22,7 @@ import { forgeDdlRunner } from '../db/sql-client';
 import type { DdlRunner } from '../db/sql-client';
 import { safeCompareHex } from '../ingest/signature';
 import { bootstrapDemoData } from '../sample/bootstrap';
-import type { BootstrapCast } from '../sample/bootstrap';
+import type { BootstrapCast, BootstrapFlow } from '../sample/bootstrap';
 
 /** Variable d'app portant le jeton d'amorçage (jamais dans le dépôt). */
 export const BOOTSTRAP_TOKEN_VAR = 'FORGE_USER_VAR_DEMO_BOOTSTRAP_TOKEN';
@@ -74,6 +74,7 @@ export function parseBootstrapBody(raw: string): {
   issueKey: string;
   ciKey: string;
   cast: BootstrapCast;
+  flow?: BootstrapFlow;
 } | null {
   let body: unknown;
   try {
@@ -95,7 +96,42 @@ export function parseBootstrapBody(raw: string): {
   }
   // Le compte de l'agent est optionnel : à défaut, c'est celui du développeur.
   const agent = asString(cast['agent']);
-  return { issueKey, ciKey, cast: { developer, tester, owner, ...(agent ? { agent } : {}) } };
+  const flow = parseFlow(source['flow']);
+  return {
+    issueKey,
+    ciKey,
+    cast: { developer, tester, owner, ...(agent ? { agent } : {}) },
+    ...(flow ? { flow } : {}),
+  };
+}
+
+/** Le flux de gestes humains (attestations, dérogations), s'il est fourni. */
+export function parseFlow(raw: unknown): BootstrapFlow | null {
+  if (typeof raw !== 'object' || raw === null) return null;
+  const source = raw as Record<string, unknown>;
+  const readItem = (item: unknown): Record<string, string> =>
+    typeof item === 'object' && item !== null ? (item as Record<string, string>) : {};
+  const attest = (Array.isArray(source['attest']) ? source['attest'] : [])
+    .map(readItem)
+    .filter((item) => asString(item['code']) !== '' && asString(item['accountId']) !== '')
+    .map((item) => ({ code: asString(item['code']), accountId: asString(item['accountId']) }));
+  const waive = (Array.isArray(source['waive']) ? source['waive'] : [])
+    .map(readItem)
+    .filter(
+      (item) =>
+        asString(item['code']) !== '' &&
+        asString(item['accountId']) !== '' &&
+        asString(item['role']) !== '' &&
+        asString(item['reason']) !== '',
+    )
+    .map((item) => ({
+      code: asString(item['code']),
+      accountId: asString(item['accountId']),
+      role: asString(item['role']),
+      reason: asString(item['reason']),
+    }));
+  if (attest.length === 0 && waive.length === 0) return null;
+  return { ...(attest.length ? { attest } : {}), ...(waive.length ? { waive } : {}) };
 }
 
 /** Écritures : le schéma d'abord, puis l'amorçage du ticket. */
