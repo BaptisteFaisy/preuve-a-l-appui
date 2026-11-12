@@ -16,7 +16,6 @@ import type { Actor, Criterion, Language, ProjectSettings } from '../../../src/t
 import { changeCriterionText } from '../../../src/domain/criteria-change.js';
 import { validateCriteria } from '../../../src/domain/criteria-import.js';
 import { canAttest, designatedRoles } from '../../../src/domain/independence.js';
-import { deterministicPairs } from '../../../src/domain/matching.js';
 import { competentRole } from '../../../src/actions/request-attestation.js';
 import { requiresCrossEvidence } from '../../../src/domain/requirements.js';
 import { getOrGenerateDossier } from '../../../src/domain/dossier.js';
@@ -131,25 +130,17 @@ async function staleOnChange(world: DemoWorld, language: Language): Promise<Gest
 }
 
 /** FP-14 et FP-20 — paires test ↔ critère proposées, à confirmer (SPEC §11). */
-async function suggestPairs(world: DemoWorld, language: Language): Promise<GestureResult> {
+/** FP-14 et FP-20 — paires test ↔ critère proposées, à confirmer (SPEC §11). */
+async function suggestPairs(world: DemoWorld): Promise<GestureResult> {
   const { agentId } = people(world);
-  const testNames = PAIR_TEST_NAMES.split(',');
   const answer = await world.tool(
     'suggest-evidence',
     { issueKey: world.scenario.issue.key, testNames: PAIR_TEST_NAMES },
     world.agentContext(agentId),
   );
-  const suggested = (answer as { suggestions?: readonly unknown[] }).suggestions ?? [];
-  if (suggested.length > 0) return note(asText(answer).text ?? '');
-  // Le modèle de la démo ne propose rien : l'app a un repli déterministe,
-  // sans réseau (SPEC §19) — c'est lui qui parle ici.
-  const criteria = await world.deps.store.listCriteriaByIssue(world.scenario.issue.id, ['active']);
-  const pairs = deterministicPairs(criteria, testNames, language);
-  const codes = new Map(criteria.map((criterion) => [criterion.id, criterion.code]));
-  const listed = pairs
-    .map((pair) => `${codes.get(pair.criterionId) ?? '?'} ↔ « ${pair.testName} » (${pair.confidence})`)
-    .join(' · ');
-  return note(say(language, 'suggest-fallback', { count: pairs.length, pairs: listed || '—' }));
+  // L'action porte son propre repli déterministe (SPEC §19) : quand le modèle
+  // ne propose rien, ce sont les mots partagés qui parlent.
+  return note(asText(answer).text ?? '');
 }
 
 /**
@@ -274,7 +265,7 @@ export async function runAdvanced(
       case 'stale-on-change':
         return await staleOnChange(world, language);
       case 'suggest-pairs':
-        return await suggestPairs(world, language);
+        return await suggestPairs(world);
       case 'request-attestation':
         return await requestAttestation(world, language);
       case 'release-proof':

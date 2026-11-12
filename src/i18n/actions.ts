@@ -138,4 +138,8 @@ export const ACTION_MESSAGES: Messages = {
     en: 'Release {versionName}: {issuesCount} issues, {criteriaCount} criteria, {provenCount} proven, {waivedCount} waived, {unprovenDeliveredCount} unproven delivered.',
     fr: 'Version {versionName} : {issuesCount} tickets, {criteriaCount} critères, {provenCount} prouvés, {waivedCount} dérogés, {unprovenDeliveredCount} critères livrés non prouvés.',
   },
+  'release.unprovenHeader': {
+    en: 'Delivered but no longer proven:',
+    fr: 'Critères livrés qui ne sont plus prouvés :',
+  },
 };

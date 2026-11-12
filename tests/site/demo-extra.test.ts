@@ -72,7 +72,9 @@ describe('panneau avancé de la démo — effets réels sur l’app', () => {
     const built = await world();
     const result = await runAdvanced(built, 'suggest-pairs', 'fr');
     expect(result.outcome).toBe('info');
-    expect(result.detail).toContain('AC-1');
+    // Le repli déterministe (SPEC §19) propose une paire pour le test qui
+    // partage des mots avec le critère.
+    expect(result.detail).toContain('paiement par carte expirée refusé');
   });
 
   it('FP-15 : la demande d’attestation notifie une personne qui peut attester', async () => {

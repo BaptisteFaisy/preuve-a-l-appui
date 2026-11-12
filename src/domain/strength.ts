@@ -136,6 +136,10 @@ export async function computeEvidenceStrength(
   const testResult = verifyTestAgainstRun(input);
   if (testResult) return testResult;
   const verified = await verifyContent(input, checker);
-  const strength = strengthWithAttestation(input.type, Boolean(input.hasValidAttestation));
+  // Une preuve que l'app n'a PAS pu vérifier reste déclarée : « vérifié par
+  // machine » exige la vérification (SPEC §9.1), sinon c'est une déclaration.
+  const strength = verified
+    ? strengthWithAttestation(input.type, Boolean(input.hasValidAttestation))
+    : 'declared';
   return { verified, strength };
 }

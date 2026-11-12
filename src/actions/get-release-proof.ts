@@ -12,7 +12,7 @@
 import type { AppDeps } from '../deps';
 import type { ActorContext } from '../ports';
 import type { DossierIssue, ReleaseDossier } from '../types';
-import { actionText, requireText } from './common';
+import { actionText, requireText, resolveLanguage } from './common';
 import {
   ActionError,
   type ReleaseIssueItem,
@@ -42,8 +42,12 @@ function toIssueItem(issue: DossierIssue): ReleaseIssueItem {
   };
 }
 
-function buildText(dossier: ReleaseDossier, unproven: readonly UnprovenDeliveredItem[]): string {
-  const summary = actionText('release.summary', 'en', {
+function buildText(
+  dossier: ReleaseDossier,
+  unproven: readonly UnprovenDeliveredItem[],
+  language: 'en' | 'fr',
+): string {
+  const summary = actionText('release.summary', language, {
     versionName: dossier.versionName,
     issuesCount: dossier.totals.issues,
     criteriaCount: dossier.totals.criteria,
@@ -53,7 +57,7 @@ function buildText(dossier: ReleaseDossier, unproven: readonly UnprovenDelivered
   });
   if (unproven.length === 0) return summary;
   const lines = unproven.map((item) => `  * ${item.issueKey} ${item.criterionCode} : ${item.criterionText}`);
-  return `${summary}\nDelivered but no longer proven:\n${lines.join('\n')}`;
+  return `${summary}\n${actionText('release.unprovenHeader', language)}\n${lines.join('\n')}`;
 }
 
 export async function getReleaseProof(
@@ -68,6 +72,9 @@ export async function getReleaseProof(
   }
 
   const unproven = dossier.issues.flatMap(unprovenOf);
+  // La langue du dossier est celle de son projet, pas celle de l'appelant :
+  // le sommaire était en anglais en dur.
+  const language = await languageOfDossier(deps, dossier);
   return {
     versionId: dossier.versionId,
     versionName: dossier.versionName,
@@ -79,6 +86,15 @@ export async function getReleaseProof(
     unprovenDeliveredCount: unproven.length,
     issues: dossier.issues.map(toIssueItem),
     unprovenDelivered: unproven,
-    text: buildText(dossier, unproven),
+    text: buildText(dossier, unproven, language),
   };
+}
+
+/** La langue du projet de la version, lue dans ses réglages via un ticket. */
+async function languageOfDossier(deps: AppDeps, dossier: ReleaseDossier): Promise<'en' | 'fr'> {
+  const firstIssue = dossier.issues[0];
+  if (firstIssue === undefined) return 'en';
+  const issue = await deps.jira.getIssue(firstIssue.issueKey);
+  const lang = await resolveLanguage(deps, issue?.projectId ?? '');
+  return lang === 'fr' ? 'fr' : 'en';
 }
