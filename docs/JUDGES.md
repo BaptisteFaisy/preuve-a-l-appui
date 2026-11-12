@@ -3,9 +3,12 @@
 ## 0. Try it right now, without installing anything
 
 **<https://baptistefaisy.github.io/preuve-a-l-appui/>** — the public site, with a
-live demo of ticket `PAY-123` that runs this repository's real decision engine
-in your browser (criteria, strengths, coverage, independence rules, gate
-message). Attach a test, run the pipeline, try to attest as the assignee, then
+live demo that runs this repository's real decision engine in your browser
+(criteria, strengths, coverage, independence rules, gate message). The demo
+reads the **real** state of the app installed on the demo Jira site — the ticket,
+its criteria, its proofs, its coverage and its people; the header says so, and
+names the ticket it is showing. The embedded `PAY-123` dataset is the fallback
+when the network is missing. Attach a test, run the pipeline, try to attest as the assignee, then
 waive as the product owner and close the ticket. English and French.
 
 Below it, **The rest of the engine, live** runs the seven features the base

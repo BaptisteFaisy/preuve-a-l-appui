@@ -130,7 +130,7 @@ export const EN: SiteStrings = {
     note: "The app never “reads” a screenshot: the models available in Forge only handle text. An image proves a file exists, not what it shows — which is why its strength stays “declared” until a third party attests it.",
   },
   demo: {
-    title: "Live demo: PAY-123",
+    title: "Live demo: {issue}",
     lede: "This page runs the app’s real decision engine, compiled to the browser — the same criteria, strengths, coverage, independence rules and gate message as the Forge app. Nothing is faked, nothing is sent anywhere.",
     engineNote: "Engine: src/domain/* and src/handlers/* of this repository, running in memory.",
     reset: "Reset the ticket",

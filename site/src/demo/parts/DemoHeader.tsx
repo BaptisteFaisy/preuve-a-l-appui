@@ -57,7 +57,7 @@ export function DemoHeader({ lang, snapshot }: DemoHeaderProps): ReactElement {
   return (
     <header className="demo-head">
       <div>
-        <h2 id="demo-title">{t.title}</h2>
+        <h2 id="demo-title">{fillText(t.title, { issue: snapshot.issueKey })}</h2>
         <p className="lede">{t.lede}</p>
         <p className="demo-engine">
           <code>{t.engineNote}</code> · <code>{snapshot.issueKey}</code>
