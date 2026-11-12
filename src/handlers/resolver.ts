@@ -18,6 +18,7 @@
 import { defaultProjectSettings } from '../defaults';
 import type { AppDeps } from '../deps';
 import { canAttest } from '../domain/independence';
+import { attachEvidence, type AttachEvidenceInput } from '../domain/evidence';
 import { isRoleAllowedToWaive, validateWaiverCandidate } from '../domain/waivers';
 import type {
   Actor,
@@ -29,7 +30,7 @@ import type {
   IssueRef,
   Language,
   ProjectSettings,
-  Strength,
+
   Waiver,
 } from '../types';
 import { text } from '../i18n/index';
@@ -218,38 +219,31 @@ const WAIVER_ERROR_KEYS: Record<string, string> = {
 };
 
 
-function strengthForEvidenceType(type: EvidenceType): Strength {
-  if (type === 'test' || type === 'documentation') return 'machine-verified';
-  if (type === 'attestation') return 'attested';
-  return 'declared';
-}
-
+/**
+ * Le panneau attache une preuve par le même geste du domaine que tout le
+ * reste : la force et la vérification sont calculées par l'app (SPEC §9.1),
+ * jamais déclarées par la personne. Une documentation n'est « vérifiée par
+ * machine » que si le vérificateur la confirme — autrefois elle l'était à
+ * l'aveugle (`verified: true` et `machine-verified` en dur).
+ */
 async function handleAttachEvidence(req: ResolverRequest, deps: AppDeps): Promise<unknown> {
   const { issueId, accountId } = extractContext(req);
   const p = req.payload;
   const criterionId = str(p, 'criterionId');
   const type = (str(p, 'type') || 'attachment') as EvidenceType;
   const criterion = await deps.store.getCriterion(criterionId);
-  const evidence: Evidence = {
-    id: deps.ids.next('ev'),
+  const input: AttachEvidenceInput = {
     criterionId,
-    criterionVersion: criterion ? criterion.version : 1,
     type,
     reference: str(p, 'reference') || str(p, 'value'),
     note: str(p, 'note'),
-    strength: strengthForEvidenceType(type),
-    commit: '',
-    freshness: 'fresh',
-    verified: true,
     addedBy: accountId || 'user',
-    addedByAgent: false,
-    at: deps.clock.now(),
-    replacedBy: '',
+    ...(str(p, 'replacesEvidenceId') ? { replacesEvidenceId: str(p, 'replacesEvidenceId') } : {}),
   };
-  await deps.store.saveEvidence(evidence);
+  const result = await attachEvidence(input, deps, criterion);
   const target = issueId || criterion?.issueId || '';
   if (target) await deps.coverage.recompute(target);
-  return { ok: true, evidenceId: evidence.id, strength: evidence.strength };
+  return { ok: true, evidenceId: result.evidence.id, strength: result.strength };
 }
 
 async function handleAttestCriterion(req: ResolverRequest, deps: AppDeps): Promise<unknown> {

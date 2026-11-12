@@ -271,6 +271,19 @@ describe('6. suggest-evidence', () => {
     const links = await scenario.store.listLinksByCriterion('crit-1');
     expect(links).toHaveLength(0);
   });
+
+  it('propose un repli déterministe quand le modèle ne répond rien (SPEC §19)', async () => {
+    const { deps, mcpContext } = await createMcpHarness();
+    // Le double du modèle ne propose rien : l'app rapproche par les mots partagés.
+    const result = (await runAction(
+      'suggest-evidence',
+      { issueKey: ISSUE_KEY, testNames: 'paiement par carte expirée refusé' },
+      deps,
+      mcpContext,
+    )) as SuggestEvidenceResult;
+    expect(result.suggestions.length).toBeGreaterThan(0);
+    expect(result.suggestions[0]?.criterionId).toBe('crit-1');
+  });
 });
 
 describe('7. get-release-proof', () => {
@@ -344,6 +357,59 @@ describe('7. get-release-proof', () => {
     expect(result.unprovenDeliveredCount).toBe(1);
     expect(result.unprovenDelivered[0]?.criterionCode).toBe('AC-2');
     expect(result.text).toContain('AC-2 : Critère qui a régressé');
+  });
+
+  it('parle la langue du projet de la version', async () => {
+    const { scenario, deps, mcpContext } = await createMcpHarness();
+    await scenario.store.saveSettings({ ...scenario.project, language: 'fr' });
+    const dossier = aDossier({
+      versionId: 'ver-2.4',
+      versionName: '2.4',
+      projectKey: 'PAY',
+      totals: {
+        issues: 1,
+        criteria: 1,
+        proven: 1,
+        machineVerified: 1,
+        attested: 0,
+        declared: 0,
+        waived: 0,
+      },
+      issues: [
+        {
+          issueKey: ISSUE_KEY,
+          summary: 'Ticket de la version',
+          total: 1,
+          proven: 1,
+          waived: 0,
+          waivers: [],
+          criteria: [
+            {
+              criterionId: 'c1',
+              code: 'AC-1',
+              text: 'Critère prouvé',
+              type: 'functional',
+              version: 1,
+              requiredStrength: 'machine-verified',
+              bestEvidenceId: 'e1',
+              bestStrength: 'machine-verified',
+              proven: true,
+              waived: false,
+              minor: false,
+              defect: null,
+              expected: 'test',
+              evidences: [],
+              waiverId: '',
+            },
+          ],
+        },
+      ],
+    });
+    await scenario.store.saveDossier(dossier);
+
+    const result = (await runAction('get-release-proof', { versionId: 'ver-2.4' }, deps, mcpContext)) as ReleaseProofResult;
+    expect(result.text).toContain('Version 2.4 :');
+    expect(result.text).toContain('ticket');
   });
 
   it('lève une erreur si la version est introuvable', async () => {

@@ -129,10 +129,28 @@ describe('attach-evidence', () => {
       reference: 'checkout refuses an expired card',
     })) as { ok: boolean; strength: string };
     expect(res.ok).toBe(true);
-    expect(res.strength).toBe('machine-verified');
+    // Un test attaché à la main reste « déclaré » : la force machine ne vient
+    // que d'un run de CI (SPEC §9.1, §22 point 3).
+    expect(res.strength).toBe('declared');
     const saved = await sc.store.listEvidencesByCriterion('crit-1');
     expect(saved.some((e: Evidence) => e.type === 'test')).toBe(true);
     expect(sc.coverage.journal.count('recompute')).toBe(1);
+  });
+
+  it('n’attribue pas « vérifiée par machine » à une documentation que le vérificateur refuse', async () => {
+    const { sc, resolver } = await setup();
+    const res = (await resolver.call('attach-evidence', {
+      issueId: ISSUE_ID,
+      criterionId: 'crit-1',
+      type: 'documentation',
+      reference: 'https://wiki.example/paiement-refuse',
+    })) as { ok: boolean; strength: string };
+    expect(res.ok).toBe(true);
+    // La page n'est pas connue du vérificateur : la preuve reste déclarée.
+    expect(res.strength).toBe('declared');
+    const saved = await sc.store.listEvidencesByCriterion('crit-1');
+    const documentation = saved.find((e: Evidence) => e.type === 'documentation');
+    expect(documentation?.verified).toBe(false);
   });
 });
 

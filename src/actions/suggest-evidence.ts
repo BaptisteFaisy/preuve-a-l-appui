@@ -14,6 +14,7 @@ import type { AppDeps } from '../deps';
 import type { ActorContext } from '../ports';
 import type { SuggestedPair } from '../ports';
 import { actionText, loadIssue, requireText, resolveLanguage, splitCsv } from './common';
+import { deterministicPairs } from '../domain/matching';
 import { ActionError, type SuggestEvidenceResult } from './types';
 
 function formatPairs(pairs: readonly SuggestedPair[]): string {
@@ -47,6 +48,7 @@ export async function suggestEvidence(
 
   // Seuls les critères actifs sont rapprochables (SPEC §8.3).
   const criteria = await deps.store.listCriteriaByIssue(issue.id, ['active']);
+  const lang = await resolveLanguage(deps, issue.projectId);
   let pairs: readonly SuggestedPair[] = [];
   if (criteria.length > 0) {
     try {
@@ -54,9 +56,13 @@ export async function suggestEvidence(
     } catch {
       pairs = [];
     }
+    // Le repli déterministe (SPEC §19) : quand le modèle ne propose rien,
+    // l'app sait quand même rapprocher un test d'un critère par les mots
+    // partagés.
+    if (pairs.length === 0) {
+      pairs = deterministicPairs(criteria, testNames, lang);
+    }
   }
-
-  const lang = await resolveLanguage(deps, issue.projectId);
   const suggestions = pairs.map((pair) => ({
     criterionId: pair.criterionId,
     testName: pair.testName,
