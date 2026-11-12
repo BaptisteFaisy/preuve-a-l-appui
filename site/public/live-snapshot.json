@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T20:55:54.019Z",
+  "generatedAt": "2026-11-12T21:14:12.960Z",
   "site": "one-atlas-cndz.atlassian.net",
   "project": {
     "id": "10238",
@@ -566,12 +566,12 @@
         "waiverId": ""
       }
     ],
-    "updatedAt": "2026-11-12T20:55:53.000Z"
+    "updatedAt": "2026-11-12T21:14:12.000Z"
   },
   "living": [],
   "stats": {
     "projectId": "PRF",
-    "since": "1970-01-01T00:00:00.000Z",
+    "since": "1970-01-01 00:00:00",
     "coverageByStrength": {
       "declared": 0,
       "attested": 1,

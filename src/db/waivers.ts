@@ -49,18 +49,23 @@ export function createWaiverStore(sql: SqlClient): WaiverStore {
       return rows.map(rowToWaiver);
     },
 
-    async listWaiversByProject(projectId: string, since: string): Promise<Waiver[]> {
+    async listWaiversByProject(projectKey: string, since: string): Promise<Waiver[]> {
+      // Les dérogations d'un projet se trouvent par la clé du projet : les
+      // tickets du projet sont ceux dont la couverture commence par la clé
+      // (`PAY-1`). On ne peut pas se fier à un préfixe d'id de ticket : Jira
+      // donne des ids numériques ('66653') sans rapport avec le projet.
       const statement = `
         SELECT w.id, w.criterion_id, w.granted_by, w.role, w.reason, w.at, w.expires_at, w.revoked_at
         FROM ${TABLE} w
         JOIN criterion c ON c.id = w.criterion_id
-        WHERE (c.issue_id LIKE ? OR c.issue_id = ?)
+        WHERE c.issue_id IN (
+          SELECT cov.issue_id FROM coverage cov WHERE cov.issue_key LIKE ?
+        )
           AND w.at >= ?
         ORDER BY w.at ASC
         LIMIT 500
       `;
-      const prefix = `${projectId}-%`;
-      const rows = await sql.query<WaiverRow>(statement, [prefix, projectId, since]);
+      const rows = await sql.query<WaiverRow>(statement, [`${projectKey}-%`, since]);
       return rows.map(rowToWaiver);
     },
 

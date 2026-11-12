@@ -41,7 +41,8 @@ import type { Clock } from './ports';
 import { defaultProjectSettings } from './defaults';
 
 /** Époque de référence pour les lectures « tout l'historique ». */
-export const SNAPSHOT_EPOCH = '1970-01-01T00:00:00.000Z';
+/** Le début de l'histoire, au format que la base accepte dans un TIMESTAMP. */
+export const SNAPSHOT_EPOCH = '1970-01-01 00:00:00';
 
 /**
  * Tous les champs qui portent un identifiant de compte, dans tous les types du

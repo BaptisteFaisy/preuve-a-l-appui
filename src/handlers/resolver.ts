@@ -60,7 +60,8 @@ interface CallContext {
   readonly language: Language;
 }
 
-const EPOCH = '1970-01-01T00:00:00.000Z';
+/** Le début de l'histoire, au format que la base accepte dans un TIMESTAMP. */
+const EPOCH = '1970-01-01 00:00:00';
 
 function str(source: Record<string, unknown>, key: string): string {
   const value = source[key];
@@ -393,7 +394,7 @@ async function handleGetProjectPage(req: ResolverRequest, deps: AppDeps): Promis
   const projectKey = await deps.jira.projectKey(id);
   const [settings, waivers, living, stats, closedIds] = await Promise.all([
     deps.store.getSettings(id),
-    deps.store.listWaiversByProject(id, EPOCH),
+    deps.store.listWaiversByProject(projectKey, EPOCH),
     deps.store.listLivingByProject(id),
     deps.store.computeStats(projectKey, EPOCH),
     deps.store.listClosedWithoutCoverage(id, 20),

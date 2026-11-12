@@ -165,7 +165,8 @@ export interface EvidenceStore {
 export interface WaiverStore {
   listWaiversByCriterion(criterionId: string): Promise<Waiver[]>;
   listWaiversByIssue(issueId: string): Promise<Waiver[]>;
-  listWaiversByProject(projectId: string, since: string): Promise<Waiver[]>;
+  /** The project's waivers, found by the project KEY (`PAY`), not by an id. */
+  listWaiversByProject(projectKey: string, since: string): Promise<Waiver[]>;
   saveWaiver(waiver: Waiver): Promise<void>;
   revokeWaiver(waiverId: string, at: string): Promise<boolean>;
 }
