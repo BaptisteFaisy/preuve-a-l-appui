@@ -166,6 +166,27 @@ describe('demo-data — amorçage protégé', () => {
     expect(criteria).toHaveLength(4);
   });
 
+  it('applique le schéma SQL sur demande (12 tables, injecté en test)', async () => {
+    process.env[BOOTSTRAP_TOKEN_VAR] = TOKEN;
+    const h = await createAcceptanceHarness();
+    const appliquees: string[][] = [];
+    const ddl = {
+      async run(migrations: readonly { name: string }[]) {
+        appliquees.push(migrations.map((migration) => migration.name));
+        return migrations.map((migration) => migration.name);
+      },
+    };
+    const response = await handleDemoData(
+      request({ method: 'POST', body: JSON.stringify({ action: 'migrate' }), headers: { 'x-bootstrap-token': TOKEN } }),
+      h.deps,
+      ddl,
+    );
+    expect(response.statusCode).toBe(200);
+    const result = JSON.parse(response.body) as { tables: number };
+    expect(result.tables).toBe(12);
+    expect(appliquees[0]?.[0]).toContain('criterion');
+  });
+
   it('valide la forme du corps avant d’écrire', () => {
     expect(parseBootstrapBody('{')).toBeNull();
     expect(parseBootstrapBody(JSON.stringify({ action: 'wipe' }))).toBeNull();
