@@ -28,6 +28,12 @@ export interface CoverageEngineDeps {
   logger: Logger;
   /** Optionnel : résolution du ticket, champ de couverture, sous-tâches. */
   jira?: JiraGateway;
+  /**
+   * Optionnel : appelé après chaque écriture de couverture — l'app y publie
+   * son instantané dans les propriétés du ticket (lot `app-runs-on-atlassian`).
+   * Le moteur reste pur : il ne connaît que ce point d'accroche.
+   */
+  onCoverageWritten?: (issueId: string) => Promise<void>;
 }
 
 interface IssueContext {
@@ -78,6 +84,9 @@ async function recomputeSafe(deps: CoverageEngineDeps, issueId: string): Promise
 
   await deps.store.saveCoverage(coverage);
   await afterSave(deps, coverage, settings, criteria.length);
+  if (deps.onCoverageWritten) {
+    await deps.onCoverageWritten(issueId);
+  }
   return coverage;
 }
 

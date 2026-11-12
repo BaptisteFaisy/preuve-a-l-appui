@@ -133,6 +133,19 @@ async function authenticate(
   return errorResponse(401, reason, settings.language);
 }
 
+/**
+ * La sortie statique correspondant à un code HTTP : un déclencheur statique
+ * ne renvoie pas de corps construit à l'exécution, seulement le nom d'une
+ * sortie déclarée dans le manifest (éligibilité « Runs on Atlassian »).
+ */
+export function ciOutputKey(statusCode: number): string {
+  if (statusCode === 202) return 'accepted';
+  if (statusCode === 401) return 'unauthorized';
+  if (statusCode === 413) return 'payload-too-large';
+  if (statusCode === 405) return 'method-not-allowed';
+  return 'invalid-payload';
+}
+
 /** Réponse « lot mis en attente » : le run n'est pas encore complet. */
 function bufferedResponse(batch: CiBatch, language: Language): CiWebResponse {
   return jsonResponse(202, {

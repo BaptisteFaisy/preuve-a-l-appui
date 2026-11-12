@@ -21,6 +21,7 @@ import type {
   IssueRef,
   LivingProof,
   ParsedCriterion,
+  ProjectMember,
   ProjectSettings,
   ProofStats,
   ReleaseDossier,
@@ -71,7 +72,15 @@ export interface JiraGateway {
   rewriteDescriptionSection(issueId: string, section: string): Promise<boolean>;
   /** The `Preuves n / m` field, or an indexed issue property as a fallback. */
   setCoverageField(issueId: string, label: string, proven: number, total: number): Promise<boolean>;
+  /**
+   * Writes the pseudonymised snapshot of the ticket in an entity property, so
+   * that the public site can read it without the app exposing a dynamic web
+   * trigger (which would cost the "Runs on Atlassian" eligibility).
+   */
+  writeSnapshot(issueId: string, snapshot: unknown): Promise<boolean>;
   projectRoles(projectId: string, accountId: string): Promise<string[]>;
+  /** The people who hold a role on the project, with that role (SPEC §9.4). */
+  projectMembers(projectId: string): Promise<readonly ProjectMember[]>;
   notify(accountId: string, subjectKey: string, bodyKey: string, issueKey: string): Promise<boolean>;
   displayName(accountId: string): Promise<string>;
 }

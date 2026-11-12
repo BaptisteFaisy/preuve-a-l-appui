@@ -54,7 +54,6 @@ function dossierValues(row: ReleaseDossierRow): SqlParam[] {
     row.generated_at,
     row.issues_json,
     row.totals_json,
-    ...DOSSIER_UPSERT_COLUMNS.map((col) => row[col]),
   ];
 }
 

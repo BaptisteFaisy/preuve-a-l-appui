@@ -362,7 +362,18 @@ function checkEventShapes(modules, report) {
   for (const entry of list('webtrigger')) {
     const scope = `modules.webtrigger.${entry?.key ?? '?'}`;
     expect(typeof entry?.function === 'string', scope, 'function obligatoire', report);
-    expect(entry?.response?.type === 'dynamic', scope, 'response.type doit valoir dynamic', report);
+    // Un déclencheur STATIQUE est exigé : seul un déclencheur statique laisse
+    // l'app éligible au programme « Runs on Atlassian » (un déclencheur
+    // dynamique pourrait faire sortir des données du tenant).
+    expect(entry?.response?.type === 'static', scope, 'response.type doit valoir static (Runs on Atlassian)', report);
+    const outputs = entry?.response?.outputs;
+    expect(Array.isArray(outputs) && outputs.length > 0, scope, 'sorties statiques obligatoires', report);
+    for (const output of Array.isArray(outputs) ? outputs : []) {
+      const outScope = `${scope}.${output?.key ?? '?'}`;
+      expect(typeof output?.key === 'string' && output.key !== '', outScope, 'clé de sortie obligatoire', report);
+      expect(typeof output?.statusCode === 'number', outScope, 'statusCode obligatoire', report);
+      expect(typeof output?.body === 'string', outScope, 'body obligatoire', report);
+    }
   }
   for (const entry of list('consumer')) {
     const scope = `modules.consumer.${entry?.key ?? '?'}`;

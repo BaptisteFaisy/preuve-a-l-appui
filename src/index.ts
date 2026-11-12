@@ -25,9 +25,10 @@ import type { ActorContext, CiIngestMessage, JobQueue } from './ports';
 import { registerResolvers } from './handlers/resolver';
 import { createValidator } from './handlers/validator';
 import { handleCiResults } from './handlers/ingest';
-import { handleDemoData } from './handlers/demo-data';
-import { toForgeResponse, toWebRequest } from './webtrigger-adapter';
-import type { ForgeWebRequest, ForgeWebResponse } from './webtrigger-adapter';
+import { ciOutputKey } from './ingest/webtrigger';
+import { handleBootstrap } from './handlers/bootstrap';
+import { flatten, toWebRequest } from './webtrigger-adapter';
+import type { ForgeWebRequest } from './webtrigger-adapter';
 import { onJiraEvent } from './handlers/events';
 import { onScheduledTick } from './handlers/scheduled';
 import { onCiMessage } from './handlers/consumer';
@@ -96,20 +97,42 @@ export async function validateProof(payload: ValidatorPayload): Promise<GateVerd
   });
 }
 
+/**
+ * Réponse d'un déclencheur STATIQUE : le nom d'une sortie déclarée dans le
+ * manifest. Un déclencheur statique ne renvoie jamais de corps construit à
+ * l'exécution — c'est la condition de l'éligibilité « Runs on Atlassian ».
+ */
+export interface ForgeOutput {
+  outputKey: string;
+}
+
 /* -------------------------------------------------------- entrée de CI (L4) */
 
 /**
- * Web trigger `demo-data` : GET = instantané réel pseudonymisé pour le site
- * public ; POST = amorçage du scénario de démonstration, protégé par jeton.
- * L'adaptation de la forme Forge (en-têtes en tableaux, `queryParameters`) vit
- * dans `src/webtrigger-adapter.ts`, testée par `tests/webtrigger-adapter.test.ts`.
+ * Web trigger `bootstrap` : amorçage du scénario de démonstration sur une
+ * installation réelle, protégé par jeton. Le déclencheur est **statique** (la
+ * réponse est l'une des sorties du manifest) : c'est la condition de
+ * l'éligibilité « Runs on Atlassian ».
  */
-export async function serveDemoData(request: ForgeWebRequest): Promise<ForgeWebResponse> {
-  return toForgeResponse(await handleDemoData(toWebRequest(request), deps));
+export async function bootstrapDemo(request: ForgeWebRequest): Promise<ForgeOutput> {
+  const outcome = await handleBootstrap(
+    {
+      method: request.method ?? 'POST',
+      headers: flatten(request.headers),
+      body: request.body ?? '',
+    },
+    deps,
+  );
+  return { outputKey: outcome.outputKey };
 }
 
-export async function ingestResults(request: ForgeWebRequest): Promise<ForgeWebResponse> {
-  return toForgeResponse(await handleCiResults(toWebRequest(request), deps));
+/**
+ * Web trigger `ci-results` : la CI pousse son résumé de résultats. Statique
+ * aussi : le code HTTP de la réponse est celui de la sortie déclarée.
+ */
+export async function ingestResults(request: ForgeWebRequest): Promise<ForgeOutput> {
+  const response = await handleCiResults(toWebRequest(request), deps);
+  return { outputKey: ciOutputKey(response.statusCode) };
 }
 
 /* ------------------------------------------------- événements et file (L4) */
@@ -118,8 +141,16 @@ export async function onEvent(payload: Record<string, unknown>): Promise<void> {
   await onJiraEvent(payload, deps);
 }
 
+/**
+ * Consommateur de la file `proof-ci` : Forge livre l'enveloppe de l'événement
+ * (`queueName`, `jobId`, `eventId`, `body`, `context`…), la charge utile est
+ * dans `body`. Sans ce déballage, le message est illisible et le consommateur
+ * ne fait rien (`ci.consumer.unreadable_message`, vérifié en réel le 12/11).
+ */
 export async function onMessage(payload: Record<string, unknown>): Promise<void> {
-  await onCiMessage(payload as unknown as CiIngestMessage, deps);
+  const body = payload['body'];
+  const message = typeof body === 'object' && body !== null ? body : payload;
+  await onCiMessage(message as unknown as CiIngestMessage, deps);
 }
 
 /* --------------------------------------------- contrôle nocturne (L3, §20) */

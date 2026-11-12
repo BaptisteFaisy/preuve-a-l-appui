@@ -41,7 +41,9 @@ const HISTORY_UPSERT_COLUMNS = CRITERION_HISTORY_COLUMNS.filter(
 
 /**
  * Construit un upsert idempotent : `INSERT … ON DUPLICATE KEY UPDATE`.
- * Les paramètres sont ceux de la ligne, suivis des colonnes rejouées.
+ * Seuls les `?` de la clause INSERT sont liés : la clause de rejeu reprend les
+ * valeurs insérées via `VALUES(col)`, et Forge SQL refuse tout paramètre en
+ * trop (`Unknown SQL execution error`).
  */
 function upsertStatement(
   table: 'criterion' | 'criterion_history',
@@ -74,7 +76,6 @@ function criterionValues(row: CriterionRow): SqlParam[] {
     row.created_by,
     row.created_at,
     row.updated_at,
-    ...CRITERION_UPSERT_COLUMNS.map((column) => row[column]),
   ];
 }
 
@@ -86,7 +87,6 @@ function historyValues(row: CriterionRevisionRow): SqlParam[] {
     row.type,
     row.changed_by,
     row.at,
-    ...HISTORY_UPSERT_COLUMNS.map((column) => row[column]),
   ];
 }
 
