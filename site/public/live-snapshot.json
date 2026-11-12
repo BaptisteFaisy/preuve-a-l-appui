@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T17:29:57.477Z",
+  "generatedAt": "2026-11-12T20:55:54.019Z",
   "site": "one-atlas-cndz.atlassian.net",
   "project": {
     "id": "10238",
@@ -118,7 +118,7 @@
     "ciKeyHash": "",
     "requireChildren": false,
     "language": "en",
-    "updatedAt": "2026-11-12T17:29:47.000Z"
+    "updatedAt": "2026-11-12T20:43:14.000Z"
   },
   "criteria": [
     {
@@ -131,8 +131,8 @@
       "version": 1,
       "status": "active",
       "createdBy": "actor-2",
-      "createdAt": "2026-11-12T17:29:47.000Z",
-      "updatedAt": "2026-11-12T17:29:47.000Z"
+      "createdAt": "2026-11-12T14:28:00.000Z",
+      "updatedAt": "2026-11-12T14:28:00.000Z"
     },
     {
       "id": "66653-crit-2",
@@ -144,8 +144,8 @@
       "version": 1,
       "status": "active",
       "createdBy": "actor-2",
-      "createdAt": "2026-11-12T17:29:47.000Z",
-      "updatedAt": "2026-11-12T17:29:47.000Z"
+      "createdAt": "2026-11-12T14:28:00.000Z",
+      "updatedAt": "2026-11-12T14:28:00.000Z"
     },
     {
       "id": "66653-crit-3",
@@ -157,8 +157,8 @@
       "version": 1,
       "status": "active",
       "createdBy": "actor-2",
-      "createdAt": "2026-11-12T17:29:47.000Z",
-      "updatedAt": "2026-11-12T17:29:47.000Z"
+      "createdAt": "2026-11-12T14:28:00.000Z",
+      "updatedAt": "2026-11-12T14:28:00.000Z"
     },
     {
       "id": "66653-crit-4",
@@ -170,8 +170,8 @@
       "version": 1,
       "status": "active",
       "createdBy": "actor-2",
-      "createdAt": "2026-11-12T17:29:47.000Z",
-      "updatedAt": "2026-11-12T17:29:47.000Z"
+      "createdAt": "2026-11-12T14:28:00.000Z",
+      "updatedAt": "2026-11-12T14:28:00.000Z"
     }
   ],
   "evidences": [
@@ -188,8 +188,8 @@
       "verified": false,
       "addedBy": "actor-2",
       "addedByAgent": true,
-      "at": "2026-11-12T17:29:47.000Z",
-      "replacedBy": "ev_mwdtpbur001"
+      "at": "2026-11-12T14:28:00.000Z",
+      "replacedBy": "ev_mwdnqzjh001"
     },
     {
       "id": "66653-ev-2",
@@ -204,8 +204,8 @@
       "verified": false,
       "addedBy": "actor-2",
       "addedByAgent": true,
-      "at": "2026-11-12T17:29:47.000Z",
-      "replacedBy": "ev_mwdtpbv9002"
+      "at": "2026-11-12T14:28:00.000Z",
+      "replacedBy": "ev_mwdnqzjh002"
     },
     {
       "id": "66653-ev-3",
@@ -220,39 +220,103 @@
       "verified": false,
       "addedBy": "actor-2",
       "addedByAgent": true,
-      "at": "2026-11-12T17:29:47.000Z",
+      "at": "2026-11-12T14:28:00.000Z",
       "replacedBy": ""
     },
     {
-      "id": "ev_mwdtpbur001",
+      "id": "ev_mwdnqzjh001",
       "criterionId": "66653-crit-1",
       "criterionVersion": 1,
       "type": "test",
       "reference": "checkout refuses an expired card",
       "note": "Passé sur le commit de la branche de PR",
       "strength": "machine-verified",
-      "commit": "5bf7f4a465bfb99018de7b8aefdf6d2b79e61ba3",
-      "freshness": "fresh",
+      "commit": "e820080ff764f381b3da20b30f46ed50920e33bf",
+      "freshness": "stale",
       "verified": true,
       "addedBy": "actor-2",
       "addedByAgent": true,
-      "at": "2026-11-12T17:29:56.000Z",
-      "replacedBy": ""
+      "at": "2026-11-12T14:43:15.000Z",
+      "replacedBy": "ev_mwdsblno001"
     },
     {
-      "id": "ev_mwdtpbv9002",
+      "id": "ev_mwdnqzjh002",
       "criterionId": "66653-crit-2",
       "criterionVersion": 1,
       "type": "test",
       "reference": "checkout logs the refusal reason",
       "note": "Passé sur le commit de la branche de PR",
       "strength": "machine-verified",
-      "commit": "5bf7f4a465bfb99018de7b8aefdf6d2b79e61ba3",
+      "commit": "e820080ff764f381b3da20b30f46ed50920e33bf",
+      "freshness": "stale",
+      "verified": true,
+      "addedBy": "actor-2",
+      "addedByAgent": true,
+      "at": "2026-11-12T14:43:15.000Z",
+      "replacedBy": "ev_mwdsblno002"
+    },
+    {
+      "id": "ev_mwdsblno001",
+      "criterionId": "66653-crit-1",
+      "criterionVersion": 1,
+      "type": "test",
+      "reference": "checkout refuses an expired card",
+      "note": "Passé sur le commit de la branche de PR",
+      "strength": "machine-verified",
+      "commit": "5b74ba02e54b86373badf160b0e6d8548b8ceec3",
+      "freshness": "stale",
+      "verified": true,
+      "addedBy": "actor-2",
+      "addedByAgent": true,
+      "at": "2026-11-12T16:51:16.000Z",
+      "replacedBy": "ev_mwe0p3q2001"
+    },
+    {
+      "id": "ev_mwdsblno002",
+      "criterionId": "66653-crit-2",
+      "criterionVersion": 1,
+      "type": "test",
+      "reference": "checkout logs the refusal reason",
+      "note": "Passé sur le commit de la branche de PR",
+      "strength": "machine-verified",
+      "commit": "5b74ba02e54b86373badf160b0e6d8548b8ceec3",
+      "freshness": "stale",
+      "verified": true,
+      "addedBy": "actor-2",
+      "addedByAgent": true,
+      "at": "2026-11-12T16:51:16.000Z",
+      "replacedBy": "ev_mwe0p3q3002"
+    },
+    {
+      "id": "ev_mwe0p3q2001",
+      "criterionId": "66653-crit-1",
+      "criterionVersion": 1,
+      "type": "test",
+      "reference": "checkout refuses an expired card",
+      "note": "Passé sur le commit de la branche de PR",
+      "strength": "machine-verified",
+      "commit": "a1b2c3d4e5f6a7b8",
       "freshness": "fresh",
       "verified": true,
       "addedBy": "actor-2",
       "addedByAgent": true,
-      "at": "2026-11-12T17:29:56.000Z",
+      "at": "2026-11-12T20:45:43.000Z",
+      "replacedBy": ""
+    },
+    {
+      "id": "ev_mwe0p3q3002",
+      "criterionId": "66653-crit-2",
+      "criterionVersion": 1,
+      "type": "test",
+      "reference": "checkout logs the refusal reason",
+      "note": "Passé sur le commit de la branche de PR",
+      "strength": "machine-verified",
+      "commit": "a1b2c3d4e5f6a7b8",
+      "freshness": "fresh",
+      "verified": true,
+      "addedBy": "actor-2",
+      "addedByAgent": true,
+      "at": "2026-11-12T20:45:43.000Z",
       "replacedBy": ""
     }
   ],
@@ -293,7 +357,7 @@
         "type": "functional",
         "version": 1,
         "requiredStrength": "machine-verified",
-        "bestEvidenceId": "ev_mwdtpbur001",
+        "bestEvidenceId": "ev_mwe0p3q2001",
         "bestStrength": "machine-verified",
         "proven": true,
         "waived": false,
@@ -314,23 +378,55 @@
             "verified": false,
             "addedBy": "actor-2",
             "addedByAgent": true,
-            "at": "2026-11-12T17:29:47.000Z",
-            "replacedBy": "ev_mwdtpbur001"
+            "at": "2026-11-12T14:28:00.000Z",
+            "replacedBy": "ev_mwdnqzjh001"
           },
           {
-            "id": "ev_mwdtpbur001",
+            "id": "ev_mwdnqzjh001",
             "criterionId": "66653-crit-1",
             "criterionVersion": 1,
             "type": "test",
             "reference": "checkout refuses an expired card",
             "note": "Passé sur le commit de la branche de PR",
             "strength": "machine-verified",
-            "commit": "5bf7f4a465bfb99018de7b8aefdf6d2b79e61ba3",
+            "commit": "e820080ff764f381b3da20b30f46ed50920e33bf",
+            "freshness": "stale",
+            "verified": true,
+            "addedBy": "actor-2",
+            "addedByAgent": true,
+            "at": "2026-11-12T14:43:15.000Z",
+            "replacedBy": "ev_mwdsblno001"
+          },
+          {
+            "id": "ev_mwdsblno001",
+            "criterionId": "66653-crit-1",
+            "criterionVersion": 1,
+            "type": "test",
+            "reference": "checkout refuses an expired card",
+            "note": "Passé sur le commit de la branche de PR",
+            "strength": "machine-verified",
+            "commit": "5b74ba02e54b86373badf160b0e6d8548b8ceec3",
+            "freshness": "stale",
+            "verified": true,
+            "addedBy": "actor-2",
+            "addedByAgent": true,
+            "at": "2026-11-12T16:51:16.000Z",
+            "replacedBy": "ev_mwe0p3q2001"
+          },
+          {
+            "id": "ev_mwe0p3q2001",
+            "criterionId": "66653-crit-1",
+            "criterionVersion": 1,
+            "type": "test",
+            "reference": "checkout refuses an expired card",
+            "note": "Passé sur le commit de la branche de PR",
+            "strength": "machine-verified",
+            "commit": "a1b2c3d4e5f6a7b8",
             "freshness": "fresh",
             "verified": true,
             "addedBy": "actor-2",
             "addedByAgent": true,
-            "at": "2026-11-12T17:29:56.000Z",
+            "at": "2026-11-12T20:45:43.000Z",
             "replacedBy": ""
           }
         ],
@@ -343,7 +439,7 @@
         "type": "regression",
         "version": 1,
         "requiredStrength": "machine-verified",
-        "bestEvidenceId": "ev_mwdtpbv9002",
+        "bestEvidenceId": "ev_mwe0p3q3002",
         "bestStrength": "machine-verified",
         "proven": true,
         "waived": false,
@@ -364,23 +460,55 @@
             "verified": false,
             "addedBy": "actor-2",
             "addedByAgent": true,
-            "at": "2026-11-12T17:29:47.000Z",
-            "replacedBy": "ev_mwdtpbv9002"
+            "at": "2026-11-12T14:28:00.000Z",
+            "replacedBy": "ev_mwdnqzjh002"
           },
           {
-            "id": "ev_mwdtpbv9002",
+            "id": "ev_mwdnqzjh002",
             "criterionId": "66653-crit-2",
             "criterionVersion": 1,
             "type": "test",
             "reference": "checkout logs the refusal reason",
             "note": "Passé sur le commit de la branche de PR",
             "strength": "machine-verified",
-            "commit": "5bf7f4a465bfb99018de7b8aefdf6d2b79e61ba3",
+            "commit": "e820080ff764f381b3da20b30f46ed50920e33bf",
+            "freshness": "stale",
+            "verified": true,
+            "addedBy": "actor-2",
+            "addedByAgent": true,
+            "at": "2026-11-12T14:43:15.000Z",
+            "replacedBy": "ev_mwdsblno002"
+          },
+          {
+            "id": "ev_mwdsblno002",
+            "criterionId": "66653-crit-2",
+            "criterionVersion": 1,
+            "type": "test",
+            "reference": "checkout logs the refusal reason",
+            "note": "Passé sur le commit de la branche de PR",
+            "strength": "machine-verified",
+            "commit": "5b74ba02e54b86373badf160b0e6d8548b8ceec3",
+            "freshness": "stale",
+            "verified": true,
+            "addedBy": "actor-2",
+            "addedByAgent": true,
+            "at": "2026-11-12T16:51:16.000Z",
+            "replacedBy": "ev_mwe0p3q3002"
+          },
+          {
+            "id": "ev_mwe0p3q3002",
+            "criterionId": "66653-crit-2",
+            "criterionVersion": 1,
+            "type": "test",
+            "reference": "checkout logs the refusal reason",
+            "note": "Passé sur le commit de la branche de PR",
+            "strength": "machine-verified",
+            "commit": "a1b2c3d4e5f6a7b8",
             "freshness": "fresh",
             "verified": true,
             "addedBy": "actor-2",
             "addedByAgent": true,
-            "at": "2026-11-12T17:29:56.000Z",
+            "at": "2026-11-12T20:45:43.000Z",
             "replacedBy": ""
           }
         ],
@@ -414,7 +542,7 @@
             "verified": false,
             "addedBy": "actor-2",
             "addedByAgent": true,
-            "at": "2026-11-12T17:29:47.000Z",
+            "at": "2026-11-12T14:28:00.000Z",
             "replacedBy": ""
           }
         ],
@@ -438,22 +566,263 @@
         "waiverId": ""
       }
     ],
-    "updatedAt": "2026-11-12T17:29:56.000Z"
+    "updatedAt": "2026-11-12T20:55:53.000Z"
   },
   "living": [],
   "stats": {
-    "projectId": "10238",
+    "projectId": "PRF",
     "since": "1970-01-01T00:00:00.000Z",
     "coverageByStrength": {
       "declared": 0,
-      "attested": 0,
-      "machine-verified": 0
+      "attested": 1,
+      "machine-verified": 2
     },
     "waiversByGranter": [],
-    "closedWithoutValidator": 0,
+    "closedWithoutValidator": 3,
     "reopenings": []
   },
-  "dossier": null,
+  "dossier": {
+    "versionId": "2.4",
+    "versionName": "2.4",
+    "projectKey": "PRF",
+    "generatedAt": "2026-11-12T20:45:44.000Z",
+    "issues": [
+      {
+        "issueKey": "PRF-1",
+        "summary": "Refuser un paiement par carte expirée et notifier le client",
+        "total": 4,
+        "proven": 2,
+        "waived": 0,
+        "waivers": [],
+        "criteria": [
+          {
+            "criterionId": "66653-crit-1",
+            "code": "AC-1",
+            "text": "Le paiement par carte expirée est refusé",
+            "type": "functional",
+            "version": 1,
+            "requiredStrength": "machine-verified",
+            "bestEvidenceId": "ev_mwe0p3q2001",
+            "bestStrength": "machine-verified",
+            "proven": true,
+            "waived": false,
+            "minor": false,
+            "defect": null,
+            "expected": "Green automated test on the branch commit, or updated documentation page",
+            "evidences": [
+              {
+                "id": "66653-ev-1",
+                "criterionId": "66653-crit-1",
+                "criterionVersion": 1,
+                "type": "test",
+                "reference": "checkout refuses an expired card",
+                "note": "Passé sur le commit de la branche de PR",
+                "strength": "declared",
+                "commit": "",
+                "freshness": "stale",
+                "verified": false,
+                "addedBy": "actor-2",
+                "addedByAgent": true,
+                "at": "2026-11-12T14:28:00.000Z",
+                "replacedBy": "ev_mwdnqzjh001"
+              },
+              {
+                "id": "ev_mwdnqzjh001",
+                "criterionId": "66653-crit-1",
+                "criterionVersion": 1,
+                "type": "test",
+                "reference": "checkout refuses an expired card",
+                "note": "Passé sur le commit de la branche de PR",
+                "strength": "machine-verified",
+                "commit": "e820080ff764f381b3da20b30f46ed50920e33bf",
+                "freshness": "stale",
+                "verified": true,
+                "addedBy": "actor-2",
+                "addedByAgent": true,
+                "at": "2026-11-12T14:43:15.000Z",
+                "replacedBy": "ev_mwdsblno001"
+              },
+              {
+                "id": "ev_mwdsblno001",
+                "criterionId": "66653-crit-1",
+                "criterionVersion": 1,
+                "type": "test",
+                "reference": "checkout refuses an expired card",
+                "note": "Passé sur le commit de la branche de PR",
+                "strength": "machine-verified",
+                "commit": "5b74ba02e54b86373badf160b0e6d8548b8ceec3",
+                "freshness": "stale",
+                "verified": true,
+                "addedBy": "actor-2",
+                "addedByAgent": true,
+                "at": "2026-11-12T16:51:16.000Z",
+                "replacedBy": "ev_mwe0p3q2001"
+              },
+              {
+                "id": "ev_mwe0p3q2001",
+                "criterionId": "66653-crit-1",
+                "criterionVersion": 1,
+                "type": "test",
+                "reference": "checkout refuses an expired card",
+                "note": "Passé sur le commit de la branche de PR",
+                "strength": "machine-verified",
+                "commit": "a1b2c3d4e5f6a7b8",
+                "freshness": "fresh",
+                "verified": true,
+                "addedBy": "actor-2",
+                "addedByAgent": true,
+                "at": "2026-11-12T20:45:43.000Z",
+                "replacedBy": ""
+              }
+            ],
+            "waiverId": ""
+          },
+          {
+            "criterionId": "66653-crit-2",
+            "code": "AC-2",
+            "text": "Un paiement déjà refusé ne repasse pas",
+            "type": "regression",
+            "version": 1,
+            "requiredStrength": "machine-verified",
+            "bestEvidenceId": "ev_mwe0p3q3002",
+            "bestStrength": "machine-verified",
+            "proven": true,
+            "waived": false,
+            "minor": false,
+            "defect": null,
+            "expected": "Green automated test on the branch commit, or updated documentation page",
+            "evidences": [
+              {
+                "id": "66653-ev-2",
+                "criterionId": "66653-crit-2",
+                "criterionVersion": 1,
+                "type": "test",
+                "reference": "checkout logs the refusal reason",
+                "note": "Passé sur le commit de la branche de PR",
+                "strength": "declared",
+                "commit": "",
+                "freshness": "stale",
+                "verified": false,
+                "addedBy": "actor-2",
+                "addedByAgent": true,
+                "at": "2026-11-12T14:28:00.000Z",
+                "replacedBy": "ev_mwdnqzjh002"
+              },
+              {
+                "id": "ev_mwdnqzjh002",
+                "criterionId": "66653-crit-2",
+                "criterionVersion": 1,
+                "type": "test",
+                "reference": "checkout logs the refusal reason",
+                "note": "Passé sur le commit de la branche de PR",
+                "strength": "machine-verified",
+                "commit": "e820080ff764f381b3da20b30f46ed50920e33bf",
+                "freshness": "stale",
+                "verified": true,
+                "addedBy": "actor-2",
+                "addedByAgent": true,
+                "at": "2026-11-12T14:43:15.000Z",
+                "replacedBy": "ev_mwdsblno002"
+              },
+              {
+                "id": "ev_mwdsblno002",
+                "criterionId": "66653-crit-2",
+                "criterionVersion": 1,
+                "type": "test",
+                "reference": "checkout logs the refusal reason",
+                "note": "Passé sur le commit de la branche de PR",
+                "strength": "machine-verified",
+                "commit": "5b74ba02e54b86373badf160b0e6d8548b8ceec3",
+                "freshness": "stale",
+                "verified": true,
+                "addedBy": "actor-2",
+                "addedByAgent": true,
+                "at": "2026-11-12T16:51:16.000Z",
+                "replacedBy": "ev_mwe0p3q3002"
+              },
+              {
+                "id": "ev_mwe0p3q3002",
+                "criterionId": "66653-crit-2",
+                "criterionVersion": 1,
+                "type": "test",
+                "reference": "checkout logs the refusal reason",
+                "note": "Passé sur le commit de la branche de PR",
+                "strength": "machine-verified",
+                "commit": "a1b2c3d4e5f6a7b8",
+                "freshness": "fresh",
+                "verified": true,
+                "addedBy": "actor-2",
+                "addedByAgent": true,
+                "at": "2026-11-12T20:45:43.000Z",
+                "replacedBy": ""
+              }
+            ],
+            "waiverId": ""
+          },
+          {
+            "criterionId": "66653-crit-3",
+            "code": "AC-3",
+            "text": "L'e-mail de refus est envoyé",
+            "type": "functional",
+            "version": 1,
+            "requiredStrength": "attested",
+            "bestEvidenceId": "66653-ev-3",
+            "bestStrength": "declared",
+            "proven": false,
+            "waived": false,
+            "minor": false,
+            "defect": "unverified",
+            "expected": "Third-party attestation from an independent reviewer",
+            "evidences": [
+              {
+                "id": "66653-ev-3",
+                "criterionId": "66653-crit-3",
+                "criterionVersion": 1,
+                "type": "agent-report",
+                "reference": "report#ac-3",
+                "note": "Le compte rendu de l'agent cite AC-3.",
+                "strength": "declared",
+                "commit": "",
+                "freshness": "fresh",
+                "verified": false,
+                "addedBy": "actor-2",
+                "addedByAgent": true,
+                "at": "2026-11-12T14:28:00.000Z",
+                "replacedBy": ""
+              }
+            ],
+            "waiverId": ""
+          },
+          {
+            "criterionId": "66653-crit-4",
+            "code": "AC-4",
+            "text": "La limite est réglable par l'administrateur",
+            "type": "functional",
+            "version": 1,
+            "requiredStrength": "machine-verified",
+            "bestEvidenceId": "",
+            "bestStrength": null,
+            "proven": false,
+            "waived": false,
+            "minor": false,
+            "defect": "no-evidence",
+            "expected": "Green automated test on the branch commit, or updated documentation page",
+            "evidences": [],
+            "waiverId": ""
+          }
+        ]
+      }
+    ],
+    "totals": {
+      "issues": 1,
+      "criteria": 4,
+      "proven": 2,
+      "machineVerified": 2,
+      "attested": 0,
+      "declared": 0,
+      "waived": 0
+    }
+  },
   "ci": null,
   "actors": [
     {

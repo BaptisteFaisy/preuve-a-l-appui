@@ -284,6 +284,13 @@ function createJiraIssueWrites(state: JiraState) {
         fields: { description: updatedDescription(raw.fields?.description, section) },
       });
     },
+    async projectKey(projectId: string): Promise<string> {
+      if (!projectId) return '';
+      const project = await state.transport.getJson<{ key?: string }>(
+        route`/rest/api/3/project/${projectId}`,
+      );
+      return project?.key ?? '';
+    },
     async writeSnapshot(issueId: string, snapshot: unknown): Promise<boolean> {
       if (!issueId) return false;
       return state.transport.write(

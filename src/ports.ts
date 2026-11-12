@@ -81,6 +81,8 @@ export interface JiraGateway {
   projectRoles(projectId: string, accountId: string): Promise<string[]>;
   /** The people who hold a role on the project, with that role (SPEC §9.4). */
   projectMembers(projectId: string): Promise<readonly ProjectMember[]>;
+  /** The key of a project, from its numeric id (`PAY` from `10238`). */
+  projectKey(projectId: string): Promise<string>;
   notify(accountId: string, subjectKey: string, bodyKey: string, issueKey: string): Promise<boolean>;
   displayName(accountId: string): Promise<string>;
 }
@@ -210,7 +212,12 @@ export interface LivingStore {
 
 /** Statistics and the release dossier (SPEC §14 FP-17, FP-18). */
 export interface ReportingStore {
-  computeStats(projectId: string, since: string): Promise<ProofStats>;
+  /**
+   * Statistiques du projet. La clé (`PAY`) et non l'id numérique : les lignes
+   * de couverture sont rangées par clé de ticket (`PAY-1`), et c'est leur
+   * préfixe qui désigne le projet.
+   */
+  computeStats(projectKey: string, since: string): Promise<ProofStats>;
   getDossier(versionId: string): Promise<ReleaseDossier | null>;
   saveDossier(dossier: ReleaseDossier): Promise<void>;
 }
