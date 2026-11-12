@@ -15,7 +15,7 @@ import { buildCoverageFieldViewModel } from '../../../src/viewmodel/coverage.js'
 import { buildMatrixViewModel, type MatrixRights } from '../../../src/viewmodel/matrix.js';
 import { canAttest } from '../../../src/domain/independence.js';
 import { isRoleAllowedToWaive } from '../../../src/domain/waivers.js';
-import type { DemoLogEntry } from './actions.js';
+import type { DemoLogEntry, GestureResult } from './actions.js';
 import type { DemoWorld } from './world.js';
 import { ISSUE_ID, ISSUE_KEY, PROJECT_ID } from './world.js';
 
@@ -76,4 +76,28 @@ export function withLog(
 ): DemoLogEntry[] {
   const id = log.length === 0 ? 1 : (log[0]?.id ?? 0) + 1;
   return [{ ...entry, id }, ...log].slice(0, 20);
+}
+
+/** Ce qu'il faut pour jouer un geste : monde, instantané, acteur, langue. */
+export interface RunContext {
+  readonly world: DemoWorld;
+  readonly snapshot: DemoSnapshot;
+  readonly actor: Actor;
+  readonly lang: Language;
+  readonly apply: (next: DemoSnapshot) => void;
+}
+
+/** Joue un geste, journalise son résultat, puis relit l'état réel de l'app. */
+export async function play(
+  ctx: RunContext,
+  label: string,
+  gesture: (world: DemoWorld) => Promise<GestureResult>,
+): Promise<void> {
+  ctx.apply({ ...ctx.snapshot, busy: true });
+  const result = await gesture(ctx.world);
+  const entry: DemoLogEntry = { id: 0, label, detail: result.detail, outcome: result.outcome };
+  const log = withLog(ctx.snapshot.log, entry);
+  ctx.apply(
+    await snapshotOf(ctx.world, ctx.actor, ctx.snapshot.mode, ctx.lang, ctx.snapshot.verdict, log, false),
+  );
 }

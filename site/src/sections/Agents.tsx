@@ -54,9 +54,9 @@ export function Agents({ lang }: { lang: Language }): ReactElement {
   const t = stringsFor(lang);
   const a = t.agents;
   return (
-    <section id="Agents" aria-labelledby="Agents-title">
+    <section id="agents" aria-labelledby="agents-title">
       <div className="wrap">
-        <h2 id="Agents-title">{a.title}</h2>
+        <h2 id="agents-title">{a.title}</h2>
         <p className="lede">{a.lede}</p>
         <ForbiddenCallout text={a.forbidden} />
 

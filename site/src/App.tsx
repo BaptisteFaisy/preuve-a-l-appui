@@ -14,6 +14,7 @@ import { Demo } from './demo/index.js';
 import { initialLang, otherLang, rememberLang } from './i18n/index.js';
 import { Agents } from './sections/Agents.js';
 import { Architecture } from './sections/Architecture.js';
+import { Features } from './sections/Features.js';
 import { Footer } from './sections/Footer.js';
 import { Hero } from './sections/Hero.js';
 import { Judges } from './sections/Judges.js';
@@ -42,6 +43,7 @@ export function App(): ReactElement {
         <Hero lang={lang} />
         <Problem lang={lang} />
         <Rule lang={lang} />
+        <Features lang={lang} />
         <section id="demo" aria-labelledby="demo-title">
           <div className="wrap">
             <Demo lang={lang} />

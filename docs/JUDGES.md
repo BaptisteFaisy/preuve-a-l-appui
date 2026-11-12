@@ -8,6 +8,15 @@ in your browser (criteria, strengths, coverage, independence rules, gate
 message). Attach a test, run the pipeline, try to attest as the assignee, then
 waive as the product owner and close the ticket. English and French.
 
+Below it, **The rest of the engine, live** runs the seven features the base
+panel does not show: importing criteria from a description, evidence going
+stale when a criterion changes, test ↔ criterion pairing, an attestation
+request and its notification, the release proof dossier, another evidence type,
+and cross-evidence. The **Features** section maps all 21 requirements of the
+specification (§14) to the place on the page where each one is visible, and the
+**Screens** section renders the four real Forge screens — ticket panel, coverage
+field, project settings, project page — from the app's own view-models.
+
 The rest of this guide is for the real app, installed on a Jira site.
 
 Ten minutes, no repository and no CI tooling required (SPEC §24). The demo

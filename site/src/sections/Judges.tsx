@@ -4,7 +4,7 @@
  *
  * Les textes viennent de `site/src/i18n/`. Le seul JavaScript de la page :
  * le bouton « Copier » (API `navigator.clipboard`, avec repli).
- * MANQUE : pas de clé i18n pour les libellés du bouton — voir `copyLabels`.
+ * Les libellés du bouton Copier viennent de `t.judges.copy` / `t.judges.copied`.
  *
  * Lot `site/sections-c`. Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
@@ -13,16 +13,6 @@ import type { ReactElement } from 'react';
 import type { Language } from '../../../src/types.js';
 import { stringsFor } from '../i18n/index.js';
 import './Judges.css';
-
-interface CopyLabels {
-  readonly copy: string;
-  readonly copied: string;
-}
-
-/** Libellés du bouton Copier — aucune clé i18n n'existe pour eux (MANQUE). */
-function copyLabels(lang: Language): CopyLabels {
-  return lang === 'fr' ? { copy: 'Copier', copied: 'Copié' } : { copy: 'Copy', copied: 'Copied' };
-}
 
 /** Repli sans `navigator.clipboard` : zone de texte cachée + `execCommand`. */
 function legacyCopy(text: string): boolean {
@@ -66,7 +56,7 @@ interface CopyCommandProps {
 function CopyCommand({ lang, title, command, body }: CopyCommandProps): ReactElement {
   const [copied, setCopied] = useState(false);
   const timer = useRef<number | undefined>(undefined);
-  const labels = copyLabels(lang);
+  const labels = stringsFor(lang).judges;
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
@@ -101,9 +91,9 @@ function CopyCommand({ lang, title, command, body }: CopyCommandProps): ReactEle
 export function Judges({ lang }: { lang: Language }): ReactElement {
   const t = stringsFor(lang);
   return (
-    <section id="Judges" aria-labelledby="Judges-title">
+    <section id="judges" aria-labelledby="judges-title">
       <div className="wrap">
-        <h2 id="Judges-title">{t.judges.title}</h2>
+        <h2 id="judges-title">{t.judges.title}</h2>
         <p className="lede">{t.judges.lede}</p>
         <h3 className="judges-steps-title">{t.judges.stepsTitle}</h3>
         <ol className="judges-steps" role="list">

@@ -1,54 +1,25 @@
 /**
  * Le moteur de la démo, exposé comme un crochet React.
  *
- * Tout l'état vit ici : monde (modules réels), instantané affiché, journal.
- * Chaque geste passe par les vrais handlers de l'app, puis l'instantané est
- * reconstruit à partir de ce que l'app a rangé en base — jamais à partir d'un
- * calcul parallèle (SPEC §12.3 : une seule ligne de couverture).
+ * Ce fichier ne tient que l'état : le monde (modules réels), l'instantané
+ * affiché, l'acteur choisi. Les gestes vivent dans `api.ts` (panneau de base)
+ * et `useAdvanced.ts` (gestes avancés) ; chacun passe par `play`
+ * (`state.ts`), donc par les vrais handlers de l'app, puis par une relecture de
+ * ce que l'app a rangé en base — jamais par un calcul parallèle (SPEC §12.3 :
+ * une seule ligne de couverture).
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import { useCallback, useEffect, useState } from 'react';
-import type { Actor, GateMode, GateVerdict, Language } from '../../../src/types.js';
-import {
-  agentTriesToAttest,
-  askAgent,
-  attachTest,
-  attest,
-  runPipeline,
-  setLanguage,
-  setMode,
-  tryDone,
-  waive,
-  type DemoLogEntry,
-  type GestureResult,
-} from './actions.js';
-import { snapshotOf, withLog, type DemoSnapshot } from './state.js';
+import type { Language } from '../../../src/types.js';
+import { setLanguage } from './actions.js';
+import { buildApi, type DemoApi } from './api.js';
+import type { DemoSnapshot, RunContext } from './state.js';
+import { snapshotOf } from './state.js';
+import { useAdvanced } from './useAdvanced.js';
 import { createDemoWorld, type DemoWorld } from './world.js';
 
-/** Ce que la démo expose au composant. */
-export interface DemoApi {
-  readonly snapshot: DemoSnapshot | null;
-  setActor(accountId: string): void;
-  /** Change le mode du projet (SPEC §12.2) : écrit dans les réglages réels. */
-  chooseMode(mode: GateMode): Promise<void>;
-  attach(criterionId: string, testName: string): Promise<void>;
-  attestCriterion(criterionId: string): Promise<void>;
-  waiveCriterion(criterionId: string, reason: string): Promise<void>;
-  runCi(mainBranch: boolean): Promise<void>;
-  close(): Promise<void>;
-  ask(): Promise<void>;
-  agentAttempt(criterionId: string): Promise<void>;
-  reset(): Promise<void>;
-}
-
-interface RunContext {
-  readonly world: DemoWorld;
-  readonly snapshot: DemoSnapshot;
-  readonly actor: Actor;
-  readonly lang: Language;
-  readonly apply: (next: DemoSnapshot) => void;
-}
+export type { DemoApi };
 
 /** Un monde neuf, réglé sur la langue demandée, avec son premier instantané. */
 async function freshWorld(lang: Language): Promise<{ world: DemoWorld; snapshot: DemoSnapshot }> {
@@ -57,28 +28,6 @@ async function freshWorld(lang: Language): Promise<{ world: DemoWorld; snapshot:
   const actor = world.scenario.actors.tester;
   const snapshot = await snapshotOf(world, actor, 'strict', lang, null, [], false);
   return { world, snapshot };
-}
-
-/** Joue un geste, journalise son résultat, puis relit l'état réel de l'app. */
-async function play(ctx: RunContext, label: string, gesture: (w: DemoWorld) => Promise<GestureResult>): Promise<void> {
-  ctx.apply({ ...ctx.snapshot, busy: true });
-  const result = await gesture(ctx.world);
-  const entry: DemoLogEntry = { id: 0, label, detail: result.detail, outcome: result.outcome };
-  const log = withLog(ctx.snapshot.log, entry);
-  ctx.apply(await snapshotOf(ctx.world, ctx.actor, ctx.snapshot.mode, ctx.lang, ctx.snapshot.verdict, log, false));
-}
-
-/** Tente la transition : le verdict du validateur entre au journal. */
-async function closeTicket(ctx: RunContext): Promise<void> {
-  const verdict: GateVerdict = await tryDone(ctx.world, ctx.snapshot.mode);
-  const entry: DemoLogEntry = {
-    id: 0,
-    label: 'jira:workflowValidator',
-    detail: verdict.result ? 'transition allowed' : verdict.errorMessage,
-    outcome: verdict.result ? 'ok' : 'refused',
-  };
-  const log = withLog(ctx.snapshot.log, entry);
-  ctx.apply(await snapshotOf(ctx.world, ctx.actor, ctx.snapshot.mode, ctx.lang, verdict, log, false));
 }
 
 export function useDemo(lang: Language): DemoApi {
@@ -104,34 +53,23 @@ export function useDemo(lang: Language): DemoApi {
   const actor = snapshot?.actors.find((one) => one.accountId === actorId) ?? snapshot?.actors[0] ?? null;
   const ctx: RunContext | null =
     world && snapshot && actor ? { world, snapshot, actor, lang, apply: setSnapshot } : null;
+  const gestures = useAdvanced(ctx, lang);
 
-  const run = useCallback(
-    (label: string, gesture: (w: DemoWorld) => Promise<GestureResult>) =>
-      ctx ? play(ctx, label, gesture) : Promise.resolve(),
-    [ctx],
-  );
+  const reset = useCallback(async (): Promise<void> => {
+    const built = await freshWorld(lang);
+    setWorld(built.world);
+    setSnapshot(built.snapshot);
+    setActorId(built.world.scenario.actors.tester.accountId);
+    gestures.clearAdvanced();
+  }, [lang, gestures]);
 
-  return {
-    snapshot,
+  return buildApi({
+    ctx,
+    actorId,
+    lang,
+    advanced: gestures.advanced,
     setActor: setActorId,
-    chooseMode: (next: GateMode) =>
-      run('save-project-settings', async (w) => {
-        const result = await setMode(w, next);
-        return result;
-      }),
-    attach: (id, testName) => run('attach-evidence', (w) => attachTest(w, id, testName, actorId)),
-    attestCriterion: (id) => run('attest-criterion', (w) => attest(w, id, actorId)),
-    waiveCriterion: (id, reason) => run('waive-criterion', (w) => waive(w, id, reason, actorId)),
-    runCi: (mainBranch) => run('consumer proof-ci', (w) => runPipeline(w, mainBranch)),
-    close: () => (ctx ? closeTicket(ctx) : Promise.resolve()),
-    ask: () => run('get-proof-status', (w) => askAgent(w, w.scenario.actors.agent.accountId)),
-    agentAttempt: (id) =>
-      run('attach-evidence via MCP', (w) => agentTriesToAttest(w, id, w.scenario.actors.agent.accountId)),
-    reset: async () => {
-      const built = await freshWorld(lang);
-      setWorld(built.world);
-      setSnapshot(built.snapshot);
-      setActorId(built.world.scenario.actors.tester.accountId);
-    },
-  };
+    advancedRun: gestures.advancedRun,
+    reset,
+  });
 }

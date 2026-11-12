@@ -16,6 +16,7 @@ export const FR: SiteStrings = {
   nav: {
     problem: "Le problème",
     rule: "La règle",
+    features: "Fonctionnalités",
     demo: "Démo en direct",
     screens: "Écrans",
     agents: "Agents & MCP",
@@ -344,6 +345,8 @@ export const FR: SiteStrings = {
     ciCommandTitle: "Une ligne en fin de pipeline",
     ciCommand: "curl -fsS -X POST \"$PROOF_CI_URL\" -H \"x-ci-key: $PROOF_CI_KEY\" \\\n  -H \"x-ci-timestamp: $(date +%s)\" -H \"x-ci-signature: $SIGNATURE\" \\\n  --data '{\"repo\":\"pay/paiements\",\"branch\":\"feature/PAY-123-refusal-email\",\n           \"commit\":\"e41f0c9a\",\"tests\":[{\"name\":\"checkout refuses an expired card\",\"state\":\"passed\"}]}'",
     ciCommandBody: "Des noms et des états seulement — aucun code, aucun journal. Au-delà de 5 Mo, le résumé est découpé en lots.",
+    copy: "Copier",
+    copied: "Copié",
     linksTitle: "Pour aller plus loin",
     links: [
       {

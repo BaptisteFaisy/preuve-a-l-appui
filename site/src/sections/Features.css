@@ -1,0 +1,165 @@
+/* Section « Fonctionnalités » : la carte des 21 exigences du cahier des
+   charges. Jetons repris de site/src/styles.css — mode sombre et responsive
+   inclus, aucune ressource externe. */
+
+.features {
+  padding: var(--space-12) 0;
+  background: var(--colour-surface);
+}
+
+.features-note {
+  margin: 0 0 var(--space-6);
+  color: var(--colour-text-subtle);
+  font-size: 0.9rem;
+}
+
+.features-group {
+  margin-bottom: var(--space-8);
+}
+
+.features-group-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  font-size: 1.05rem;
+}
+
+.features-group-count {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--colour-brand);
+  color: #fff;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.features-tablescroll {
+  overflow-x: auto;
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-lg);
+  background: var(--colour-surface-raised);
+}
+
+.features-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.features-table th,
+.features-table td {
+  padding: var(--space-3);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--colour-border);
+}
+
+.features-table thead th {
+  background: var(--colour-surface);
+  color: var(--colour-text-subtle);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.features-table tbody tr:last-child th,
+.features-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.features-col-desc {
+  width: 100%;
+}
+
+.features-code code {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--colour-brand);
+  white-space: nowrap;
+}
+
+.features-title {
+  display: block;
+  font-weight: 600;
+}
+
+.features-desc {
+  display: block;
+  margin-top: 2px;
+  color: var(--colour-text-subtle);
+  font-size: 0.88rem;
+  max-width: var(--measure);
+}
+
+.features-prio-cell,
+.features-where-cell {
+  white-space: nowrap;
+}
+
+.features-prio {
+  display: inline-block;
+  min-width: 1.5em;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.features-prio--m {
+  background: var(--colour-ok-bg);
+  color: var(--colour-ok);
+}
+
+.features-prio--s {
+  background: var(--colour-warn-bg);
+  color: var(--colour-warn);
+}
+
+.features-prio--c {
+  background: var(--colour-surface);
+  color: var(--colour-text-subtle);
+}
+
+.features-link {
+  color: var(--colour-brand);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.features-link:hover,
+.features-link:focus-visible {
+  border-bottom-color: currentColor;
+}
+
+@media (max-width: 720px) {
+  .features-table thead {
+    display: none;
+  }
+
+  .features-table,
+  .features-table tbody,
+  .features-table tr,
+  .features-table th,
+  .features-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .features-row {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--colour-border);
+  }
+
+  .features-table th,
+  .features-table td {
+    border-bottom: none;
+    padding: 2px var(--space-3);
+  }
+}
