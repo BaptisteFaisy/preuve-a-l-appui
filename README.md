@@ -146,11 +146,14 @@ every push to `main` that touches `site/`, `src/` or `tests/helpers/`:
   `site/dist/` — never committed.
 - **Local preview**: `npm run site:dev` (development) or
   `npm run site:build && npm run site:preview`.
-- **Live data**: the `#demo` section reads the **real** state of the app installed
-  on the demo Jira site (web trigger `demo-data`: the ticket, its criteria, its
-  proofs, its coverage, its statistics, its people — all pseudonymised). The
-  header says where the numbers come from; the embedded PAY-123 dataset is the
-  fallback when the network is missing.
+- **Live data**: the `#demo` section runs on the **real** state of the app
+  installed on the demo Jira site — the ticket, its criteria, its proofs, its
+  coverage, its statistics, its people, all pseudonymised. The app publishes that
+  snapshot in a ticket property; `node tools/refresh-live-snapshot.mjs` reads it
+  and the site embeds it at build time, so the page stays fully static (no
+  runtime call, no CORS — and no dynamic web trigger in the app, which is what
+  keeps it **eligible for the "Runs on Atlassian" program**). The header says
+  where the numbers come from; the embedded PAY-123 dataset is the fallback.
 - **Live demo**: the `#demo` section drives the real modules — `src/domain/*`,
   `src/handlers/*`, `src/viewmodel/*` — over the PAY-123 dataset
   (`src/sample/pay-123.ts`) with the in-memory fakes of `tests/helpers/`. Attach
