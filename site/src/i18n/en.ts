@@ -32,7 +32,7 @@ export const EN: SiteStrings = {
     ctaRepo: "Read the source",
     statCriteria: "criteria, versioned",
     statProofTypes: "proof types, 3 strengths",
-    statTests: "tests behind the rule",
+    statTests: "acceptance points, replayed on every commit",
   },
   problem: {
     title: "“Done” is a declaration",
@@ -75,6 +75,7 @@ export const EN: SiteStrings = {
       },
     ],
     typesTitle: "Six kinds of proof",
+    principlesTitle: "The five principles",
     principles: [
       "Proof attaches to a criterion, never to the ticket.",
       "The one who does the work does not attest it. An agent can only declare.",

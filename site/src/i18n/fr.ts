@@ -32,7 +32,7 @@ export const FR: SiteStrings = {
     ctaRepo: "Lire le code",
     statCriteria: "critères, versionnés",
     statProofTypes: "types de preuve, 3 forces",
-    statTests: "tests derrière la règle",
+    statTests: "points de recette, rejoués à chaque commit",
   },
   problem: {
     title: "« Terminé » est une déclaration",
@@ -75,6 +75,7 @@ export const FR: SiteStrings = {
       },
     ],
     typesTitle: "Six types de preuve",
+    principlesTitle: "Les cinq principes",
     principles: [
       "La preuve s’attache à un critère, jamais au ticket.",
       "Celui qui fait n’atteste pas. Un agent ne peut que déclarer.",
