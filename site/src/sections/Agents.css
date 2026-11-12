@@ -1,0 +1,129 @@
+/* Section « Agents » — lot site/sections-b. Sélecteurs préfixés .agents-.
+   Jetons de site/src/styles.css uniquement ; mode sombre automatique. */
+
+.agents-forbidden {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: var(--space-6) 0;
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--colour-bad);
+  border-left: 6px solid var(--colour-bad);
+  background: var(--colour-bad-bg);
+  color: var(--colour-text);
+}
+
+.agents-forbidden-icon {
+  flex: 0 0 auto;
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--colour-bad);
+}
+
+.agents-forbidden-text {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  max-width: var(--measure);
+}
+
+.agents-subtitle {
+  margin: var(--space-8) 0 var(--space-3);
+  font-size: 1.25rem;
+}
+
+.agents-tablescroll {
+  overflow-x: auto;
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-lg);
+}
+
+.agents-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.agents-table th,
+.agents-table td {
+  text-align: left;
+  vertical-align: middle;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--colour-border);
+}
+
+.agents-table thead th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--colour-text-subtle);
+  background: var(--colour-surface);
+}
+
+.agents-table tbody tr:last-child th,
+.agents-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.agents-tool-key code {
+  color: var(--colour-brand);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.agents-tool-verb {
+  white-space: nowrap;
+}
+
+.agents-verb {
+  display: inline-block;
+  min-width: 4.5rem;
+  text-align: center;
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1px solid transparent;
+}
+
+.agents-verb--get {
+  color: var(--colour-ok);
+  background: var(--colour-ok-bg);
+}
+
+.agents-verb--create {
+  color: var(--colour-brand);
+  background: var(--colour-surface);
+  border-color: var(--colour-brand);
+}
+
+.agents-tool-returns {
+  color: var(--colour-text-subtle);
+}
+
+/* Les quatre questions, comme des amorces de conversation. */
+.agents-questions {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.agents-question {
+  display: flex;
+}
+
+.agents-question-bubble {
+  position: relative;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--space-1);
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  color: var(--colour-text);
+  font-size: 0.98rem;
+}

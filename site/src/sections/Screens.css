@@ -1,0 +1,264 @@
+/* Section « Screens » — lot site/sections-b. Sélecteurs préfixés .screens-.
+   Jetons de site/src/styles.css uniquement ; mode sombre automatique. */
+
+.screens-cards {
+  margin: var(--space-8) 0;
+}
+
+.screens-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.screens-card-name {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.screens-card-module {
+  align-self: flex-start;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius);
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  color: var(--colour-brand);
+  font-size: 0.8rem;
+}
+
+.screens-card-body {
+  margin: 0;
+  color: var(--colour-text-subtle);
+  font-size: 0.95rem;
+}
+
+/* Maquettes : un cadre sobre qui évoque le panneau Forge. */
+.screens-mock {
+  margin: var(--space-6) 0;
+  padding: 0;
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-lg);
+  background: var(--colour-surface-raised);
+  overflow: hidden;
+}
+
+.screens-mock-cap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--colour-surface);
+  border-bottom: 1px solid var(--colour-border);
+}
+
+.screens-mock-title {
+  font-weight: 600;
+  color: var(--colour-text);
+}
+
+.screens-tablescroll {
+  overflow-x: auto;
+}
+
+.screens-table,
+.screens-board {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.screens-table th,
+.screens-table td,
+.screens-board th,
+.screens-board td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--colour-border);
+}
+
+.screens-table thead th,
+.screens-board thead th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--colour-text-subtle);
+  background: var(--colour-surface);
+}
+
+.screens-th-row {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  color: var(--colour-text);
+}
+
+.screens-td-none {
+  color: var(--colour-text-subtle);
+  font-style: italic;
+}
+
+.screens-crittext {
+  display: block;
+}
+
+.screens-defect {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: 0.8rem;
+  color: var(--colour-bad);
+}
+
+.screens-type {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--colour-text-subtle);
+  font-size: 0.82rem;
+}
+
+.screens-evlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.screens-evitem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.screens-evref {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--colour-text-subtle);
+}
+
+/* Pastilles de force (vert = machine, bleu = attesté, gris = déclaré). */
+.screens-pill {
+  display: inline-block;
+  padding: 1px var(--space-2);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid var(--colour-border);
+}
+
+.screens-pill--green {
+  color: var(--colour-ok);
+  background: var(--colour-ok-bg);
+  border-color: transparent;
+}
+
+.screens-pill--blue {
+  color: var(--colour-brand);
+  background: var(--colour-surface);
+  border-color: var(--colour-brand);
+}
+
+.screens-pill--grey {
+  color: var(--colour-text-subtle);
+  background: var(--colour-surface);
+}
+
+/* Lozenges d'état, alignés sur les « appearance » du viewmodel. */
+.screens-lozenge {
+  display: inline-block;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius);
+  font-size: 0.74rem;
+  font-weight: 600;
+  border: 1px solid var(--colour-border);
+  background: var(--colour-surface);
+  color: var(--colour-text-subtle);
+}
+
+.screens-lozenge--success {
+  color: var(--colour-ok);
+  background: var(--colour-ok-bg);
+  border-color: transparent;
+}
+
+.screens-lozenge--moved {
+  color: var(--colour-brand);
+  background: var(--colour-surface);
+  border-color: var(--colour-brand);
+}
+
+.screens-lozenge--inprogress {
+  color: var(--colour-warn);
+  background: var(--colour-warn-bg);
+  border-color: transparent;
+}
+
+.screens-lozenge--removed {
+  color: var(--colour-bad);
+  background: var(--colour-bad-bg);
+  border-color: transparent;
+}
+
+/* Les gestes : boutons statiques (aucun JS), désactivés si critère prouvé. */
+.screens-gestures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.screens-btn {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--colour-border);
+  background: var(--colour-surface-raised);
+  color: var(--colour-text);
+  font-size: 0.76rem;
+  font-family: inherit;
+  cursor: default;
+}
+
+.screens-btn--primary {
+  border-color: var(--colour-brand);
+  color: var(--colour-brand);
+}
+
+.screens-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* Champ de couverture « 2 / 4 » : pastille colorée comme au tableau Jira. */
+.screens-board {
+  max-width: 30rem;
+}
+
+.screens-coverage {
+  display: inline-block;
+  min-width: 3.5rem;
+  text-align: center;
+  padding: 2px var(--space-3);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+
+.screens-coverage--green {
+  color: var(--colour-ok);
+  background: var(--colour-ok-bg);
+}
+
+.screens-coverage--orange {
+  color: var(--colour-warn);
+  background: var(--colour-warn-bg);
+}
+
+.screens-coverage--red {
+  color: var(--colour-bad);
+  background: var(--colour-bad-bg);
+}
