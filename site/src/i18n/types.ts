@@ -46,6 +46,7 @@ export interface SiteStrings {
     readonly strengthsTitle: string;
     readonly strengths: readonly { readonly name: string; readonly meaning: string; readonly example: string }[];
     readonly typesTitle: string;
+    readonly principlesTitle: string;
     readonly principles: readonly string[];
   };
   readonly ruleTypes: {

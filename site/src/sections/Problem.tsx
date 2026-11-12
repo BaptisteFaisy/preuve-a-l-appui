@@ -1,23 +1,54 @@
 /**
- * Section « Problem » du site public — souche posée par le socle du site.
+ * Le problème : trois dérives, puis l'urgence ajoutée par les agents de code.
  *
- * Propriétaire : lot `site/contenu`. Le contrat est gelé : le composant
- * exporté porte ce nom et accepte `{ lang }` (SPEC §20 : anglais et
- * français). Les textes viennent de `site/src/i18n/`, jamais en dur.
+ * Contenu issu du SPEC §2 (les trois dérives) et §2 (paragraphe sur les
+ * agents). Les icônes sont des glyphes texte, aucune ressource externe.
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import type { ReactElement } from 'react';
 import type { Language } from '../../../src/types.js';
 import { stringsFor } from '../i18n/index.js';
+import './Problem.css';
+
+/** Une dérive : titre, corps, et un glyphe pour l'œil. */
+const GLYPHS = ['①', '②', '③'] as const;
+
+function DriftCard({
+  drift,
+  glyph,
+}: {
+  drift: { title: string; body: string };
+  glyph: string;
+}): ReactElement {
+  return (
+    <article className="problem-card card">
+      <span className="problem-glyph" aria-hidden="true">
+        {glyph}
+      </span>
+      <h3>{drift.title}</h3>
+      <p>{drift.body}</p>
+    </article>
+  );
+}
 
 export function Problem({ lang }: { lang: Language }): ReactElement {
-  const t = stringsFor(lang);
+  const t = stringsFor(lang).problem;
   return (
-    <section id="Problem" aria-labelledby="Problem-title">
+    <section id="problem" className="problem">
       <div className="wrap">
-        <h2 id="Problem-title">{t.hero.titleEmphasis}</h2>
-        <p className="lede">Section « Problem » à écrire (lot site/contenu).</p>
+        <h2 id="problem-title">{t.title}</h2>
+        <p className="lede">{t.lede}</p>
+
+        <div className="grid problem-grid">
+          {t.drifts.map((drift, index) => (
+            <DriftCard key={drift.title} drift={drift} glyph={GLYPHS[index] ?? '•'} />
+          ))}
+        </div>
+
+        <blockquote className="problem-agents">
+          <p>{t.agents}</p>
+        </blockquote>
       </div>
     </section>
   );
