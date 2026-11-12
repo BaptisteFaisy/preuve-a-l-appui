@@ -146,6 +146,11 @@ every push to `main` that touches `site/`, `src/` or `tests/helpers/`:
   `site/dist/` — never committed.
 - **Local preview**: `npm run site:dev` (development) or
   `npm run site:build && npm run site:preview`.
+- **Live data**: the `#demo` section reads the **real** state of the app installed
+  on the demo Jira site (web trigger `demo-data`: the ticket, its criteria, its
+  proofs, its coverage, its statistics, its people — all pseudonymised). The
+  header says where the numbers come from; the embedded PAY-123 dataset is the
+  fallback when the network is missing.
 - **Live demo**: the `#demo` section drives the real modules — `src/domain/*`,
   `src/handlers/*`, `src/viewmodel/*` — over the PAY-123 dataset
   (`src/sample/pay-123.ts`) with the in-memory fakes of `tests/helpers/`. Attach

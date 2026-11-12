@@ -130,7 +130,7 @@ export const FR: SiteStrings = {
     note: "L’app ne « lit » pas les captures : les modèles disponibles dans Forge ne traitent que du texte. Une image prouve qu’une pièce existe, pas ce qu’elle montre — d’où sa force « déclarée » tant qu’un tiers n’a pas attesté.",
   },
   demo: {
-    title: "Démo en direct : PAY-123",
+    title: "Démo en direct : {issue}",
     lede: "Cette page exécute le vrai moteur de décision de l’app, compilé pour le navigateur — les mêmes critères, forces, couvertures, règles d’indépendance et message de blocage que l’app Forge. Rien n’est simulé, rien n’est envoyé nulle part.",
     engineNote: "Moteur : src/domain/* et src/handlers/* de ce dépôt, en mémoire.",
     reset: "Réinitialiser le ticket",
