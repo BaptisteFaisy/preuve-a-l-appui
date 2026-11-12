@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T16:51:17.309Z",
+  "generatedAt": "2026-11-12T17:29:57.477Z",
   "site": "one-atlas-cndz.atlassian.net",
   "project": {
     "id": "10238",
@@ -118,7 +118,7 @@
     "ciKeyHash": "",
     "requireChildren": false,
     "language": "en",
-    "updatedAt": "2026-11-12T16:41:34.000Z"
+    "updatedAt": "2026-11-12T17:29:47.000Z"
   },
   "criteria": [
     {
@@ -131,8 +131,8 @@
       "version": 1,
       "status": "active",
       "createdBy": "actor-2",
-      "createdAt": "2026-11-12T14:28:00.000Z",
-      "updatedAt": "2026-11-12T14:28:00.000Z"
+      "createdAt": "2026-11-12T17:29:47.000Z",
+      "updatedAt": "2026-11-12T17:29:47.000Z"
     },
     {
       "id": "66653-crit-2",
@@ -144,8 +144,8 @@
       "version": 1,
       "status": "active",
       "createdBy": "actor-2",
-      "createdAt": "2026-11-12T14:28:00.000Z",
-      "updatedAt": "2026-11-12T14:28:00.000Z"
+      "createdAt": "2026-11-12T17:29:47.000Z",
+      "updatedAt": "2026-11-12T17:29:47.000Z"
     },
     {
       "id": "66653-crit-3",
@@ -157,8 +157,8 @@
       "version": 1,
       "status": "active",
       "createdBy": "actor-2",
-      "createdAt": "2026-11-12T14:28:00.000Z",
-      "updatedAt": "2026-11-12T14:28:00.000Z"
+      "createdAt": "2026-11-12T17:29:47.000Z",
+      "updatedAt": "2026-11-12T17:29:47.000Z"
     },
     {
       "id": "66653-crit-4",
@@ -170,8 +170,8 @@
       "version": 1,
       "status": "active",
       "createdBy": "actor-2",
-      "createdAt": "2026-11-12T14:28:00.000Z",
-      "updatedAt": "2026-11-12T14:28:00.000Z"
+      "createdAt": "2026-11-12T17:29:47.000Z",
+      "updatedAt": "2026-11-12T17:29:47.000Z"
     }
   ],
   "evidences": [
@@ -188,8 +188,8 @@
       "verified": false,
       "addedBy": "actor-2",
       "addedByAgent": true,
-      "at": "2026-11-12T14:28:00.000Z",
-      "replacedBy": "ev_mwdnqzjh001"
+      "at": "2026-11-12T17:29:47.000Z",
+      "replacedBy": "ev_mwdtpbur001"
     },
     {
       "id": "66653-ev-2",
@@ -204,8 +204,8 @@
       "verified": false,
       "addedBy": "actor-2",
       "addedByAgent": true,
-      "at": "2026-11-12T14:28:00.000Z",
-      "replacedBy": "ev_mwdnqzjh002"
+      "at": "2026-11-12T17:29:47.000Z",
+      "replacedBy": "ev_mwdtpbv9002"
     },
     {
       "id": "66653-ev-3",
@@ -220,71 +220,39 @@
       "verified": false,
       "addedBy": "actor-2",
       "addedByAgent": true,
-      "at": "2026-11-12T14:28:00.000Z",
+      "at": "2026-11-12T17:29:47.000Z",
       "replacedBy": ""
     },
     {
-      "id": "ev_mwdnqzjh001",
+      "id": "ev_mwdtpbur001",
       "criterionId": "66653-crit-1",
       "criterionVersion": 1,
       "type": "test",
       "reference": "checkout refuses an expired card",
       "note": "Passé sur le commit de la branche de PR",
       "strength": "machine-verified",
-      "commit": "e820080ff764f381b3da20b30f46ed50920e33bf",
-      "freshness": "stale",
-      "verified": true,
-      "addedBy": "actor-2",
-      "addedByAgent": true,
-      "at": "2026-11-12T14:43:15.000Z",
-      "replacedBy": "ev_mwdsblno001"
-    },
-    {
-      "id": "ev_mwdnqzjh002",
-      "criterionId": "66653-crit-2",
-      "criterionVersion": 1,
-      "type": "test",
-      "reference": "checkout logs the refusal reason",
-      "note": "Passé sur le commit de la branche de PR",
-      "strength": "machine-verified",
-      "commit": "e820080ff764f381b3da20b30f46ed50920e33bf",
-      "freshness": "stale",
-      "verified": true,
-      "addedBy": "actor-2",
-      "addedByAgent": true,
-      "at": "2026-11-12T14:43:15.000Z",
-      "replacedBy": "ev_mwdsblno002"
-    },
-    {
-      "id": "ev_mwdsblno001",
-      "criterionId": "66653-crit-1",
-      "criterionVersion": 1,
-      "type": "test",
-      "reference": "checkout refuses an expired card",
-      "note": "Passé sur le commit de la branche de PR",
-      "strength": "machine-verified",
-      "commit": "5b74ba02e54b86373badf160b0e6d8548b8ceec3",
+      "commit": "5bf7f4a465bfb99018de7b8aefdf6d2b79e61ba3",
       "freshness": "fresh",
       "verified": true,
       "addedBy": "actor-2",
       "addedByAgent": true,
-      "at": "2026-11-12T16:51:16.000Z",
+      "at": "2026-11-12T17:29:56.000Z",
       "replacedBy": ""
     },
     {
-      "id": "ev_mwdsblno002",
+      "id": "ev_mwdtpbv9002",
       "criterionId": "66653-crit-2",
       "criterionVersion": 1,
       "type": "test",
       "reference": "checkout logs the refusal reason",
       "note": "Passé sur le commit de la branche de PR",
       "strength": "machine-verified",
-      "commit": "5b74ba02e54b86373badf160b0e6d8548b8ceec3",
+      "commit": "5bf7f4a465bfb99018de7b8aefdf6d2b79e61ba3",
       "freshness": "fresh",
       "verified": true,
       "addedBy": "actor-2",
       "addedByAgent": true,
-      "at": "2026-11-12T16:51:16.000Z",
+      "at": "2026-11-12T17:29:56.000Z",
       "replacedBy": ""
     }
   ],
@@ -325,7 +293,7 @@
         "type": "functional",
         "version": 1,
         "requiredStrength": "machine-verified",
-        "bestEvidenceId": "ev_mwdsblno001",
+        "bestEvidenceId": "ev_mwdtpbur001",
         "bestStrength": "machine-verified",
         "proven": true,
         "waived": false,
@@ -346,39 +314,23 @@
             "verified": false,
             "addedBy": "actor-2",
             "addedByAgent": true,
-            "at": "2026-11-12T14:28:00.000Z",
-            "replacedBy": "ev_mwdnqzjh001"
+            "at": "2026-11-12T17:29:47.000Z",
+            "replacedBy": "ev_mwdtpbur001"
           },
           {
-            "id": "ev_mwdnqzjh001",
+            "id": "ev_mwdtpbur001",
             "criterionId": "66653-crit-1",
             "criterionVersion": 1,
             "type": "test",
             "reference": "checkout refuses an expired card",
             "note": "Passé sur le commit de la branche de PR",
             "strength": "machine-verified",
-            "commit": "e820080ff764f381b3da20b30f46ed50920e33bf",
-            "freshness": "stale",
-            "verified": true,
-            "addedBy": "actor-2",
-            "addedByAgent": true,
-            "at": "2026-11-12T14:43:15.000Z",
-            "replacedBy": "ev_mwdsblno001"
-          },
-          {
-            "id": "ev_mwdsblno001",
-            "criterionId": "66653-crit-1",
-            "criterionVersion": 1,
-            "type": "test",
-            "reference": "checkout refuses an expired card",
-            "note": "Passé sur le commit de la branche de PR",
-            "strength": "machine-verified",
-            "commit": "5b74ba02e54b86373badf160b0e6d8548b8ceec3",
+            "commit": "5bf7f4a465bfb99018de7b8aefdf6d2b79e61ba3",
             "freshness": "fresh",
             "verified": true,
             "addedBy": "actor-2",
             "addedByAgent": true,
-            "at": "2026-11-12T16:51:16.000Z",
+            "at": "2026-11-12T17:29:56.000Z",
             "replacedBy": ""
           }
         ],
@@ -391,7 +343,7 @@
         "type": "regression",
         "version": 1,
         "requiredStrength": "machine-verified",
-        "bestEvidenceId": "ev_mwdsblno002",
+        "bestEvidenceId": "ev_mwdtpbv9002",
         "bestStrength": "machine-verified",
         "proven": true,
         "waived": false,
@@ -412,39 +364,23 @@
             "verified": false,
             "addedBy": "actor-2",
             "addedByAgent": true,
-            "at": "2026-11-12T14:28:00.000Z",
-            "replacedBy": "ev_mwdnqzjh002"
+            "at": "2026-11-12T17:29:47.000Z",
+            "replacedBy": "ev_mwdtpbv9002"
           },
           {
-            "id": "ev_mwdnqzjh002",
+            "id": "ev_mwdtpbv9002",
             "criterionId": "66653-crit-2",
             "criterionVersion": 1,
             "type": "test",
             "reference": "checkout logs the refusal reason",
             "note": "Passé sur le commit de la branche de PR",
             "strength": "machine-verified",
-            "commit": "e820080ff764f381b3da20b30f46ed50920e33bf",
-            "freshness": "stale",
-            "verified": true,
-            "addedBy": "actor-2",
-            "addedByAgent": true,
-            "at": "2026-11-12T14:43:15.000Z",
-            "replacedBy": "ev_mwdsblno002"
-          },
-          {
-            "id": "ev_mwdsblno002",
-            "criterionId": "66653-crit-2",
-            "criterionVersion": 1,
-            "type": "test",
-            "reference": "checkout logs the refusal reason",
-            "note": "Passé sur le commit de la branche de PR",
-            "strength": "machine-verified",
-            "commit": "5b74ba02e54b86373badf160b0e6d8548b8ceec3",
+            "commit": "5bf7f4a465bfb99018de7b8aefdf6d2b79e61ba3",
             "freshness": "fresh",
             "verified": true,
             "addedBy": "actor-2",
             "addedByAgent": true,
-            "at": "2026-11-12T16:51:16.000Z",
+            "at": "2026-11-12T17:29:56.000Z",
             "replacedBy": ""
           }
         ],
@@ -478,7 +414,7 @@
             "verified": false,
             "addedBy": "actor-2",
             "addedByAgent": true,
-            "at": "2026-11-12T14:28:00.000Z",
+            "at": "2026-11-12T17:29:47.000Z",
             "replacedBy": ""
           }
         ],
@@ -502,7 +438,7 @@
         "waiverId": ""
       }
     ],
-    "updatedAt": "2026-11-12T16:51:16.000Z"
+    "updatedAt": "2026-11-12T17:29:56.000Z"
   },
   "living": [],
   "stats": {

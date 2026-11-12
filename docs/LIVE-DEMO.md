@@ -8,17 +8,24 @@
 ## 1. Principe
 
 ```
-GitHub Pages (statique)                     Forge (site de démonstration)
-site/src/demo/remote.ts  ──GET──────────▶   webtrigger demo-data
-                       ◀─────JSON──────     src/handlers/demo-data.ts
-                                            └─ src/demo-snapshot.ts (contrat)
-                                               └─ Forge SQL + API Jira
+Forge (site de démonstration)                     GitHub Pages (statique)
+couverture recalculée                            site/src/demo/live-snapshot.ts
+   └─ instantané pseudonymisé                      └─ importe site/public/live-snapshot.json
+      └─ propriété Jira du ticket                     └─ réhydrate le monde de la démo
+         proof-live-snapshot                               └─ même moteur, mêmes règles
 ```
 
-Le site appelle un seul point d'entrée, en lecture seule, sans secret. Il
-hydrate un magasin en mémoire avec l'instantané reçu, puis **rejoue exactement
-les mêmes modules** que le jeu embarqué (`src/domain/*`, `src/handlers/*`,
-`src/viewmodel/*`). Si l'appel échoue (réseau, app non déployée, CORS), le site
+L'app écrit son état pseudonymisé dans une **propriété du ticket Jira**, à
+chaque écriture de couverture. L'outil `tools/refresh-live-snapshot.mjs` lit
+cette propriété et la versionne dans `site/public/live-snapshot.json` ; le site
+l'importe **à la construction**. La page reste entièrement statique : pas de
+`fetch` à l'exécution, pas de CORS, pas d'egress — et surtout **pas de web
+trigger dynamique dans l'app**, sans quoi elle perdrait l'éligibilité
+« Runs on Atlassian » (voir §6).
+
+Le site réhydrate un magasin en mémoire avec cet instantané, puis **rejoue
+exactement les mêmes modules** que le jeu embarqué (`src/domain/*`,
+`src/handlers/*`, `src/viewmodel/*`). Sans instantané (fichier absent), il
 bascule sur le jeu PAY-123 embarqué et le dit à l'écran : la page ne casse
 jamais, et la provenance est toujours affichée.
 
@@ -99,17 +106,51 @@ PY
 )
 ```
 
-## 5. Déploiement
+## 5. Déploiement et rafraîchissement
 
 ```bash
-forge deploy                                     # development
-forge install --site <site>.atlassian.net -p jira -e development --confirm-scopes --non-interactive
-forge webtrigger create -f demo-data -s <site>.atlassian.net -p jira -e development --non-interactive
+forge deploy -e production                       # ou -e development
+forge install --site <site>.atlassian.net -p jira -e production --confirm-scopes --non-interactive
 ```
 
 Le premier `install` sur un environnement vierge ne prend **pas** `--upgrade`.
-L'URL obtenue est de la forme
-`https://<installationId>.webtrigger.atlassian.app/public/<jeton>` : c'est elle
-que le site appelle (variable de build `VITE_PROOF_DEMO_URL`, avec une valeur
-par défaut commitée — l'URL est publique par nature, elle ne donne accès qu'à
-de la lecture pseudonymisée).
+Un changement de scope ou de type de déclencheur est une version majeure :
+`forge deploy --approve MAJOR_VERSION_RULE`.
+
+Puis, pour rafraîchir les données que montre le site (une commande) :
+
+```bash
+node tools/refresh-live-snapshot.mjs              # → site/public/live-snapshot.json
+```
+
+Le jeton Atlassian est lu dans `ATLASSIAN_API_TOKEN` ou dans
+`~/.atlassian-api-token` ; le ticket et le site se règlent par
+`ATLASSIAN_ISSUE` et `ATLASSIAN_SITE`.
+
+## 6. Éligibilité « Runs on Atlassian »
+
+Le programme exige que l'app **n'ait aucun déclencheur dynamique** : seule une
+réponse construite à l'exécution peut faire sortir des données du tenant. Les
+deux déclencheurs de l'app sont donc statiques — la réponse est l'une des
+sorties déclarées dans `manifest.yml` :
+
+| Déclencheur | Sorties |
+|---|---|
+| `ci-results` | accepted / unauthorized / invalid-payload / payload-too-large / method-not-allowed |
+| `bootstrap` | ok / migrated / forbidden / invalid-payload / not-found / method-not-allowed |
+
+`tools/lib/manifest-checks.mjs` (via `tools/check-manifest.mjs`) refuse tout
+déclencheur dynamique : la CI protège l'éligibilité.
+
+Vérification :
+
+```bash
+forge eligibility -e production
+# ✔ The version of your app [2.0.0] that's deployed to [production]
+#   is eligible for the Runs on Atlassian program.
+```
+
+Le site public n'est plus lisible en direct depuis l'app : c'est le prix du
+badge. Le compromis retenu — l'app publie dans le ticket, l'outil lit, le site
+embarque — garde les données réellement produites par l'app, sans exposition
+d'egress.
