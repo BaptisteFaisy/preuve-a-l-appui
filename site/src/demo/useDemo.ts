@@ -19,19 +19,19 @@ import { snapshotOf } from './state.js';
 import { useAdvanced } from './useAdvanced.js';
 import { createDemoWorld, createWorld, type DemoWorld } from './world.js';
 import { createLiveScenario } from './live-world.js';
-import { readLiveSnapshot } from './remote.js';
+import { bundledSnapshot } from './live-snapshot.js';
 
 export type { DemoApi };
 
 /**
- * Un monde neuf : l'état RÉEL de l'app installée s'il est joignable, sinon le
- * jeu PAY-123 embarqué. Les deux mondes câblent les mêmes modules de l'app —
- * seule la provenance change, et le bandeau de la démo la dit.
+ * Un monde neuf : l'état RÉEL de l'app installée s'il est embarqué dans le
+ * site, sinon le jeu PAY-123 du dépôt. Les deux mondes câblent les mêmes
+ * modules de l'app — seule la provenance change, et le bandeau de la démo la dit.
  */
 async function freshWorld(lang: Language): Promise<{ world: DemoWorld; snapshot: DemoSnapshot }> {
-  const live = await readLiveSnapshot();
-  const world = live.snapshot
-    ? await createWorld(await createLiveScenario(live.snapshot, lang))
+  const live = bundledSnapshot();
+  const world = live
+    ? await createWorld(await createLiveScenario(live, lang))
     : await createDemoWorld();
   await setLanguage(world, lang);
   const actor = world.scenario.actors.tester;

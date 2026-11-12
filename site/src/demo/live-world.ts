@@ -165,7 +165,7 @@ export async function createLiveScenario(
       kind: 'live',
       site: snapshot.site,
       generatedAt: snapshot.generatedAt,
-      readAt: new Date().toISOString(),
+      readAt: snapshot.generatedAt,
       error,
     },
   };
