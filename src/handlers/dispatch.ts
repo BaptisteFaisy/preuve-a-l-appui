@@ -13,12 +13,12 @@
  * Signature exportée GELÉE (docs/CONTRACTS.md §3) : `runAction(name, payload,
  * deps, context)`. Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import { actionText } from '../actions/common.js';
-import { ACTION_KEYS, ACTION_TOOLS, isActionKey } from '../actions/registry.js';
-import type { ActionKey } from '../actions/registry.js';
-import { ActionError } from '../actions/types.js';
-import type { AppDeps } from '../deps.js';
-import type { ActorContext } from '../ports.js';
+import { actionText } from '../actions/common';
+import { ACTION_KEYS, ACTION_TOOLS, isActionKey } from '../actions/registry';
+import type { ActionKey } from '../actions/registry';
+import { ActionError } from '../actions/types';
+import type { AppDeps } from '../deps';
+import type { ActorContext } from '../ports';
 
 export { ACTION_KEYS, ActionError };
 export type { ActionKey };

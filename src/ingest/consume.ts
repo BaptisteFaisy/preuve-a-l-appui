@@ -10,12 +10,12 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { CiIngestMessage } from '../ports.js';
-import type { IssueRef, Language, LivingProof, TestOutcome } from '../types.js';
-import { ciText } from '../i18n/ci.js';
-import { applyCiSummaryToEvidences } from '../domain/freshness.js';
-import { evaluateLivingProofs, type LivingAlert, type TrackedLivingItem } from '../domain/living.js';
+import type { AppDeps } from '../deps';
+import type { CiIngestMessage } from '../ports';
+import type { IssueRef, Language, LivingProof, TestOutcome } from '../types';
+import { ciText } from '../i18n/ci';
+import { applyCiSummaryToEvidences } from '../domain/freshness';
+import { evaluateLivingProofs, type LivingAlert, type TrackedLivingItem } from '../domain/living';
 
 /** Statuts Jira qui signifient « livré » : la preuve vivante prend le relais (§13). */
 const CLOSED_STATUSES: readonly string[] = [

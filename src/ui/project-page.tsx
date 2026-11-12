@@ -19,11 +19,11 @@ import {
   Stack,
   Text,
 } from '@forge/react';
-import { text } from '../i18n/index.js';
-import { UI_MESSAGES } from '../i18n/ui.js';
-import type { Language } from '../types.js';
-import type { ProjectPageViewModel } from '../viewmodel/project.js';
-import { CoverageField } from './coverage-field.js';
+import { text } from '../i18n/index';
+import { UI_MESSAGES } from '../i18n/ui';
+import type { Language } from '../types';
+import type { ProjectPageViewModel } from '../viewmodel/project';
+import { CoverageField } from './coverage-field';
 
 export interface ProjectPageProps {
   readonly vm: ProjectPageViewModel;

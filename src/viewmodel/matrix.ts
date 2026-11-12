@@ -7,8 +7,8 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import { text } from '../i18n/index.js';
-import { UI_MESSAGES } from '../i18n/ui.js';
+import { text } from '../i18n/index';
+import { UI_MESSAGES } from '../i18n/ui';
 import type {
   Coverage,
   CriterionRevision,
@@ -17,7 +17,7 @@ import type {
   Freshness,
   Language,
   Strength,
-} from '../types.js';
+} from '../types';
 
 export type MatrixStatusKind = 'proven' | 'waived' | 'missing' | 'to-reconfirm';
 export type LozengeAppearance = 'success' | 'moved' | 'inprogress' | 'removed' | 'default';

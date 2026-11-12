@@ -15,7 +15,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Attestation, Evidence, Waiver } from '../types.js';
+import type { Attestation, Evidence, Waiver } from '../types';
 import {
   EVIDENCE_TYPES,
   FRESHNESS_VALUES,
@@ -28,7 +28,7 @@ import {
   toNumber,
   toSqlBoolean,
   toTimestamp,
-} from './mapping-common.js';
+} from './mapping-common';
 
 /* ----------------------------------------------------------------- evidence */
 

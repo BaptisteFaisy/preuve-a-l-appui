@@ -16,10 +16,10 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { CiIngestMessage } from '../ports.js';
-import { recordRun, refreshIssueProofs, refreshLivingProofs } from '../ingest/consume.js';
-import { isObject } from '../db/mapping-common.js';
+import type { AppDeps } from '../deps';
+import type { CiIngestMessage } from '../ports';
+import { recordRun, refreshIssueProofs, refreshLivingProofs } from '../ingest/consume';
+import { isObject } from '../db/mapping-common';
 
 /** Un message lisible : sans run ni branche, il n'y a rien à faire (jamais d'exception). */
 export function isUsableMessage(message: CiIngestMessage | null | undefined): boolean {

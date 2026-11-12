@@ -15,7 +15,7 @@ import type {
   CriterionType,
   EvidenceType,
   Strength,
-} from '../types.js';
+} from '../types';
 
 /** Erreur métier d'une action : message lisible par l'agent qui appelle. */
 export class ActionError extends Error {

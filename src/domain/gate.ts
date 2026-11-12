@@ -19,9 +19,9 @@ import type {
   GateMode,
   GateVerdict,
   Language,
-} from '../types.js';
-import { text } from '../i18n/index.js';
-import { GATE_MESSAGES } from '../i18n/gate.js';
+} from '../types';
+import { text } from '../i18n/index';
+import { GATE_MESSAGES } from '../i18n/gate';
 
 /** Au plus deux critères nommés dans le message (SPEC §19). */
 export const MAX_NAMED_CRITERIA = 2;

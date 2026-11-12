@@ -10,7 +10,7 @@
  */
 import React from 'react';
 import { Tag, Tooltip } from '@forge/react';
-import type { CoverageFieldViewModel } from '../viewmodel/coverage.js';
+import type { CoverageFieldViewModel } from '../viewmodel/coverage';
 
 export interface CoverageFieldProps {
   readonly vm: CoverageFieldViewModel;

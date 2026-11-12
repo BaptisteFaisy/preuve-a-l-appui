@@ -13,7 +13,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { DossierIssue, DossierTotals, LivingProof, ReleaseDossier } from '../types.js';
+import type { DossierIssue, DossierTotals, LivingProof, ReleaseDossier } from '../types';
 import {
   LIVING_STATES,
   fromTimestamp,
@@ -25,9 +25,9 @@ import {
   parseObjectList,
   text,
   toTimestamp,
-} from './mapping-common.js';
-import { parseCriterionStates } from './mapping-coverage.js';
-import { parseWaiverValue } from './mapping-evidence.js';
+} from './mapping-common';
+import { parseCriterionStates } from './mapping-coverage';
+import { parseWaiverValue } from './mapping-evidence';
 
 /* ------------------------------------------------------------- living proof */
 

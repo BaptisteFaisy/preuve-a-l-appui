@@ -5,7 +5,7 @@
  *
  * Rule: files < 500 lines, functions < 50 lines.
  */
-import type { Messages } from './index.js';
+import type { Messages } from './index';
 
 export const DOCS_MESSAGES: Messages = {
   'sample.title': {

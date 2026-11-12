@@ -19,9 +19,9 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes. Domaine pur.
  */
-import type { Clock, EvidenceChecker, IdGenerator, ProofStore } from '../ports.js';
-import type { Criterion, Evidence, EvidenceType, Freshness, Strength } from '../types.js';
-import { computeEvidenceStrength, type TestRunContext } from './strength.js';
+import type { Clock, EvidenceChecker, IdGenerator, ProofStore } from '../ports';
+import type { Criterion, Evidence, EvidenceType, Freshness, Strength } from '../types';
+import { computeEvidenceStrength, type TestRunContext } from './strength';
 
 /** L'entrée d'`attachEvidence` : seul `criterionId` + `type` sont requis. */
 export interface AttachEvidenceInput {

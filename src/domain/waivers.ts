@@ -10,7 +10,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { GranterCount, RolePolicy, Waiver } from '../types.js';
+import type { GranterCount, RolePolicy, Waiver } from '../types';
 
 /** Vrai si la dérogation est actuellement valide (non révoquée et non expirée). */
 export function isWaiverValid(waiver: Waiver, now: string): boolean {

@@ -14,7 +14,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes. Domaine pur.
  */
-import type { RequirementResolver } from '../ports.js';
+import type { RequirementResolver } from '../ports';
 import type {
   Criterion,
   CriterionType,
@@ -22,9 +22,9 @@ import type {
   ProjectSettings,
   Requirement,
   Strength,
-} from '../types.js';
-import { text } from '../i18n/index.js';
-import { EVIDENCE_MESSAGES } from '../i18n/evidence.js';
+} from '../types';
+import { text } from '../i18n/index';
+import { EVIDENCE_MESSAGES } from '../i18n/evidence';
 
 /** Exigence neutre de repli si la grille du projet ne couvre pas un type. */
 export const FALLBACK_REQUIREMENT: Requirement = {

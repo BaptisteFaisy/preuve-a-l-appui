@@ -13,9 +13,9 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { SqlClient, SqlParam } from './sql-client.js';
-import type { EvidenceStore } from '../ports.js';
-import type { Attestation, Evidence } from '../types.js';
+import type { SqlClient, SqlParam } from './sql-client';
+import type { EvidenceStore } from '../ports';
+import type { Attestation, Evidence } from '../types';
 import {
   ATTESTATION_COLUMNS,
   attestationToRow,
@@ -27,7 +27,7 @@ import {
   selectColumns,
   type AttestationRow,
   type EvidenceRow,
-} from './mapping.js';
+} from './mapping';
 
 /** Borne de toute liste (CONTRACTS §4 : aucune liste sans LIMIT). */
 export const EVIDENCE_LIST_LIMIT = 500;

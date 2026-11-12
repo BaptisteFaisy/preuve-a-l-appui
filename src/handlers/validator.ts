@@ -12,12 +12,12 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { Coverage, GateMode, GateVerdict, IssueRef, Language } from '../types.js';
-import { GATE_MODES } from '../db/mapping-common.js';
-import { evaluateGate } from '../domain/gate.js';
-import { text } from '../i18n/index.js';
-import { GATE_MESSAGES } from '../i18n/gate.js';
+import type { AppDeps } from '../deps';
+import type { Coverage, GateMode, GateVerdict, IssueRef, Language } from '../types';
+import { GATE_MODES } from '../db/mapping-common';
+import { evaluateGate } from '../domain/gate';
+import { text } from '../i18n/index';
+import { GATE_MESSAGES } from '../i18n/gate';
 
 /** Charge utile du validateur : clé, configuration, statuts (SPEC §19). */
 export interface ValidatorInput {

@@ -7,7 +7,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Messages } from './index.js';
+import type { Messages } from './index';
 
 export const EVIDENCE_MESSAGES: Messages = {
   // Types de preuves (SPEC §9.1)

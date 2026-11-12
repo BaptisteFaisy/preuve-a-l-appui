@@ -9,6 +9,11 @@ Règles de code du dépôt. Elles sont opposables : la CI les vérifie.
 - **Zéro duplication.** Un helper existe une fois : on le cherche avant
   d'écrire. Les fakes sont dans `tests/helpers/`, les messages dans
   `src/i18n/`, les requêtes dans `src/db/`.
+- **Les imports relatifs de `src/` sont sans extension** (`from './deps'`, pas
+  `'./deps.js'`) : le bundler de Forge (webpack + ts-loader) ne résout pas
+  `./x.js` vers `x.ts` et le déploiement échoue. Vite et vitest résolvent les
+  deux formes ; `tsconfig.json` n'a donc pas `noEmit` (la CI le passe en ligne
+  de commande), sans quoi ts-loader n'émet rien.
 - **Le domaine est pur.** `src/domain/` n'importe jamais `@forge/*`, ni
   `node:fs`, ni le réseau. Les entrées/sorties passent par `src/ports.ts`.
 - **Typage strict** : pas de `any` implicite, pas de `!` non justifié, pas

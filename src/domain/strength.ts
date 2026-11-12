@@ -19,8 +19,8 @@
  * - Domaine pur : aucun import `@forge/*` ;
  * - Fichier < 500 lignes, fonctions < 50 lignes.
  */
-import type { EvidenceChecker } from '../ports.js';
-import type { EvidenceType, Strength, TestOutcome } from '../types.js';
+import type { EvidenceChecker } from '../ports';
+import type { EvidenceType, Strength, TestOutcome } from '../types';
 
 /** Résultat de la vérification d'une preuve : force obtenue et vérification. */
 export interface VerificationResult {

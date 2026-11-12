@@ -6,16 +6,16 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { SqlClient } from './sql-client.js';
-import type { WaiverStore } from '../ports.js';
-import type { Waiver } from '../types.js';
+import type { SqlClient } from './sql-client';
+import type { WaiverStore } from '../ports';
+import type { Waiver } from '../types';
 import {
   insertPlaceholders,
   rowToWaiver,
   selectColumns,
   type WaiverRow,
   waiverToRow,
-} from './mapping.js';
+} from './mapping';
 
 const TABLE = 'waiver';
 

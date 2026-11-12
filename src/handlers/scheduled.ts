@@ -8,10 +8,10 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { Language } from '../types.js';
-import { text } from '../i18n/index.js';
-import { GATE_MESSAGES } from '../i18n/gate.js';
+import type { AppDeps } from '../deps';
+import type { Language } from '../types';
+import { text } from '../i18n/index';
+import { GATE_MESSAGES } from '../i18n/gate';
 
 /** Plafond de tickets traités en un tick pour rester sous les quotas Forge. */
 export const NIGHTLY_MAX_ISSUES = 200;

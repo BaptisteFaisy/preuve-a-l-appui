@@ -7,16 +7,16 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import { text } from '../i18n/index.js';
-import { UI_MESSAGES } from '../i18n/ui.js';
+import { text } from '../i18n/index';
+import { UI_MESSAGES } from '../i18n/ui';
 import type {
   Coverage,
   Language,
   LivingProof,
   ProofStats,
   Waiver,
-} from '../types.js';
-import { buildCoverageFieldViewModel, type CoverageFieldViewModel } from './coverage.js';
+} from '../types';
+import { buildCoverageFieldViewModel, type CoverageFieldViewModel } from './coverage';
 
 export interface ProjectIssueItemViewModel {
   readonly issueId: string;

@@ -4,8 +4,8 @@
  * Règle : anglais et français pour chaque clé visible, fichiers < 500 lignes,
  * fonctions < 50 lignes.
  */
-import type { Language } from '../types.js';
-import { text, type MessageVars, type Messages } from './index.js';
+import type { Language } from '../types';
+import { text, type MessageVars, type Messages } from './index';
 
 export const CI_MESSAGES: Messages = {
   'ci.coverage.label': {

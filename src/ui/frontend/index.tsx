@@ -15,17 +15,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Spinner, Text, useProductContext } from '@forge/react';
 import { invoke } from '@forge/bridge';
-import { text } from '../../i18n/index.js';
-import { UI_MESSAGES } from '../../i18n/ui.js';
-import type { Language } from '../../types.js';
-import type { CoverageFieldViewModel } from '../../viewmodel/coverage.js';
-import type { MatrixViewModel } from '../../viewmodel/matrix.js';
-import type { ProjectPageViewModel } from '../../viewmodel/project.js';
-import type { SettingsViewModel } from '../../viewmodel/settings.js';
-import { CoverageField } from '../coverage-field.js';
-import { MatrixPanel } from '../matrix.js';
-import { ProjectPagePanel } from '../project-page.js';
-import { ProjectSettingsPanel } from '../settings.js';
+import { text } from '../../i18n/index';
+import { UI_MESSAGES } from '../../i18n/ui';
+import type { Language } from '../../types';
+import type { CoverageFieldViewModel } from '../../viewmodel/coverage';
+import type { MatrixViewModel } from '../../viewmodel/matrix';
+import type { ProjectPageViewModel } from '../../viewmodel/project';
+import type { SettingsViewModel } from '../../viewmodel/settings';
+import { CoverageField } from '../coverage-field';
+import { MatrixPanel } from '../matrix';
+import { ProjectPagePanel } from '../project-page';
+import { ProjectSettingsPanel } from '../settings';
 
 /** Détecte la langue depuis la locale du contexte (SPEC §20 : en + fr). */
 export function resolveLanguage(locale: string | undefined): Language {

@@ -14,12 +14,12 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Clock, CoverageEngine, JiraGateway, Logger, ProofStore } from '../ports.js';
-import type { Coverage, IssueRef, ProjectSettings } from '../types.js';
-import { defaultProjectSettings } from '../defaults.js';
-import { buildCoverage, coverageFieldLabel } from './coverage.js';
-import { text } from '../i18n/index.js';
-import { GATE_MESSAGES } from '../i18n/gate.js';
+import type { Clock, CoverageEngine, JiraGateway, Logger, ProofStore } from '../ports';
+import type { Coverage, IssueRef, ProjectSettings } from '../types';
+import { defaultProjectSettings } from '../defaults';
+import { buildCoverage, coverageFieldLabel } from './coverage';
+import { text } from '../i18n/index';
+import { GATE_MESSAGES } from '../i18n/gate';
 
 /** Ce dont le moteur a besoin : la persistance, l'horloge, le journal. */
 export interface CoverageEngineDeps {

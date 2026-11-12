@@ -23,10 +23,10 @@ import type {
   TestOutcome,
   TestRun,
   Waiver,
-} from '../types.js';
-import type { ProofStore } from '../ports.js';
-import { defaultProjectSettings } from '../defaults.js';
-import { DOCS_MESSAGES } from '../i18n/docs.js';
+} from '../types';
+import type { ProofStore } from '../ports';
+import { defaultProjectSettings } from '../defaults';
+import { DOCS_MESSAGES } from '../i18n/docs';
 
 /** Reads a demo message in French; the English twin lives beside it. */
 function fr(key: string): string {

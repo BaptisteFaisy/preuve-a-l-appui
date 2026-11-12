@@ -3,7 +3,7 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import { reaches, STRENGTH_ORDER } from '../types.js';
+import { reaches, STRENGTH_ORDER } from '../types';
 import type {
   BlockingItem,
   Coverage,
@@ -16,10 +16,10 @@ import type {
   ProjectSettings,
   Strength,
   Waiver,
-} from '../types.js';
-import { text } from '../i18n/index.js';
-import { GATE_MESSAGES } from '../i18n/gate.js';
-import { findActiveWaiver } from './waivers.js';
+} from '../types';
+import { text } from '../i18n/index';
+import { GATE_MESSAGES } from '../i18n/gate';
+import { findActiveWaiver } from './waivers';
 
 export interface CriterionEvaluationInput {
   criterion: Criterion;

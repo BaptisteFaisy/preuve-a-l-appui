@@ -16,8 +16,8 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import { isObject } from '../db/mapping-common.js';
+import type { AppDeps } from '../deps';
+import { isObject } from '../db/mapping-common';
 
 /** Le seul champ dont dépend la lecture des critères (SPEC §8.2). */
 const CRITERIA_FIELD = 'description';

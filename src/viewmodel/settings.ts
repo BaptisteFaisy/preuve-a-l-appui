@@ -6,10 +6,10 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import { defaultProjectSettings } from '../defaults.js';
-import { text } from '../i18n/index.js';
-import { UI_MESSAGES } from '../i18n/ui.js';
-import { CRITERION_TYPES } from '../types.js';
+import { defaultProjectSettings } from '../defaults';
+import { text } from '../i18n/index';
+import { UI_MESSAGES } from '../i18n/ui';
+import { CRITERION_TYPES } from '../types';
 import type {
   CriterionType,
   GateMode,
@@ -18,7 +18,7 @@ import type {
   ProjectSettings,
   Requirement,
   RolePolicy,
-} from '../types.js';
+} from '../types';
 
 export interface RequirementRowViewModel {
   readonly type: CriterionType;

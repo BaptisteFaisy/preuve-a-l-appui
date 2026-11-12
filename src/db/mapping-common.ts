@@ -24,8 +24,8 @@ import type {
   MissingCriteriaPolicy,
   Strength,
   TestState,
-} from '../types.js';
-import { CRITERION_TYPES, EVIDENCE_TYPES } from '../types.js';
+} from '../types';
+import { CRITERION_TYPES, EVIDENCE_TYPES } from '../types';
 
 export { CRITERION_TYPES, EVIDENCE_TYPES };
 

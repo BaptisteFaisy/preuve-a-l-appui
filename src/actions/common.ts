@@ -7,12 +7,12 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import { defaultProjectSettings } from '../defaults.js';
-import { text } from '../i18n/index.js';
-import { ACTION_MESSAGES } from '../i18n/actions.js';
-import type { Criterion, IssueRef, Language, ProjectSettings } from '../types.js';
-import { ActionError } from './types.js';
+import type { AppDeps } from '../deps';
+import { defaultProjectSettings } from '../defaults';
+import { text } from '../i18n/index';
+import { ACTION_MESSAGES } from '../i18n/actions';
+import type { Criterion, IssueRef, Language, ProjectSettings } from '../types';
+import { ActionError } from './types';
 
 /**
  * Découpe une liste transmise en chaîne séparée par des virgules (SPEC §19).

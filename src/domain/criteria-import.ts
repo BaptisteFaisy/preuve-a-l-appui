@@ -15,7 +15,7 @@
  * Domaine pur : aucun import `@forge/*`.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Clock, CriterionStore, IdGenerator, JiraGateway, LlmGateway } from '../ports.js';
+import type { Clock, CriterionStore, IdGenerator, JiraGateway, LlmGateway } from '../ports';
 import type {
   Actor,
   Criterion,
@@ -24,8 +24,8 @@ import type {
   Language,
   ParsedCriterion,
   ProjectSettings,
-} from '../types.js';
-import { criteriaMessage } from '../i18n/criteria.js';
+} from '../types';
+import { criteriaMessage } from '../i18n/criteria';
 import {
   buildCriterion,
   inferType,
@@ -33,7 +33,7 @@ import {
   normalizeCriterionText,
   renderCriteriaSection,
   sortCriteriaByCode,
-} from './criteria.js';
+} from './criteria';
 
 /* ------------------------------------------------------------- découpage */
 

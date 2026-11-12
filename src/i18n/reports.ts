@@ -9,9 +9,9 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { Language, Strength } from '../types.js';
-import type { MessageVars, Messages } from './index.js';
-import { translate } from './index.js';
+import type { Language, Strength } from '../types';
+import type { MessageVars, Messages } from './index';
+import { translate } from './index';
 
 /** Dictionnaire du lot L7 : aucun autre lot n'y écrit. */
 export const REPORT_MESSAGES: Messages = {

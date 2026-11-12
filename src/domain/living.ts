@@ -4,8 +4,8 @@
  * Domaine pur : aucun import `@forge/*`.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { IdGenerator } from '../ports.js';
-import type { LivingProof, LivingState, TestOutcome, TestState } from '../types.js';
+import type { IdGenerator } from '../ports';
+import type { LivingProof, LivingState, TestOutcome, TestState } from '../types';
 
 /** Une preuve vivante existante ou un lien confirmé suivi sur la branche principale. */
 export interface TrackedLivingItem {

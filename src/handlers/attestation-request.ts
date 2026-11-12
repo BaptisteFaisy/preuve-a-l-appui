@@ -18,10 +18,10 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { AppDeps } from '../deps.js';
-import type { Actor, Criterion, IssueRef, Language, ProjectSettings } from '../types.js';
-import { text } from '../i18n/index.js';
-import { REPORT_MESSAGES } from '../i18n/reports.js';
+import type { AppDeps } from '../deps';
+import type { Actor, Criterion, IssueRef, Language, ProjectSettings } from '../types';
+import { text } from '../i18n/index';
+import { REPORT_MESSAGES } from '../i18n/reports';
 
 export interface AttestationRequest {
   issueKey: string;
