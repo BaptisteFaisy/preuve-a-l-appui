@@ -47,9 +47,9 @@ export function Architecture({ lang }: { lang: Language }): ReactElement {
   const t = stringsFor(lang);
   const arch = t.architecture;
   return (
-    <section id="Architecture" aria-labelledby="Architecture-title">
+    <section id="architecture" aria-labelledby="architecture-title">
       <div className="wrap">
-        <h2 id="Architecture-title">{arch.title}</h2>
+        <h2 id="architecture-title">{arch.title}</h2>
         <p className="lede">{arch.lede}</p>
 
         <h3 className="archi-subtitle">{arch.flowTitle}</h3>

@@ -13,6 +13,7 @@
 import type { ReactElement } from 'react';
 import type { GateMode, Language } from '../../../src/types.js';
 import { stringsFor } from '../i18n/index.js';
+import { AdvancedPanel } from './parts/AdvancedPanel.js';
 import { Controls } from './parts/Controls.js';
 import { DemoHeader } from './parts/DemoHeader.js';
 import { LogPanel } from './parts/LogPanel.js';
@@ -60,6 +61,13 @@ export function Demo({ lang }: { lang: Language }): ReactElement {
         onAttest={(criterionId) => void demo.attestCriterion(criterionId)}
         onWaive={(criterionId, reason) => void demo.waiveCriterion(criterionId, reason)}
         onAgentAttest={(criterionId) => void demo.agentAttempt(criterionId)}
+      />
+
+      <AdvancedPanel
+        lang={lang}
+        results={demo.advanced}
+        busy={snapshot.busy}
+        onRun={(id) => void demo.advancedRun(id)}
       />
 
       <VerdictPanel lang={lang} verdict={snapshot.verdict} passedText={stringsFor(lang).demo.gatePassed} />

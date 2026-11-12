@@ -152,6 +152,19 @@ every push to `main` that touches `site/`, `src/` or `tests/helpers/`:
   a test, run the pipeline, try to attest as the assignee (refused), attest as
   the tester, waive as the product owner, then attempt the transition and read
   the validator’s own message. English and French, like the app.
+- **Feature map**: the `#features` section lists the 21 requirements of the
+  specification (§14, FP-01…FP-21) with their priority and a link to where each
+  one is visible on the page. `tests/site/features.test.ts` re-reads the
+  specification table: a feature present in the SPEC and missing from the site
+  fails the CI.
+- **The four screens**: `#screens` renders the real view-models
+  (`src/viewmodel/*`) — ticket panel, coverage field, project settings, project
+  page — over the PAY-123 dataset, with no hard-coded text.
+- **Advanced gestures**: below the demo, seven more buttons run the rest of the
+  engine — criteria import, evidence going stale when a criterion changes,
+  test ↔ criterion pairing, attestation request with its notification, release
+  proof dossier, another evidence type, cross-evidence (FP-02, FP-03, FP-13,
+  FP-14, FP-15, FP-17, FP-20, FP-21).
 
 ## Documentation
 

@@ -19,6 +19,8 @@ import { createInitialDemoCoverage, DEMO_ISSUE_KEY } from '../../../src/sample/p
 import { buildCoverageFieldViewModel } from '../../../src/viewmodel/coverage.js';
 import { buildMatrixViewModel } from '../../../src/viewmodel/matrix.js';
 import type { MatrixRowViewModel } from '../../../src/viewmodel/matrix.js';
+import { ProjectPageMock } from './parts/ProjectPageMock.js';
+import { SettingsMock } from './parts/SettingsMock.js';
 import './Screens.css';
 
 /** Une des quatre cartes d'écran : nom, module Forge dans un <code>, texte. */
@@ -179,9 +181,9 @@ export function Screens({ lang }: { lang: Language }): ReactElement {
   const t = stringsFor(lang);
   const coverage = createInitialDemoCoverage();
   return (
-    <section id="Screens" aria-labelledby="Screens-title">
+    <section id="screens" aria-labelledby="screens-title">
       <div className="wrap">
-        <h2 id="Screens-title">{t.screens.title}</h2>
+        <h2 id="screens-title">{t.screens.title}</h2>
         <p className="lede">{t.screens.lede}</p>
         <div className="grid screens-cards">
           {t.screens.items.map((item) => (
@@ -190,6 +192,8 @@ export function Screens({ lang }: { lang: Language }): ReactElement {
         </div>
         <TicketPanelMock coverage={coverage} lang={lang} />
         <CoverageFieldMock coverage={coverage} lang={lang} />
+        <SettingsMock lang={lang} />
+        <ProjectPageMock lang={lang} />
       </div>
     </section>
   );

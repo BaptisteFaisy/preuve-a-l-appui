@@ -45,9 +45,9 @@ function RecipePoint({
 export function Recipe({ lang }: { lang: Language }): ReactElement {
   const t = stringsFor(lang);
   return (
-    <section id="Recipe" aria-labelledby="Recipe-title">
+    <section id="recipe" aria-labelledby="recipe-title">
       <div className="wrap">
-        <h2 id="Recipe-title">{t.recipe.title}</h2>
+        <h2 id="recipe-title">{t.recipe.title}</h2>
         <p className="lede">{t.recipe.lede}</p>
         <div className="recipe-head">
           <span className="recipe-head-point">{t.recipe.head[0]}</span>

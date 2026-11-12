@@ -16,6 +16,7 @@ export interface SiteStrings {
   readonly nav: {
     readonly problem: string;
     readonly rule: string;
+    readonly features: string;
     readonly demo: string;
     readonly screens: string;
     readonly agents: string;
@@ -128,6 +129,8 @@ export interface SiteStrings {
     readonly ciCommandTitle: string;
     readonly ciCommand: string;
     readonly ciCommandBody: string;
+    readonly copy: string;
+    readonly copied: string;
     readonly linksTitle: string;
     readonly links: readonly { readonly label: string; readonly href: string }[];
   };

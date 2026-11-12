@@ -1,0 +1,170 @@
+/* Maquettes supplémentaires (réglages du projet, page projet) — lot
+   `site-toutes-features`. Même vocabulaire que Screens.css : sélecteurs
+   préfixés .screens-, jetons de site/src/styles.css uniquement, mode sombre
+   automatique, aucune ressource externe. */
+
+/* Corps d'une maquette : empile les blocs sous le figcaption. */
+.screens-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+/* Titre de bloc, aligné sur les en-têtes de tableaux du site. */
+.screens-subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--colour-text);
+}
+
+.screens-subhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* Caption visible d'un tableau de maquette : même style que les en-têtes. */
+.screens-subcap {
+  text-align: left;
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--colour-text-subtle);
+  caption-side: top;
+}
+
+/* Sélecteur de mode du validateur : trois options empilées. */
+.screens-modes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.screens-mode {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius);
+  background: var(--colour-surface-raised);
+  color: var(--colour-text);
+  font-family: inherit;
+  font-size: 0.88rem;
+  cursor: default;
+}
+
+.screens-mode--selected {
+  border-color: var(--colour-brand);
+  background: var(--colour-surface);
+}
+
+.screens-mode-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.screens-mode-desc {
+  color: var(--colour-text-subtle);
+  font-size: 0.82rem;
+}
+
+/* Badge « preuve croisée » : une contrainte d'exigence de plus. */
+.screens-xbadge {
+  display: inline-block;
+  margin-top: var(--space-1);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--colour-brand);
+  color: var(--colour-brand);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+/* Tableaux étroits : rôles et statistiques. */
+.screens-roles,
+.screens-stats {
+  max-width: 46rem;
+}
+
+/* Bloc CI : la commande générée par l'app, à copier. */
+.screens-ci {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.screens-code {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--colour-border);
+  background: var(--colour-surface);
+  color: var(--colour-text);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Paragraphes et valeurs : politique sans critère, langue, compteurs. */
+.screens-para {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--colour-text);
+}
+
+.screens-para-label {
+  color: var(--colour-text-subtle);
+}
+
+.screens-value {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+/* Badge de compteur collé à un titre d'onglet. */
+.screens-count {
+  display: inline-block;
+  min-width: 1.6rem;
+  text-align: center;
+  padding: 1px var(--space-2);
+  border-radius: 999px;
+  background: var(--colour-brand);
+  color: var(--colour-surface-raised);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+/* Mention « ce que l'écran montre », en bas de maquette. */
+.screens-note {
+  margin: 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--colour-border);
+  color: var(--colour-text-subtle);
+  font-size: 0.82rem;
+}
+
+/* Responsive : les tableaux larges défilent déjà (.screens-tablescroll) ;
+   ici on resserre seulement les blocs sur petit écran. */
+@media (max-width: 40rem) {
+  .screens-body {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .screens-roles,
+  .screens-stats {
+    max-width: none;
+  }
+}

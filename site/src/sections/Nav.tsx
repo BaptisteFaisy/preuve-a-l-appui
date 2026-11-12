@@ -26,6 +26,7 @@ function anchors(t: ReturnType<typeof stringsFor>['nav']): { href: string; label
   return [
     { href: '#problem', label: t.problem },
     { href: '#rule', label: t.rule },
+    { href: '#features', label: t.features },
     { href: '#demo', label: t.demo },
     { href: '#screens', label: t.screens },
     { href: '#agents', label: t.agents },
