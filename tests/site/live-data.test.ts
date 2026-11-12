@@ -14,11 +14,11 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type { DemoSnapshotData } from '../../src/demo-contract.js';
 import { createLiveScenario, liveCast } from '../../site/src/demo/live-world.js';
-import { isSnapshot } from '../../site/src/demo/remote.js';
+import { bundledSnapshot, isSnapshot } from '../../site/src/demo/live-snapshot.js';
 import { snapshotOf } from '../../site/src/demo/state.js';
 import { createWorld } from '../../site/src/demo/world.js';
 
-const FIXTURE = fileURLToPath(new URL('../fixtures/live-snapshot.json', import.meta.url));
+const FIXTURE = fileURLToPath(new URL('../../site/public/live-snapshot.json', import.meta.url));
 
 /** L'instantané réel, tel que l'app l'a servi. */
 function snapshot(): DemoSnapshotData {
@@ -28,6 +28,11 @@ function snapshot(): DemoSnapshotData {
 }
 
 describe('lecture des données réelles', () => {
+  it('embarque le même instantané que le site public', () => {
+    expect(bundledSnapshot()).not.toBeNull();
+    expect(bundledSnapshot()?.issue.key).toBe('PRF-1');
+  });
+
   it('reconnaît un instantané et refuse autre chose', () => {
     expect(isSnapshot(snapshot())).toBe(true);
     expect(isSnapshot(null)).toBe(false);
