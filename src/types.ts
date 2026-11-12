@@ -373,6 +373,17 @@ export interface Actor {
 }
 
 /** The ticket, as read from Jira, with only what the app needs. */
+/**
+ * A member of the Jira project: their account, their display name and the
+ * project roles they hold (SPEC §9.4). The public site uses it to name the
+ * people it shows — the app never invents an actor.
+ */
+export interface ProjectMember {
+  readonly accountId: string;
+  readonly displayName: string;
+  readonly roles: readonly string[];
+}
+
 export interface IssueRef {
   id: string;
   key: string;

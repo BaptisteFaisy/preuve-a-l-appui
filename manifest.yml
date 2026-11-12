@@ -97,22 +97,69 @@ modules:
   # Résumé (noms et états des tests) envoyé en fin de pipeline ; signature
   # vérifiée, corps mis en file, réponse immédiate (§17).
   webtrigger:
+    # Entrée des résultats de CI (SPEC §10, FP-06). Le déclencheur est STATIQUE :
+    # la réponse est l'une des sorties déclarées ici, jamais un corps construit à
+    # l'exécution. C'est la condition de l'éligibilité « Runs on Atlassian » —
+    # un déclencheur dynamique pourrait faire sortir des données du tenant.
     - key: ci-results
       function: ingestResults
       urlFormat: v2
       response:
-        type: dynamic
-    # Lecture publique de l'état réel d'un ticket pour le site public : le site
-    # rejoue le vrai moteur sur des données vivantes (lot `app-donnees-reelles`).
-    # GET sans secret (instantané pseudonymisé, aucun identifiant de compte ne
-    # sort) ; POST `bootstrap` protégé par la variable d'app
-    # FORGE_USER_VAR_DEMO_BOOTSTRAP_TOKEN. Réponses dynamiques + en-têtes CORS
-    # posés par le handler (`src/handlers/demo-data.ts`).
-    - key: demo-data
-      function: serveDemoData
+        type: static
+        outputs:
+          - key: accepted
+            statusCode: 202
+            contentType: application/json
+            body: '{"status":"accepted","message":"CI summary accepted"}'
+          - key: unauthorized
+            statusCode: 401
+            contentType: application/json
+            body: '{"status":"unauthorized","message":"Missing or invalid CI signature"}'
+          - key: invalid-payload
+            statusCode: 400
+            contentType: application/json
+            body: '{"status":"invalid-payload","message":"Invalid CI summary payload"}'
+          - key: payload-too-large
+            statusCode: 413
+            contentType: application/json
+            body: '{"status":"payload-too-large","message":"Payload exceeds the limit"}'
+          - key: method-not-allowed
+            statusCode: 405
+            contentType: application/json
+            body: '{"status":"method-not-allowed","message":"Only POST is accepted"}'
+    # Amorçage du scénario de démonstration sur une installation réelle, protégé
+    # par le jeton de la variable d'app FORGE_USER_VAR_DEMO_BOOTSTRAP_TOKEN.
+    # Statique lui aussi (éligibilité « Runs on Atlassian »).
+    - key: bootstrap
+      function: bootstrapDemo
       urlFormat: v2
       response:
-        type: dynamic
+        type: static
+        outputs:
+          - key: ok
+            statusCode: 200
+            contentType: application/json
+            body: '{"status":"ok","message":"Demo scenario bootstrapped"}'
+          - key: migrated
+            statusCode: 200
+            contentType: application/json
+            body: '{"status":"migrated","message":"Schema applied"}'
+          - key: forbidden
+            statusCode: 403
+            contentType: application/json
+            body: '{"status":"forbidden","message":"Missing or invalid bootstrap token"}'
+          - key: invalid-payload
+            statusCode: 400
+            contentType: application/json
+            body: '{"status":"invalid-payload","message":"Invalid bootstrap payload"}'
+          - key: not-found
+            statusCode: 404
+            contentType: application/json
+            body: '{"status":"not-found","message":"Unknown ticket"}'
+          - key: method-not-allowed
+            statusCode: 405
+            contentType: application/json
+            body: '{"status":"method-not-allowed","message":"Only POST is accepted"}'
 
   # ------------------------------------------ file de vérification des preuves (§17)
   # Le consommateur retrouve le ticket par la branche, met à jour les preuves
@@ -164,8 +211,8 @@ modules:
       handler: index.validateProof
     - key: ingestResults
       handler: index.ingestResults
-    - key: serveDemoData
-      handler: index.serveDemoData
+    - key: bootstrapDemo
+      handler: index.bootstrapDemo
     - key: onEvent
       handler: index.onEvent
     - key: onScheduled
@@ -399,6 +446,10 @@ permissions:
     # Lire les tickets, versions, champs et changelog : matrice des critères,
     # ticket retrouvé par la branche de CI (§8, §10).
     - read:jira-work
+    # Lire le nom affiché des personnes (assignée, rapporteur, rôles projet) :
+    # sans ce scope, l'API `user` refuse et la démo ne peut pas nommer ses
+    # acteurs. Lecture seule, aucun accès aux données personnelles.
+    - read:jira-user
     # Écrire ce que l'app possède : réécriture de la section « Critères » de la
     # description (§8.2), propriété de ticket pour le champ de couverture
     # (§12.3, §19), commentaire de notification (§9.4, §14 FP-15).

@@ -4,6 +4,7 @@
  * Découpé depuis `fake-gateways.ts` pour respecter la règle des 50 lignes par fonction.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
+import type { ProjectMember } from '../../src/types';
 import type { IssueRef } from '../../src/types.js';
 import type { CallJournal, JiraWrite } from './fake-gateways.js';
 
@@ -16,6 +17,8 @@ export interface FakeJiraState {
   rewrites: { issueId: string; section: string }[];
   coverageFields: { issueId: string; label: string; proven: number; total: number }[];
   notifications: { accountId: string; subjectKey: string; bodyKey: string; issueKey: string }[];
+  /** Les instantanés écrits dans les propriétés de ticket, par ticket. */
+  snapshots: Map<string, unknown>;
 }
 
 export function matchesProject(issue: IssueRef, projectId: string): boolean {
@@ -54,6 +57,19 @@ export function createJiraWriter(state: FakeJiraState) {
     async projectRoles(projectId: string, accountId: string): Promise<string[]> {
       state.journal.calls.push({ method: 'projectRoles', args: [projectId, accountId] });
       return [...(state.roles.get(accountId) ?? [])];
+    },
+    async projectMembers(projectId: string): Promise<readonly ProjectMember[]> {
+      state.journal.calls.push({ method: 'projectMembers', args: [projectId] });
+      return [...state.roles.entries()].map(([accountId, roles]) => ({
+        accountId,
+        displayName: state.names.get(accountId) ?? accountId,
+        roles: [...roles],
+      }));
+    },
+    async writeSnapshot(issueId: string, snapshot: unknown): Promise<boolean> {
+      state.journal.calls.push({ method: 'writeSnapshot', args: [issueId] });
+      state.snapshots.set(issueId, snapshot);
+      return true;
     },
     async notify(accountId: string, subjectKey: string, bodyKey: string, issueKey: string): Promise<boolean> {
       state.journal.calls.push({ method: 'notify', args: [accountId, subjectKey, bodyKey, issueKey] });

@@ -35,7 +35,9 @@ import type {
   SnapshotCi,
   SnapshotInput,
 } from './demo-contract';
-import type { AppDeps } from './deps';
+import type { ProofStore } from './ports';
+import type { JiraGateway } from './ports';
+import type { Clock } from './ports';
 import { defaultProjectSettings } from './defaults';
 
 /** Époque de référence pour les lectures « tout l'historique ». */
@@ -101,7 +103,7 @@ export function anonymizeDeep<T>(value: T, refs: ActorRefs): T {
 }
 
 /** Lit le dernier run de CI connu pour un couple dépôt/branche. */
-async function readCi(deps: AppDeps, input: SnapshotInput): Promise<SnapshotCi | null> {
+async function readCi(deps: SnapshotDeps, input: SnapshotInput): Promise<SnapshotCi | null> {
   if (input.repo === undefined || input.branch === undefined) return null;
   const run = await deps.store.latestRunForBranch(input.repo, input.branch);
   if (run === null) return null;
@@ -110,7 +112,7 @@ async function readCi(deps: AppDeps, input: SnapshotInput): Promise<SnapshotCi |
 
 /** Le dossier de la première version de correction du ticket, s'il est figé. */
 async function readDossier(
-  deps: AppDeps,
+  deps: SnapshotDeps,
   versionId: string | undefined,
 ): Promise<ReleaseDossier | null> {
   if (versionId === undefined || versionId === '') return null;
@@ -135,9 +137,20 @@ interface RawSnapshot {
   readonly ci: SnapshotCi | null;
 }
 
+/**
+ * Ce dont la construction d'un instantané a besoin : la base, Jira et
+ * l'horloge. Rien d'autre — le même constructeur sert depuis l'app (elle publie
+ * l'instantané dans le ticket) et depuis le dépôt (l'outil de rafraîchissement).
+ */
+export interface SnapshotDeps {
+  readonly store: ProofStore;
+  readonly jira: JiraGateway;
+  readonly clock: Clock;
+}
+
 /** Construit l'instantané réel d'un ticket : lectures en base et dans Jira. */
 export async function buildDemoSnapshot(
-  deps: AppDeps,
+  deps: SnapshotDeps,
   input: SnapshotInput,
 ): Promise<DemoSnapshotData | null> {
   const issue = await deps.jira.getIssue(input.issueKey);
@@ -179,7 +192,7 @@ export async function buildDemoSnapshot(
  * Pseudonymise l'instantané, résout les personnes rencontrées, et vide la clé
  * de CI. L'ordre compte : les acteurs ne sont connus qu'après le parcours.
  */
-async function finalize(deps: AppDeps, raw: RawSnapshot): Promise<DemoSnapshotData> {
+async function finalize(deps: SnapshotDeps, raw: RawSnapshot): Promise<DemoSnapshotData> {
   const refs = new ActorRefs();
   refs.of(raw.issue.assigneeAccountId);
   refs.of(raw.issue.reporterAccountId);
@@ -228,17 +241,24 @@ async function finalize(deps: AppDeps, raw: RawSnapshot): Promise<DemoSnapshotDa
  * pas deviné : sa référence sert de nom, l'identifiant réel ne sort pas.
  */
 async function readActors(
-  deps: AppDeps,
+  deps: SnapshotDeps,
   refs: ActorRefs,
   projectId: string,
 ): Promise<readonly SnapshotActor[]> {
+  // Les personnes du projet ET celles rencontrées dans les données : le site
+  // peut ainsi nommer les acteurs qu'il affiche, sans jamais en inventer.
+  const members = await deps.jira.projectMembers(projectId);
+  for (const member of members) refs.of(member.accountId);
   const actors: SnapshotActor[] = [];
   for (const accountId of refs.accounts()) {
     const ref = refs.of(accountId);
-    const [resolved, roles] = await Promise.all([
-      deps.jira.displayName(accountId),
-      deps.jira.projectRoles(projectId, accountId),
-    ]);
+    const member = members.find((one) => one.accountId === accountId);
+    const [resolved, roles] = member
+      ? [member.displayName, member.roles]
+      : await Promise.all([
+          deps.jira.displayName(accountId),
+          deps.jira.projectRoles(projectId, accountId),
+        ]);
     actors.push({
       ref,
       displayName: resolved === accountId || resolved === '' ? ref : resolved,

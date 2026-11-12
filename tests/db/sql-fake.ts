@@ -22,6 +22,37 @@ export interface FakeSql extends SqlClient {
   clear(): FakeSql;
 }
 
+/**
+ * Compte les `?` d'un énoncé, en ignorant ceux qui sont dans une chaîne
+ * littérale. Forge SQL lie les paramètres positionnellement : un nombre de
+ * paramètres différent du nombre de `?` fait échouer l'écriture en production
+ * (`Unknown SQL execution error`, sans détail) — le double doit crier au même
+ * endroit, sinon le bogue reste invisible jusqu'au déploiement.
+ */
+export function countPlaceholders(statement: string): number {
+  let count = 0;
+  let inString = false;
+  for (let i = 0; i < statement.length; i += 1) {
+    const char = statement[i];
+    if (char === "'") {
+      inString = !inString;
+      continue;
+    }
+    if (!inString && char === '?') count += 1;
+  }
+  return count;
+}
+
+/** Crie si le nombre de paramètres ne correspond pas aux `?` de l'énoncé. */
+export function assertBound(statement: string, params: readonly SqlParam[]): void {
+  const expected = countPlaceholders(statement);
+  if (expected === params.length) return;
+  throw new Error(
+    `SQL : ${params.length} paramètre(s) lié(s) pour ${expected} « ? » — Forge SQL refuse ` +
+      `l'écriture. Énoncé : ${statement.replace(/\s+/g, ' ').slice(0, 150)}`,
+  );
+}
+
 export function createFakeSql(): FakeSql {
   const calls: SqlCall[] = [];
   const queue: unknown[][] = [];
@@ -32,11 +63,13 @@ export function createFakeSql(): FakeSql {
     calls,
     async query<Row>(statement: string, params: readonly SqlParam[] = []): Promise<Row[]> {
       calls.push({ kind: 'query', statement, params });
+      assertBound(statement, params);
       const next = queue.shift() ?? defaultRows;
       return [...next] as Row[];
     },
     async execute(statement: string, params: readonly SqlParam[] = []): Promise<number> {
       calls.push({ kind: 'execute', statement, params });
+      assertBound(statement, params);
       return affectedRows;
     },
     scriptRows(rows) {

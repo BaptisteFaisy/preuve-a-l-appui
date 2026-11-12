@@ -15,6 +15,7 @@ import { createEvidenceChecker } from './collect/checker';
 import { createLlmGateway } from './collect/llm';
 import { createIdentityGateway } from './collect/identity';
 import { createCoverageEngine } from './domain/coverage-engine';
+import { publishSnapshot } from './ingest/snapshot';
 import type {
   Clock,
   CoverageEngine,
@@ -77,10 +78,23 @@ export function createAppDeps(queue: JobQueue, sql?: SqlClient): AppDeps {
   const clock = systemClock;
   const logger = createLogger();
   const store = createStore(client);
+  const jira = createJiraGateway();
+  // L'app publie son instantané dans les propriétés du ticket à chaque écriture
+  // de couverture : c'est ainsi que le site public lit des données réelles sans
+  // web trigger dynamique (donc sans perdre « Runs on Atlassian »).
+  const coverage = createCoverageEngine({
+    store,
+    clock,
+    logger,
+    jira,
+    onCoverageWritten: async (issueId: string) => {
+      await publishSnapshot({ store, jira, clock, logger }, issueId);
+    },
+  });
   return {
     store,
-    coverage: createCoverageEngine({ store, clock, logger }),
-    jira: createJiraGateway(),
+    coverage,
+    jira,
     checker: createEvidenceChecker(),
     llm: createLlmGateway(),
     identity: createIdentityGateway(),

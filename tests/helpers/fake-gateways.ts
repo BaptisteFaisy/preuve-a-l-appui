@@ -120,6 +120,7 @@ function jiraState(issues: readonly IssueRef[], options: FakeJiraOptions): FakeJ
     rewrites: [],
     coverageFields: [],
     notifications: [],
+    snapshots: new Map<string, unknown>(),
   };
 }
 
