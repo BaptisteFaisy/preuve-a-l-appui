@@ -1,0 +1,106 @@
+name: Site (GitHub Pages)
+
+# Publie le site public sur GitHub Pages : https://tradoooo.github.io/preuve-a-l-appui/
+#
+# Le site est construit par Vite depuis `site/` ; il embarque le VRAI moteur de
+# l'app (`src/domain`, `src/handlers`) et le jeu de démonstration PAY-123, donc
+# toute modification du domaine peut changer le site : ce workflow se déclenche
+# aussi sur ces chemins.
+#
+# Budget : 5 minutes par job (règle CI de fin octobre 2026). Le build Vite dure
+# quelques secondes une fois les dépendances présentes ; le magasin partagé du
+# runner évite une installation complète (voir `.github/workflows/ci.yml`).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "src/**"
+      - "tests/helpers/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/site.yml"
+  workflow_dispatch:
+
+# Un seul déploiement à la fois ; on n'annule pas un déploiement en cours
+# (un site à moitié publié vaut mieux qu'un site cassé).
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: build-site
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Dépendances (npm ci)
+        run: npm ci --prefer-offline --no-audit --no-fund
+      - name: Nettoyage du workspace (node_modules conservé)
+        shell: bash
+        run: git clean -ffdx -e /node_modules -e /.npm-state -e /dist -e /build -e /site/dist
+
+      - name: Types du site (tsc -p site/tsconfig.json)
+        run: npm run site:typecheck
+
+      - name: Construction du site (vite build)
+        run: npm run site:build
+
+      - name: "Garde — ressources du site servies sous la base Pages"
+        shell: bash
+        run: |
+          # Pages sert le site sous /preuve-a-l-appui/ : une URL absolue qui
+          # part de la racine (/assets/…) casserait la page. On n'accepte que
+          # les URL relatives ou préfixées par la base.
+          python3 - <<'PY'
+          import pathlib
+          import re
+          import sys
+
+          BASE = "/preuve-a-l-appui/"
+          mauvaises = []
+          for fichier in sorted(pathlib.Path("site/dist").rglob("*.html")):
+              texte = fichier.read_text(encoding="utf-8")
+              for trouve in re.finditer(r'(?:href|src)="(/[^"]*)"', texte):
+                  url = trouve.group(1)
+                  if not url.startswith(BASE):
+                      mauvaises.append(f"{fichier}: {url}")
+          if mauvaises:
+              for ligne in mauvaises[:10]:
+                  print(f"::error::URL absolue hors base Pages — {ligne}")
+              sys.exit(1)
+          print(f"OK : toutes les URL absolues du build portent la base {BASE}")
+          PY
+
+      - name: Artefact Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    name: deploy-pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publication sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

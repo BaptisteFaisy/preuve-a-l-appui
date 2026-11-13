@@ -1,0 +1,102 @@
+/* Section « Architecture » — lot site/sections-b. Sélecteurs préfixés .archi-.
+   Jetons de site/src/styles.css uniquement ; mode sombre automatique. */
+
+.archi-subtitle {
+  margin: var(--space-8) 0 var(--space-3);
+  font-size: 1.25rem;
+}
+
+.archi-flows {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.archi-flow {
+  padding: var(--space-4);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-lg);
+  background: var(--colour-surface-raised);
+}
+
+.archi-flow-name {
+  margin: 0 0 var(--space-3);
+  font-weight: 600;
+  color: var(--colour-text);
+}
+
+.archi-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.archi-step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.archi-step-box {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--colour-border);
+  background: var(--colour-surface);
+  color: var(--colour-text);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+.archi-arrow {
+  color: var(--colour-brand);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Encadré « pourquoi le validateur répond vite ». */
+.archi-fast {
+  margin: var(--space-8) 0;
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--colour-ok);
+  border-left: 6px solid var(--colour-ok);
+  background: var(--colour-ok-bg);
+}
+
+.archi-fast-title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.1rem;
+  color: var(--colour-text);
+}
+
+.archi-fast-body {
+  margin: 0;
+  color: var(--colour-text);
+  max-width: var(--measure);
+}
+
+/* Les limites annoncées : honnêteté sur ce que l'app ne bloque pas. */
+.archi-limits {
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-6);
+  display: grid;
+  gap: var(--space-2);
+  max-width: var(--measure);
+}
+
+.archi-limit {
+  color: var(--colour-text-subtle);
+  padding-left: var(--space-1);
+}
+
+.archi-limit::marker {
+  color: var(--colour-warn);
+}

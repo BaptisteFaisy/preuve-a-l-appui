@@ -1,0 +1,106 @@
+/* Panneau des gestes avancés de la démo — même vocabulaire que demo.css :
+   jetons du site, mode sombre hérité, aucune ressource externe. */
+
+.demo-advanced {
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-lg);
+  background: var(--colour-surface);
+}
+
+.demo-advanced-title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.05rem;
+}
+
+.demo-advanced-lede {
+  margin: 0 0 var(--space-4);
+  color: var(--colour-text-subtle);
+  font-size: 0.9rem;
+  max-width: var(--measure);
+}
+
+.demo-adv-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.demo-adv-item {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.demo-adv-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius);
+  background: var(--colour-surface-raised);
+  color: var(--colour-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.demo-adv-btn:hover:not(:disabled),
+.demo-adv-btn:focus-visible:not(:disabled) {
+  border-color: var(--colour-brand);
+}
+
+.demo-adv-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.demo-adv-fp {
+  flex: none;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius);
+  background: var(--colour-brand);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+.demo-adv-label {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.demo-adv-result {
+  margin: 0;
+  padding-left: var(--space-3);
+  font-size: 0.85rem;
+  color: var(--colour-text-subtle);
+  white-space: pre-line;
+}
+
+.demo-adv-result--empty {
+  min-height: 0;
+}
+
+.demo-adv-result--ok {
+  color: var(--colour-ok);
+}
+
+.demo-adv-result--refused {
+  color: var(--colour-bad);
+}
+
+.demo-adv-result--info {
+  color: var(--colour-text-subtle);
+}
+
+@media (min-width: 900px) {
+  .demo-adv-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
