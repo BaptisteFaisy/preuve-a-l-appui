@@ -100,6 +100,8 @@ export interface FakeJira extends JiraGateway {
     subjectKey: string;
     bodyKey: string;
     issueKey: string;
+    /** La langue dans laquelle la passerelle a traduit le message. */
+    language: string;
   }[];
   addIssue(issue: IssueRef): FakeJira;
   setRoles(accountId: string, roles: readonly string[]): FakeJira;

@@ -60,6 +60,11 @@ export const CI_MESSAGES: Messages = {
     en: '{code} is no longer proven since commit {commit}: test "{testName}" was skipped or removed.',
     fr: '{code} n’est plus prouvé depuis le commit {commit} : le test « {testName} » a été ignoré ou absent.',
   },
+  // Notification hors Jira (webhook d'équipe) : la ligne « qui doit agir ».
+  'ci.living.webhook.who': {
+    en: 'To handle: {who}',
+    fr: 'À traiter par : {who}',
+  },
 };
 
 /** Traduit une clé du dictionnaire CI dans la langue du projet. */

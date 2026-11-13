@@ -442,6 +442,24 @@ resources:
 # --------------------------------------------------------------------- scopes
 # Le strict nécessaire, chaque scope commenté avec sa raison (§14, §20).
 permissions:
+  # -------------------------------------------------- sorties réseau déclarées
+  # Forge n'autorise `api.fetch` sortant que vers les domaines déclarés ici
+  # (schéma @forge/manifest : `permissions.external.fetch.backend`, une liste
+  # de domaines ou d'objets `{ address, inScopeEUD }`). L'app n'appelle que les
+  # hôtes de webhooks d'équipe connus, et seulement si l'administrateur a posé
+  # une URL dans la variable d'app FORGE_USER_VAR_NOTIFY_WEBHOOK ; sans elle,
+  # aucun appel n'est fait (src/collect/webhook.ts).
+  external:
+    fetch:
+      backend:
+        # Slack (webhook entrant « Incoming Webhooks »).
+        - hooks.slack.com
+        # Microsoft Teams : connecteur Office 365 et webhooks de workflow.
+        - outlook.office.com
+        - '*.webhook.office.com'
+        # Discord.
+        - discord.com
+        - discordapp.com
   scopes:
     # Lire les tickets, versions, champs et changelog : matrice des critères,
     # ticket retrouvé par la branche de CI (§8, §10).

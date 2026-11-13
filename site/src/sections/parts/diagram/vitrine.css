@@ -1,0 +1,165 @@
+/* Vitrine de confiance : la bande de chiffres et le badge « Runs on Atlassian ».
+   Jetons de site/src/styles.css uniquement ; contraste AA ; focus visible. */
+
+/* --- bande de chiffres clés ------------------------------------------- */
+
+.figures {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--colour-border);
+}
+
+.figures-head {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.figures-title {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.figures-lede {
+  margin: 0;
+  color: var(--colour-text-subtle);
+  max-width: var(--measure);
+}
+
+.figures-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
+}
+
+.figures-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--colour-border);
+  border-left: 4px solid var(--colour-brand);
+  border-radius: var(--radius);
+  background: var(--colour-surface);
+}
+
+.figures-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--colour-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.figures-label {
+  font-size: 0.9rem;
+  color: var(--colour-text);
+}
+
+.figures-detail {
+  font-size: 0.8rem;
+  color: var(--colour-text-subtle);
+}
+
+.figures-source {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  font-size: 0.76rem;
+  color: var(--colour-text-subtle);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.figures-note {
+  margin: var(--space-4) 0 0;
+  font-size: 0.8rem;
+  color: var(--colour-text-subtle);
+  max-width: var(--measure);
+}
+
+.figures-notice {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--colour-warn);
+  background: var(--colour-warn-bg);
+  color: var(--colour-text);
+  font-size: 0.82rem;
+  max-width: var(--measure);
+}
+
+/* --- badge « Runs on Atlassian » -------------------------------------- */
+
+.atlas-badge--full {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--colour-brand);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--colour-brand) 8%, var(--colour-bg));
+  max-width: var(--measure);
+}
+
+.atlas-badge-mark {
+  flex: none;
+  margin-top: 2px;
+  color: var(--colour-brand);
+}
+
+.atlas-badge-body {
+  margin: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.atlas-badge-label {
+  font-size: 0.95rem;
+  color: var(--colour-text);
+}
+
+.atlas-badge-meaning {
+  font-size: 0.85rem;
+  color: var(--colour-text-subtle);
+}
+
+.atlas-badge-proof {
+  font-size: 0.8rem;
+  /* Sur le fond teinté du badge, le bleu clair tombe sous 4,5:1 : on prend le
+     bleu foncé, et le soulignement porte le lien sans dépendre de la couleur. */
+  color: var(--colour-brand-strong);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.atlas-badge--compact {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-6) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--colour-border);
+  font-size: 0.85rem;
+  color: var(--colour-text-subtle);
+  max-width: var(--measure);
+}
+
+.atlas-badge--compact .atlas-badge-mark {
+  margin-top: 0;
+}
+
+.figures-source:hover,
+.atlas-badge-proof:hover {
+  color: var(--colour-brand-strong);
+}
+
+.figures-source:focus-visible,
+.atlas-badge-proof:focus-visible {
+  outline: 2px solid var(--colour-brand);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

@@ -1,0 +1,85 @@
+name: eligibility (Runs on Atlassian)
+
+# L'éligibilité au programme Atlassian « Runs on Atlassian » se perd dès que
+# l'app utilise un déclencheur dynamique : la CLI Forge répond alors
+# « App is using a webtrigger module that can egress data ». Le relevé du
+# 12/11/2026 est favorable (production et development éligibles) — ce
+# workflow garde ce point, parce qu'une seule ligne de manifest suffit à le
+# perdre et que rien d'autre ne le voyait.
+#
+# La règle est vérifiée par `tools/check-eligibility.mjs` — implémentation
+# unique, appelée aussi par `tests/tools/check-eligibility.test.ts`. La CLI
+# Forge sort en code 0 même quand l'app est INÉLIGIBLE : c'est le garde qui lit
+# le message de la CLI et fait échouer le job, en citant la raison donnée par
+# Atlassian (« App is using a webtrigger module that can egress data »).
+#
+# Secrets GitHub Actions (à poser) :
+#   gh secret set FORGE_EMAIL       # le login Atlassian du compte propriétaire
+#   gh secret set FORGE_API_TOKEN   # son API token personnel
+#
+# Budget : 5 minutes par job (règle CI du 24 octobre 2026). Le runner
+# self-hosted est persistant : la CLI Forge est installée une fois dans
+# `$HOME/.cache/forge-cli/<version>` et réutilisée d'un run à l'autre, le cache
+# npm est partagé. Jamais de timeout allongé : on optimise ou on découpe.
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: eligibility-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false  # un check requis annulé bloque la file (leçon du 11 nov.)
+
+permissions:
+  contents: read
+
+jobs:
+  eligibility:
+    name: eligibility
+    runs-on: [self-hosted, linux, x64, preuve-a-l-appui-worker]
+    timeout-minutes: 5
+    # Le dépôt est PUBLIC : une pull request venue d'une fourche ne doit
+    # jamais voir le jeton Atlassian. On ne vérifie donc que les PR dont la
+    # branche est dans ce dépôt.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # La CLI Forge est déjà celle que le dépôt connaît (14.2, cf.
+      # tools/check-manifest.mjs) : elle accepte `forge eligibility` et un
+      # node >= 20.18.1. `--ignore-scripts` évite les binaires natifs
+      # inutiles ici (keytar, cloudflared) — l'authentification passe par les
+      # variables d'environnement, pas par le trousseau.
+      - name: CLI Forge (install une fois, réutilisée d'un run à l'autre)
+        shell: bash
+        env:
+          FORGE_CLI_VERSION: '14.2.0'
+        run: |
+          set -euo pipefail
+          prefix="$HOME/.cache/forge-cli/$FORGE_CLI_VERSION"
+          if [ ! -x "$prefix/node_modules/.bin/forge" ]; then
+            npm install --prefix "$prefix" --no-save --ignore-scripts \
+              --no-audit --no-fund --prefer-offline "@forge/cli@$FORGE_CLI_VERSION"
+          fi
+          test -x "$prefix/node_modules/.bin/forge"
+          echo "FORGE_BIN=$prefix/node_modules/.bin/forge" >> "$GITHUB_ENV"
+
+      - name: Éligibilité « Runs on Atlassian » (production + development)
+        shell: bash
+        env:
+          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
+          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+          FORGE_DISABLE_ANALYTICS: '1'
+        run: node tools/check-eligibility.mjs

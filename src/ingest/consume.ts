@@ -133,14 +133,84 @@ export async function collectTrackedItems(
   return items;
 }
 
+/** Le nom affiché du destinataire, s'il est connu : « qui » doit agir. */
+async function recipientName(deps: AppDeps, accountId: string): Promise<string> {
+  if (accountId === '') return '';
+  return (await deps.jira.displayName(accountId)).trim();
+}
+
+/**
+ * Le texte du canal externe (Slack, Teams, Discord) : qui doit agir, quoi,
+ * quel ticket, quel test, quel commit — dans la langue du projet.
+ */
+async function webhookTextOf(
+  deps: AppDeps,
+  alert: LivingAlert,
+  language: Language,
+  accountId: string,
+): Promise<string> {
+  const regressed = alert.proof.state === 'regressed';
+  const prefix = regressed ? 'ci.living.regressed' : 'ci.living.unproven';
+  const criterion = await deps.store.getCriterion(alert.criterionId);
+  const vars = {
+    issueKey: alert.issueKey,
+    code: criterion?.code ?? alert.criterionId,
+    testName: alert.testName,
+    commit: alert.proof.commit,
+    since: alert.proof.since,
+  };
+  const lines = [
+    `${regressed ? '🔴' : '⚠️'} ${ciText(`${prefix}.subject`, language, vars)}`,
+    ciText(`${prefix}.body`, language, vars),
+  ];
+  const who = await recipientName(deps, accountId);
+  if (who !== '') lines.push(ciText('ci.living.webhook.who', language, { who }));
+  return lines.join('\n');
+}
+
+/**
+ * La notification hors Jira : elle **double** la notification Jira, elle ne la
+ * remplace pas (SPEC §13). Le canal vient du graphe de dépendances
+ * (`deps.webhook`, `src/collect/webhook.ts`) : absent du graphe, il n'y a
+ * simplement rien à envoyer. Un envoi raté est journalisé et n'interrompt
+ * jamais le résumé de CI (SPEC §17).
+ */
+async function notifyChannel(
+  deps: AppDeps,
+  alert: LivingAlert,
+  language: Language,
+  accountId: string,
+): Promise<void> {
+  const channel = deps.webhook;
+  // Pas de canal, ou canal non configuré : rien ne se passe, pas même une ligne
+  // de journal (variable d'app absente = fonctionnalité éteinte).
+  if (channel === undefined || !channel.enabled) return;
+  try {
+    const text = await webhookTextOf(deps, alert, language, accountId);
+    const sent = await channel.send({ text, issueKey: alert.issueKey });
+    deps.logger.log(sent ? 'info' : 'warn', 'ci.living.webhook', {
+      issueKey: alert.issueKey,
+      sent,
+    });
+  } catch (error) {
+    deps.logger.log('warn', 'ci.living.webhook_failed', { issueKey: alert.issueKey, error });
+  }
+}
+
 /**
  * Signale sur le ticket d'origine un critère livré qui n'est plus prouvé
  * (SPEC §7.5, §13). Le port `notify` transporte des clés de message : les
  * variables (code du critère, nom du test, commit) sont journalisées.
  */
-async function notifyAlert(deps: AppDeps, alert: LivingAlert): Promise<void> {
+async function notifyAlert(
+  deps: AppDeps,
+  alert: LivingAlert,
+  language: Language,
+): Promise<void> {
   const issue = await deps.jira.getIssue(alert.issueKey);
   const accountId = issue?.reporterAccountId || issue?.assigneeAccountId || '';
+  // Le canal externe est prévenu même quand Jira n'a personne à nommer.
+  await notifyChannel(deps, alert, language, accountId);
   if (accountId.length === 0) {
     deps.logger.log('warn', 'ci.living.no_recipient', { issueKey: alert.issueKey });
     return;
@@ -153,7 +223,13 @@ async function notifyAlert(deps: AppDeps, alert: LivingAlert): Promise<void> {
     commit: alert.proof.commit,
     since: alert.proof.since,
   });
-  await deps.jira.notify(accountId, `${prefix}.subject`, `${prefix}.body`, alert.issueKey);
+  await deps.jira.notify(
+    accountId,
+    `${prefix}.subject`,
+    `${prefix}.body`,
+    alert.issueKey,
+    language,
+  );
 }
 
 /** Étape 4 : sur la branche principale, la preuve vivante des tickets clos (§13). */
@@ -181,8 +257,9 @@ export async function refreshLivingProofs(
   for (const proof of evaluation.updated) {
     await deps.store.saveLivingProof(proof);
   }
+  const language = await languageOf(deps, projectId);
   for (const alert of evaluation.alerts) {
-    await notifyAlert(deps, alert);
+    await notifyAlert(deps, alert, language);
   }
   return { updated: evaluation.updated.length, alerts: evaluation.alerts.length };
 }

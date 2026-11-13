@@ -50,6 +50,7 @@ describe('handlers/scheduled — contrôle nocturne (SPEC §20)', () => {
       subjectKey: 'scheduled.leak.subject',
       bodyKey: 'scheduled.leak.body',
       issueKey: CLOSED_KEY,
+      language: 'en',
     });
   });
 

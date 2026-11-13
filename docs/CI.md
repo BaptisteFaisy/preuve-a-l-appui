@@ -7,6 +7,7 @@
 | `ci` | `.github/workflows/ci.yml` | types faux, tests rouges, fichier > 500 lignes, fonction > 50 lignes, manifeste incohérent, doc vide ou illisible, garde de CI en échec |
 | `ci-budget` | `.github/workflows/ci-budget.yml` | un job sans `timeout-minutes`, ou au-delà de 5 min sur une PR |
 | `couche0` | `.github/workflows/couche0.yml` | fichier modifié hors du `## Scope` de la PR, motif interdit (poussée forcée, déclencheur à privilèges, clé en clair), workflow de garde modifié sans la mention `SAMVISION_ALLOW_GUARD_BUMP` |
+| `eligibility` | `.github/workflows/eligibility.yml` | app inéligible au programme Atlassian « Runs on Atlassian » en production ou en development, job au-delà de 5 min, secret absent, garde local non appelé |
 
 Le check `ci` est exigé par le ruleset de `main` et par la file Mergify : sans lui, la PR n'entre pas dans la file.
 
@@ -28,6 +29,32 @@ npm run typecheck && npm test && python3 tools/check-file-limits.py && node tool
 ```
 
 Une seule garde, hors limites : `node tools/check-function-limits.mjs --limite 40 --racine src`.
+
+## Éligibilité « Runs on Atlassian » (check `eligibility`)
+
+L'app est déployée chez un vrai client et **éligible au programme Atlassian « Runs on Atlassian »** : c'est un argument de la candidature, pas un détail. L'éligibilité se perd dès qu'un module fait sortir des données — en pratique un webtrigger dynamique, que la CLI résume par « App is using a webtrigger module that can egress data ». Une seule ligne de `manifest.yml` suffit à la perdre, et aucune autre garde ne le verrait.
+
+Le check `eligibility` (`.github/workflows/eligibility.yml`, sur chaque PR) interroge Atlassian **en production et en development** et échoue si l'une des deux n'est plus éligible. Il affiche la phrase exacte de la CLI et la liste des règles violées, jamais un `exit 1` nu. Comme `forge eligibility` sort en code 0 même quand l'app est inéligible, c'est le garde qui lit la sortie et tranche.
+
+Une seule implémentation : `tools/check-eligibility.mjs`, appelée par le workflow et par `tests/tools/check-eligibility.test.ts`. Le même fichier vérifie aussi, hors ligne (`--check-workflow`), que le workflow est bien branché : déclencheur `pull_request`, `timeout-minutes` ≤ 5, les deux secrets, appel du garde.
+
+Secrets à créer une fois (dépôt → Settings → Secrets, ou CLI) :
+
+```bash
+gh secret set FORGE_EMAIL       # login du compte Atlassian propriétaire de l'app
+gh secret set FORGE_API_TOKEN   # son API token personnel
+```
+
+Le workflow utilise exactement ces deux noms (`secrets.FORGE_EMAIL`, `secrets.FORGE_API_TOKEN`) et `FORGE_DISABLE_ANALYTICS=1` ; la CLI est installée une fois dans `~/.cache/forge-cli/` et réutilisée d'un run à l'autre.
+
+En local, même vérification (identifiants dans l'environnement, jamais dans le dépôt) :
+
+```bash
+export FORGE_EMAIL="$(grep -E '^email=' ~/.atlassian-login | cut -d= -f2-)"
+export FORGE_API_TOKEN="$(tr -d '\n' < ~/.atlassian-api-token)"
+FORGE_DISABLE_ANALYTICS=1 node tools/check-eligibility.mjs        # production + development
+node tools/check-eligibility.mjs --check-workflow                  # câblage, hors ligne
+```
 
 ## Budget : 5 minutes
 

@@ -170,6 +170,13 @@ function IssuesTable(props: { issues: readonly ProjectIssueItemViewModel[]; lang
               <span className={`screens-coverage screens-coverage--${item.coverage.tone}`} title={item.coverage.tooltip}>
                 {item.coverage.label}
               </span>
+              {/* Marqueur discret : des critères à la fois prouvés par un test et
+                  attestés par un humain (SPEC §9.1, §9.4). Rien quand il n'y en a pas. */}
+              {item.doublyProvenLabel ? (
+                <span className="screens-evref" title={head('ui.matrix.doublyProvenTitle')}>
+                  {item.doublyProvenLabel}
+                </span>
+              ) : null}
             </td>
             <td className="screens-td">
               <span className={`screens-lozenge screens-lozenge--${item.passes ? 'success' : 'removed'}`}>

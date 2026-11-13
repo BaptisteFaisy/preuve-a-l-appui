@@ -345,7 +345,7 @@ async function handleWaiveCriterion(req: ResolverRequest, deps: AppDeps): Promis
 }
 
 async function handleRequestAttestation(req: ResolverRequest, deps: AppDeps): Promise<unknown> {
-  const { issueKey, accountId } = extractContext(req);
+  const { issueKey, accountId, language } = extractContext(req);
   const p = req.payload;
   const criterionId = str(p, 'criterionId');
   const target = str(p, 'targetAccount') || accountId;
@@ -356,6 +356,7 @@ async function handleRequestAttestation(req: ResolverRequest, deps: AppDeps): Pr
       'ui.notify.attestation.subject',
       'ui.notify.attestation.body',
       issueKey || criterionId,
+      language,
     );
   }
   return { ok: true };

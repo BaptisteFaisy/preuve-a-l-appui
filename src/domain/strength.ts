@@ -20,7 +20,7 @@
  * - Fichier < 500 lignes, fonctions < 50 lignes.
  */
 import type { EvidenceChecker } from '../ports';
-import type { EvidenceType, Strength, TestOutcome } from '../types';
+import type { Evidence, EvidenceType, Strength, TestOutcome } from '../types';
 
 /** Résultat de la vérification d'une preuve : force obtenue et vérification. */
 export interface VerificationResult {
@@ -142,4 +142,71 @@ export async function computeEvidenceStrength(
     ? strengthWithAttestation(input.type, Boolean(input.hasValidAttestation))
     : 'declared';
   return { verified, strength };
+}
+
+/* ------------------------------------------------------- preuve double */
+
+/**
+ * Ce dont le verdict « doublement prouvé » a besoin : un état de critère,
+ * pas davantage.
+ */
+export interface CriterionProofView {
+  readonly criterionId: string;
+  readonly version: number;
+  readonly evidences: readonly Evidence[];
+  /** Posé par le domaine à l'évaluation ; absent d'une ligne lue en base. */
+  readonly doublyProven?: boolean;
+}
+
+/** Une preuve compte encore : fraîche, vérifiée, sur la version du critère (SPEC §9.3). */
+export function countsAsLiveProof(evidence: Evidence, criterionVersion: number): boolean {
+  return (
+    evidence.replacedBy === '' &&
+    evidence.freshness === 'fresh' &&
+    evidence.verified &&
+    evidence.criterionVersion >= criterionVersion
+  );
+}
+
+/**
+ * Les deux sources indépendantes d'un même critère : la machine (un test
+ * vérifié, SPEC §9.1) et un humain (une attestation, SPEC §9.4).
+ *
+ * Additif : la force de chaque preuve reste ce qu'elle est. « Doublement
+ * prouvé » n'est pas un niveau de force — le barème, les statistiques et le
+ * dossier ne bougent pas.
+ */
+export function proofSourcesOf(
+  evidences: readonly Evidence[],
+  criterionId: string,
+  criterionVersion: number,
+): { readonly machine: boolean; readonly human: boolean } {
+  const live = evidences.filter(
+    (e) => e.criterionId === criterionId && countsAsLiveProof(e, criterionVersion),
+  );
+  return {
+    machine: live.some((e) => e.strength === 'machine-verified'),
+    human: live.some((e) => e.strength === 'attested'),
+  };
+}
+
+/** Le critère est-il doublement prouvé (une preuve machine ET une attestation) ? */
+export function isDoubleProven(
+  evidences: readonly Evidence[],
+  criterionId: string,
+  criterionVersion: number,
+): boolean {
+  const sources = proofSourcesOf(evidences, criterionId, criterionVersion);
+  return sources.machine && sources.human;
+}
+
+/**
+ * Le verdict d'un état de critère, même relu en base : une ligne de couverture
+ * écrite avant l'existence du champ est recalculée depuis ses preuves.
+ */
+export function isDoublyProven(state: CriterionProofView): boolean {
+  return (
+    state.doublyProven === true ||
+    isDoubleProven(state.evidences, state.criterionId, state.version)
+  );
 }

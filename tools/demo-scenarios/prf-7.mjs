@@ -4,9 +4,12 @@
  * L'histoire : le refus est sur le chemin critique du paiement. Le critère
  * est de type `performance`, prouvé par une **mesure** (le test de latence).
  *
- * C'est le témoin des **réouvertures** : le test a disparu de la branche
- * principale, la preuve vivante du critère livré tombe (SPEC §7.5, §13),
- * et le ticket est rouvert par l'opérateur. Le catalogue le marque
+ * C'est le témoin des **réouvertures**, et le test est **rouge** : sur la
+ * branche principale, le contrôle de fraude rate son cache une fois sur dix,
+ * la p95 du refus dépasse le budget (220 ms pour 200 ms) et le test échoue.
+ * La preuve vivante du critère livré passe de « prouvée » à « **régressée** »
+ * (SPEC §7.5, §13), l'app le signale sur le ticket, et le ticket est rouvert
+ * par l'opérateur. Le catalogue le marque
  * `reopen: true` : le rejoueur ne le rouvre qu'après l'avoir livré, et
  * jamais un ticket qui ne l'est pas.
  *
@@ -20,12 +23,14 @@ export default {
   description: [
     "Un refus doit être décidé aussi vite qu'un paiement accepté : le client attend une réponse, pas un silence.",
     "Ce ticket fixe la cible de latence du chemin de refus et la mesure qui la vérifie.",
-    "Le test de latence a disparu de la branche principale : la preuve du critère livré tombe, et le ticket est rouvert.",
+    "Le test de latence est rouge sur la branche principale : la preuve du critère livré tombe, et le ticket est rouvert.",
   ].join('\n'),
   component: 'checkout-performance',
   branch: 'feature/PRF-7-refusal-latency',
   tests: ['refusal answers in under 200 ms at p95'],
-  mainTests: [],
+  // Le test est toujours sur la branche principale — c'est lui qui échoue.
+  mainTests: ['refusal answers in under 200 ms at p95'],
+  failing: ['refusal answers in under 200 ms at p95'],
   cast: DEMO_CAST,
   close: true,
   reopen: true,

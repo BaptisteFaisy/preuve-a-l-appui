@@ -39,6 +39,7 @@ import type {
 } from './demo-contract';
 import type { ProofStore } from './ports';
 import { reopeningEvents, reopeningRates } from './domain/stats';
+import { isDoublyProven } from './domain/strength';
 import type { JiraGateway } from './ports';
 import type { Clock } from './ports';
 import { defaultProjectSettings } from './defaults';
@@ -128,7 +129,7 @@ async function readDossier(
  * propriété Jira qui porte l'instantané refuse plus de 32 768 octets ; le
  * dossier complet vit dans l'app, pas dans le site public.
  */
-function toSnapshotDossier(dossier: ReleaseDossier): SnapshotDossier {
+export function toSnapshotDossier(dossier: ReleaseDossier): SnapshotDossier {
   return {
     versionId: dossier.versionId,
     versionName: dossier.versionName,
@@ -141,6 +142,8 @@ function toSnapshotDossier(dossier: ReleaseDossier): SnapshotDossier {
       total: issue.total,
       proven: issue.proven,
       waived: issue.waived,
+      // Un seul entier par ticket : la propriété Jira plafonne à 32 768 octets.
+      doublyProven: issue.criteria.filter((state) => isDoublyProven(state)).length,
       waivers: issue.waivers.map((waiver) => ({
         grantedBy: waiver.grantedBy,
         role: waiver.role,

@@ -146,6 +146,14 @@ export const GATE_MESSAGES: Messages = {
     en: 'The proof gate did not run on this closure (bulk transition, automation or API). Reopen the issue or attach the missing proof.',
     fr: 'Le validateur n’a pas vu cette clôture (transition en masse, automatisation ou API). Rouvrez le ticket ou joignez la preuve manquante.',
   },
+  'scheduled.waiver.expired.subject': {
+    en: 'A waiver has expired',
+    fr: 'Une dérogation a expiré',
+  },
+  'scheduled.waiver.expired.body': {
+    en: 'The waiver on {code} expired on {date}. The criterion is no longer waived: the issue needs a proof, or a new waiver.',
+    fr: 'La dérogation sur {code} a expiré le {date}. Le critère n’est plus dérogé : le ticket a besoin d’une preuve, ou d’une nouvelle dérogation.',
+  },
   'scheduled.noProject': {
     en: 'Nightly check: no project id in the payload, nothing to audit.',
     fr: 'Contrôle nocturne : aucun identifiant de projet dans la charge utile, rien à auditer.',

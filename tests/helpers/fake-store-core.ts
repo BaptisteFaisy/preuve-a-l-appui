@@ -116,7 +116,14 @@ export function projectOf(tables: FakeStoreTables, identifier: string): string {
 /** Vrai si le ticket appartient au projet (id de projet ou clé acceptés). */
 export function inProject(tables: FakeStoreTables, identifier: string, projectId: string): boolean {
   const project = projectOf(tables, identifier);
-  return project === projectId || projectKeyOf(project) === projectKeyOf(projectId);
+  if (project === projectId) return true;
+  if (projectKeyOf(project) === projectKeyOf(projectId)) return true;
+  // Le projet peut être une CLÉ (« PAY ») : on la compare alors au préfixe de
+  // la clé du ticket (« PAY-123 » → « PAY »), comme le fait la vraie table SQL
+  // (`issue_key LIKE 'PAY-%'`). Sans cela, le faux magasin et la vraie base
+  // ne lisaient pas les mêmes dérogations.
+  const issueKey = tables.coverage.get(identifier)?.issueKey ?? '';
+  return issueKey !== '' && projectKeyOf(issueKey) === projectKeyOf(projectId);
 }
 
 /** Critères d'un ticket, éventuellement filtrés par statut. */

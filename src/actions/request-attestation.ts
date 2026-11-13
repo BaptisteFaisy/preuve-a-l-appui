@@ -63,7 +63,13 @@ export async function requestAttestation(
   const recipients = await findRecipients(deps, settings, issue, role);
   let notified = false;
   for (const accountId of recipients) {
-    const sent = await deps.jira.notify(accountId, 'request.notify.subject', 'request.notify.body', issueKey);
+    const sent = await deps.jira.notify(
+      accountId,
+      'request.notify.subject',
+      'request.notify.body',
+      issueKey,
+      settings.language,
+    );
     notified = notified || sent;
   }
 
