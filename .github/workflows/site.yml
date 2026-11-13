@@ -36,7 +36,7 @@ permissions:
 jobs:
   build:
     name: build-site
-    runs-on: [self-hosted, linux, x64, preuve-a-l-appui-worker]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -45,34 +45,15 @@ jobs:
           persist-credentials: false
           clean: false
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Dépendances (npm ci)
+        run: npm ci --prefer-offline --no-audit --no-fund
       - name: Nettoyage du workspace (node_modules conservé)
         shell: bash
         run: git clean -ffdx -e /node_modules -e /.npm-state -e /dist -e /build -e /site/dist
-
-      - name: Dépendances (magasin partagé, installation seulement si le lock change)
-        shell: bash
-        run: |
-          echo "$HOME/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/bin:$PATH"
-          export NPM_CONFIG_CACHE="$HOME/.npm-ci-cache"
-          LOCK_HASH="$(sha256sum package-lock.json | cut -d' ' -f1)"
-          MARKER="node_modules/.proof-lock-hash"
-          STORE="$HOME/.proof-ci-deps/$LOCK_HASH"
-          if [ -d node_modules ] && [ "$LOCK_HASH" = "$(cat "$MARKER" 2>/dev/null)" ]; then
-            echo "node_modules deja a jour - installation sautee"
-          elif [ -d "$STORE/node_modules" ]; then
-            rm -rf node_modules
-            cp -al "$STORE/node_modules" node_modules
-            printf '%s' "$LOCK_HASH" > "$MARKER"
-            echo "node_modules copie depuis le magasin $STORE"
-          else
-            echo "installation des dependances (a froid)..."
-            npm ci --prefer-offline --no-audit --no-fund
-            printf '%s' "$LOCK_HASH" > "$MARKER"
-            mkdir -p "$STORE" && rm -rf "$STORE/node_modules" \
-              && cp -al node_modules "$STORE/node_modules" \
-              && echo "magasin alimente : $STORE"
-          fi
 
       - name: Types du site (tsc -p site/tsconfig.json)
         run: npm run site:typecheck
@@ -114,7 +95,7 @@ jobs:
   deploy:
     name: deploy-pages
     needs: build
-    runs-on: [self-hosted, linux, x64, preuve-a-l-appui-worker]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     environment:
       name: github-pages
