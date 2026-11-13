@@ -18,8 +18,12 @@
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
-import type { DemoSnapshotData, SnapshotActor } from '../../../../src/demo-contract.js';
-import type { DossierIssue, DossierTotals, Language } from '../../../../src/types.js';
+import type {
+  DemoSnapshotData,
+  SnapshotActor,
+  SnapshotDossierIssue,
+} from '../../../../src/demo-contract.js';
+import type { DossierTotals, Language } from '../../../../src/types.js';
 import { reportMessage } from '../../../../src/i18n/reports.js';
 import { text } from '../../../../src/i18n/index.js';
 import { UI_MESSAGES } from '../../../../src/i18n/ui.js';
@@ -77,7 +81,7 @@ export function displayNameOf(
 }
 
 /** L'état lisible d'un ticket : dérogé, livré, sinon en cours. */
-export function dossierStateOf(issue: DossierIssue): DossierStateKind {
+export function dossierStateOf(issue: SnapshotDossierIssue): DossierStateKind {
   if (issue.waived > 0 || issue.waivers.length > 0) return 'waived';
   if (issue.total > 0 && issue.proven >= issue.total) return 'delivered';
   return 'in-progress';
@@ -100,7 +104,7 @@ export function dossierStateLabel(state: DossierStateKind, lang: Language): stri
 
 /** La couverture « n / m » d'un ticket, comme le champ de couverture de l'app. */
 export function dossierCoverageOf(
-  issue: DossierIssue,
+  issue: SnapshotDossierIssue,
   lang: Language,
   state: DossierStateKind,
 ): { readonly label: string; readonly tone: CoverageColorTone; readonly tooltip: string } {
@@ -121,7 +125,7 @@ export function dossierCoverageOf(
 
 /** Les dérogations d'un ticket, l'accordant résolu par les acteurs. */
 function waiverViews(
-  issue: DossierIssue,
+  issue: SnapshotDossierIssue,
   actors: readonly SnapshotActor[],
 ): DossierWaiverView[] {
   return issue.waivers.map((waiver) => ({
@@ -132,7 +136,7 @@ function waiverViews(
 
 /** Un ticket du dossier, projeté pour l'affichage. */
 function issueView(
-  issue: DossierIssue,
+  issue: SnapshotDossierIssue,
   actors: readonly SnapshotActor[],
   lang: Language,
 ): DossierIssueView {

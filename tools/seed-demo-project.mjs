@@ -79,6 +79,7 @@ function readCible() {
     cast,
     projectKey: process.env.DEMO_PROJECT ?? cible.projectKey ?? 'PRF',
     versionId: cible.versionId ?? '',
+    issueKey: cible.issueKey ?? 'PRF-1',
   };
 }
 
@@ -364,6 +365,28 @@ async function refreshDossier(issueKey) {
   return `${response.status} ${(await response.text()).slice(0, 120)}`;
 }
 
+/**
+ * Rafraîchit l'instantané public du ticket vedette : l'app ne réécrit sa
+ * propriété que lorsqu'une couverture change. Le bootstrap du ticket (sans
+ * scénario) relance le calcul de couverture, donc l'instantané.
+ */
+async function refreshVedette(issueKey, cast) {
+  const response = await fetch(BOOTSTRAP, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-bootstrap-token': BOOTSTRAP_TOKEN,
+    },
+    body: JSON.stringify({
+      action: 'bootstrap',
+      issueKey,
+      ciKey: CI_KEY,
+      cast,
+    }),
+  });
+  return `${response.status} ${(await response.text()).slice(0, 120)}`;
+}
+
 /* ------------------------------------------------------------------ main */
 
 if (TOKEN === '' || BOOTSTRAP === '' || CI_URL === '' || CI_KEY === '') {
@@ -413,5 +436,8 @@ for (const ticket of DEMO_SCENARIOS.filter((one) => one.reopen)) {
 // Le dossier de preuve de la version est reconstruit après tout le jeu : il
 // doit refléter les tickets tels qu'ils sont maintenant.
 console.log(`dossier de preuve → ${await refreshDossier(cible.issueKey)}`);
+// L'instantané public du ticket vedette est réécrit à chaque écriture de
+// couverture : on le déclenche pour qu'il reflète le projet d'aujourd'hui.
+console.log(`instantané du ticket vedette → ${await refreshVedette(cible.issueKey, cible.cast)}`);
 
 console.log('environnement de démonstration rejoué');
