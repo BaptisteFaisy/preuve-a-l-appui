@@ -15,7 +15,8 @@
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import { route } from '@forge/api';
-import type { ProjectMember } from '../types';
+import type { ProjectMember, TicketStatusHistory } from '../types';
+import { readStatusHistories } from './jira-changelog';
 import type { Route } from '@forge/api';
 import type { JiraGateway } from '../ports';
 import type { IssueRef } from '../types';
@@ -228,6 +229,16 @@ function createJiraReads(state: JiraState) {
         maxResults: MAX_VERSION_ISSUES,
       });
       return (page?.issues ?? []).filter((raw) => raw.id && raw.key).map(toIssueRef);
+    },
+
+    /**
+     * L'historique de statuts des tickets d'un projet, en **un seul** appel :
+     * la recherche Jira renvoie le changelog via `expand: "changelog"` dans le
+     * corps (le champ n'existe pas dans `/rest/api/3/issue/{id}/changelog` sans
+     * un appel par ticket). Borné par `MAX_VERSION_ISSUES`.
+     */
+    async statusHistories(projectId: string): Promise<TicketStatusHistory[]> {
+      return readStatusHistories(state.transport, projectId);
     },
   };
 }

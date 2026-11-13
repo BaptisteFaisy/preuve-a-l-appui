@@ -79,6 +79,14 @@ export function coverageStore(tables: FakeStoreTables): CoverageStore {
     async listClosedWithoutCoverage(projectId, limit) {
       return bounded(closedWithoutCoverageIds(tables, projectId), limit);
     },
+
+    async listCoveragesByProject(projectKey) {
+      return bounded(
+        [...tables.coverage.values()].filter((coverage) =>
+          inProject(tables, coverage.issueKey, projectKey),
+        ),
+      );
+    },
   };
 }
 

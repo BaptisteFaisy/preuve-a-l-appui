@@ -27,6 +27,7 @@ import type {
   ProofStats,
   ProjectSettings,
   ReleaseDossier,
+  ReopeningRate,
   Waiver,
 } from './types';
 import type {
@@ -36,6 +37,7 @@ import type {
   SnapshotInput,
 } from './demo-contract';
 import type { ProofStore } from './ports';
+import { reopeningEvents, reopeningRates } from './domain/stats';
 import type { JiraGateway } from './ports';
 import type { Clock } from './ports';
 import { defaultProjectSettings } from './defaults';
@@ -120,6 +122,23 @@ async function readDossier(
   return deps.store.getDossier(versionId);
 }
 
+
+/**
+ * Les réouvertures du projet (SPEC §14 FP-18) : lues dans le changelog Jira,
+ * calculées par le domaine. Un ticket livré puis rouvert compte une
+ * réouverture, à la force de sa preuve.
+ */
+async function readReopenings(
+  deps: SnapshotDeps,
+  issue: IssueRef,
+): Promise<ReopeningRate[]> {
+  const [histories, coverages] = await Promise.all([
+    deps.jira.statusHistories(issue.projectId),
+    deps.store.listCoveragesByProject(issue.projectKey),
+  ]);
+  return reopeningRates(reopeningEvents(histories, coverages));
+}
+
 /** L'instantané brut, avant pseudonymisation. */
 interface RawSnapshot {
   readonly generatedAt: string;
@@ -156,20 +175,30 @@ export async function buildDemoSnapshot(
 ): Promise<DemoSnapshotData | null> {
   const issue = await deps.jira.getIssue(input.issueKey);
   if (issue === null) return null;
-  const criteria = await deps.store.listCriteriaByIssue(issue.id);
+  // Les critères « superseded » appartiennent à une histoire remplacée : ils ne
+  // font plus partie du ticket (SPEC §8.3).
+  const criteria = (await deps.store.listCriteriaByIssue(issue.id)).filter(
+    (criterion) => criterion.status !== 'superseded',
+  );
   const attestations = (
     await Promise.all(criteria.map((criterion) => deps.store.listAttestations(criterion.id)))
   ).flat();
-  const [settings, evidences, waivers, coverage, living, stats, dossier, ci] = await Promise.all([
-    deps.store.getSettings(issue.projectId),
-    deps.store.listEvidencesByIssue(issue.id),
-    deps.store.listWaiversByIssue(issue.id),
-    deps.store.getCoverage(issue.id),
-    deps.store.listLivingByProject(issue.projectKey),
-    deps.store.computeStats(issue.projectKey, SNAPSHOT_EPOCH),
-    readDossier(deps, issue.fixVersions[0]),
-    readCi(deps, input),
-  ]);
+  const criterionIds = new Set(criteria.map((criterion) => criterion.id));
+  const [settings, allEvidences, waivers, coverage, living, stats, dossier, ci, reopenings] =
+    await Promise.all([
+      deps.store.getSettings(issue.projectId),
+      deps.store.listEvidencesByIssue(issue.id),
+      deps.store.listWaiversByIssue(issue.id),
+      deps.store.getCoverage(issue.id),
+      deps.store.listLivingByProject(issue.projectKey),
+      deps.store.computeStats(issue.projectKey, SNAPSHOT_EPOCH),
+      readDossier(deps, issue.fixVersions[0]),
+      readCi(deps, input),
+      readReopenings(deps, issue),
+    ]);
+  // Les preuves des critères remplacés ne comptent plus : elles appartiennent
+  // à l'ancienne histoire du ticket.
+  const evidences = allEvidences.filter((evidence) => criterionIds.has(evidence.criterionId));
   const raw: RawSnapshot = {
     generatedAt: deps.clock.now(),
     site: input.site,
@@ -182,7 +211,7 @@ export async function buildDemoSnapshot(
     waivers,
     coverage,
     living,
-    stats,
+    stats: stats === null ? null : { ...stats, reopenings },
     dossier,
     ci,
   };

@@ -22,7 +22,10 @@ import { forgeDdlRunner } from '../db/sql-client';
 import type { DdlRunner } from '../db/sql-client';
 import { safeCompareHex } from '../ingest/signature';
 import { bootstrapDemoData } from '../sample/bootstrap';
+import { buildVersionDossier } from '../domain/dossier';
 import type { BootstrapCast, BootstrapFlow } from '../sample/bootstrap';
+import { parseScenario } from '../sample/scenario';
+import type { DemoScenario } from '../sample/scenario';
 
 /** Variable d'app portant le jeton d'amorçage (jamais dans le dépôt). */
 export const BOOTSTRAP_TOKEN_VAR = 'FORGE_USER_VAR_DEMO_BOOTSTRAP_TOKEN';
@@ -75,6 +78,7 @@ export function parseBootstrapBody(raw: string): {
   ciKey: string;
   cast: BootstrapCast;
   flow?: BootstrapFlow;
+  scenario?: DemoScenario;
 } | null {
   let body: unknown;
   try {
@@ -97,12 +101,26 @@ export function parseBootstrapBody(raw: string): {
   // Le compte de l'agent est optionnel : à défaut, c'est celui du développeur.
   const agent = asString(cast['agent']);
   const flow = parseFlow(source['flow']);
+  // Un scénario présent mais mal formé fait refuse l'amorçage : une histoire
+  // à moitié appliquée mentirait sur l'état du ticket.
+  const scenario = parseScenarioField(source['scenario']);
+  if (scenario === null) return null;
   return {
     issueKey,
     ciKey,
     cast: { developer, tester, owner, ...(agent ? { agent } : {}) },
     ...(flow ? { flow } : {}),
+    ...(scenario ? { scenario } : {}),
   };
+}
+
+/**
+ * Le scénario de démonstration, s'il est fourni : `undefined` quand la clé
+ * est absente, `null` quand elle est présente mais mal formée.
+ */
+function parseScenarioField(raw: unknown): DemoScenario | null | undefined {
+  if (raw === undefined) return undefined;
+  return parseScenario(raw);
 }
 
 /** Le flux de gestes humains (attestations, dérogations), s'il est fourni. */
@@ -134,6 +152,42 @@ export function parseFlow(raw: unknown): BootstrapFlow | null {
   return { ...(attest.length ? { attest } : {}), ...(waive.length ? { waive } : {}) };
 }
 
+/**
+ * Le dossier de preuve d'une version, reconstruit à la demande.
+ *
+ * Un dossier figé ne se réécrit pas tout seul (SPEC §17) : c'est le cas
+ * d'usage de l'environnement de démonstration, où la version change de contenu
+ * quand le catalogue est rejoué. On reconstruit donc explicitement, à partir
+ * de la couverture réelle de chaque ticket de la version.
+ */
+async function refreshVersionDossier(deps: AppDeps, raw: string): Promise<boolean> {
+  const issueKey = asString(readField(raw, 'issueKey'));
+  if (issueKey === '') return false;
+  const issue = await deps.jira.getIssue(issueKey);
+  if (issue === null) return false;
+  const version = issue.fixVersions[0] ?? '';
+  if (version === '') return false;
+  const dossier = await buildVersionDossier(deps, {
+    projectId: issue.projectId,
+    projectKey: issue.projectKey,
+    versionId: version,
+    versionName: version,
+  });
+  await deps.store.saveDossier(dossier);
+  return true;
+}
+
+/** Un champ du corps JSON de l'amorçage ; chaîne vide si le corps est illisible. */
+function readField(raw: string, field: string): unknown {
+  try {
+    const body = JSON.parse(raw) as unknown;
+    if (typeof body !== 'object' || body === null) return '';
+    return (body as Record<string, unknown>)[field];
+  } catch {
+    return '';
+  }
+}
+
 /** Écritures : le schéma d'abord, puis l'amorçage du ticket. */
 async function write(
   request: BootstrapRequest,
@@ -149,6 +203,11 @@ async function write(
   if (action === 'migrate') {
     await applySchema(ddl);
     return { statusCode: 200, outputKey: 'migrated' };
+  }
+  if (action === 'dossier') {
+    const refreshed = await refreshVersionDossier(deps, request.body);
+    if (!refreshed) return { statusCode: 404, outputKey: 'not-found' };
+    return { statusCode: 200, outputKey: 'ok' };
   }
   if (action !== 'bootstrap') return { statusCode: 400, outputKey: 'invalid-payload' };
   const input = parseBootstrapBody(request.body);
