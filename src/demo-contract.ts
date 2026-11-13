@@ -13,11 +13,11 @@ import type {
   Attestation,
   Coverage,
   Criterion,
+  DossierTotals,
   Evidence,
   LivingProof,
   ProofStats,
   ProjectSettings,
-  ReleaseDossier,
   TestOutcome,
   TestRun,
   Waiver,
@@ -53,6 +53,45 @@ export interface SnapshotCi {
   readonly results: readonly TestOutcome[];
 }
 
+/**
+ * Une dérogation, dans le dossier public : qui l'accorde, son rôle, son
+ * motif, sa date — et la référence de la personne, jamais son identifiant.
+ */
+export interface SnapshotDossierWaiver {
+  readonly grantedBy: string;
+  readonly role: string;
+  readonly reason: string;
+  readonly at: string;
+}
+
+/**
+ * Un ticket du dossier public : sa couverture et ses dérogations, sans le
+ * détail des critères.
+ *
+ * Pourquoi allégé : l'instantané est rangé dans une **propriété de ticket
+ * Jira**, qui refuse plus de 32 768 octets. Le dossier complet (chaque
+ * critère, chaque preuve, chaque ligne d'historique) est dans l'app et dans
+ * l'outil `get-release-proof` ; le site n'a besoin que de la vue par ticket.
+ */
+export interface SnapshotDossierIssue {
+  readonly issueKey: string;
+  readonly summary: string;
+  readonly total: number;
+  readonly proven: number;
+  readonly waived: number;
+  readonly waivers: readonly SnapshotDossierWaiver[];
+}
+
+/** Le dossier de preuve d'une version, vu par ticket. */
+export interface SnapshotDossier {
+  readonly versionId: string;
+  readonly versionName: string;
+  readonly projectKey: string;
+  readonly generatedAt: string;
+  readonly totals: DossierTotals;
+  readonly issues: readonly SnapshotDossierIssue[];
+}
+
 /** Tout ce que le site doit recevoir pour rejouer l'app sur des données réelles. */
 export interface DemoSnapshotData {
   readonly generatedAt: string;
@@ -68,7 +107,7 @@ export interface DemoSnapshotData {
   readonly coverage: Coverage | null;
   readonly living: readonly LivingProof[];
   readonly stats: ProofStats | null;
-  readonly dossier: ReleaseDossier | null;
+  readonly dossier: SnapshotDossier | null;
   readonly ci: SnapshotCi | null;
   readonly actors: readonly SnapshotActor[];
 }

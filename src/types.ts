@@ -454,3 +454,29 @@ export interface ReopeningRate {
   closed: number;
   reopened: number;
 }
+
+/* ------------------------------------------------------------- statuts Jira */
+
+/** Un changement de statut d'un ticket, lu dans le changelog Jira. */
+export interface StatusTransition {
+  /** Le statut quitté. */
+  readonly from: string;
+  /** Le statut atteint. */
+  readonly to: string;
+}
+
+/**
+ * L'historique de statuts d'un ticket : ce qui dit s'il a été clos puis
+ * rouvert (SPEC §14 FP-18). Aucun identifiant de compte : le changement de
+ * statut est un fait du workflow, pas une personne.
+ */
+export interface TicketStatusHistory {
+  /** L'id Jira du ticket (`10001`), celui de la ligne de couverture. */
+  readonly issueId: string;
+  /** La clé Jira du ticket (`PAY-123`). */
+  readonly issueKey: string;
+  /** Le statut actuel du ticket. */
+  readonly currentStatus: string;
+  /** Les changements de statut, du plus ancien au plus récent. */
+  readonly transitions: readonly StatusTransition[];
+}

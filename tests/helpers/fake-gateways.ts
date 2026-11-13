@@ -31,6 +31,7 @@ import type {
   CriterionType,
   IssueRef,
   ParsedCriterion,
+  StatusTransition,
 } from '../../src/types.js';
 import {
   createJiraReader,
@@ -121,6 +122,7 @@ function jiraState(issues: readonly IssueRef[], options: FakeJiraOptions): FakeJ
     coverageFields: [],
     notifications: [],
     snapshots: new Map<string, unknown>(),
+    transitions: new Map<string, StatusTransition[]>(),
   };
 }
 

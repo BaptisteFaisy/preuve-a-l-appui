@@ -20,6 +20,7 @@ import type { AppDeps } from '../deps';
 import { canAttest } from '../domain/independence';
 import { attachEvidence, type AttachEvidenceInput } from '../domain/evidence';
 import { isRoleAllowedToWaive, validateWaiverCandidate } from '../domain/waivers';
+import { reopeningEvents, reopeningRates } from '../domain/stats';
 import type {
   Actor,
   Attestation,
@@ -386,21 +387,27 @@ async function handleGetProjectPage(req: ResolverRequest, deps: AppDeps): Promis
   // sont rangées par clé de ticket (`PAY-1`), dont le préfixe est la clé du
   // projet. Passer l'id numérique donnait des statistiques vides.
   const projectKey = await deps.jira.projectKey(id);
-  const [settings, waivers, living, stats, closedIds] = await Promise.all([
-    deps.store.getSettings(id),
-    deps.store.listWaiversByProject(projectKey, EPOCH),
-    deps.store.listLivingByProject(projectKey),
-    deps.store.computeStats(projectKey, EPOCH),
-    deps.store.listClosedWithoutCoverage(id, 20),
-  ]);
+  const [settings, waivers, living, stats, closedIds, projectCoverages, histories] =
+    await Promise.all([
+      deps.store.getSettings(id),
+      deps.store.listWaiversByProject(projectKey, EPOCH),
+      deps.store.listLivingByProject(projectKey),
+      deps.store.computeStats(projectKey, EPOCH),
+      deps.store.listClosedWithoutCoverage(id, 20),
+      deps.store.listCoveragesByProject(projectKey),
+      deps.jira.statusHistories(id),
+    ]);
   const rows = await Promise.all(closedIds.map((cid) => deps.store.getCoverage(cid)));
   const coverages = rows.filter((r): r is Coverage => r !== null);
+  // Les réouvertures se lisent dans le changelog Jira, pas dans la base
+  // (SPEC §14 FP-18) : sans elles, le taux resterait toujours à zéro.
+  const reopenings = reopeningRates(reopeningEvents(histories, projectCoverages));
   return buildProjectPageViewModel({
     projectId: id,
     coverages,
     waivers,
     living,
-    stats,
+    stats: { ...stats, reopenings },
     language: settings?.language ?? language,
   });
 }

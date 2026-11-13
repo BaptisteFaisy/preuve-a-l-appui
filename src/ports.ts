@@ -30,6 +30,7 @@ import type {
   TestOutcome,
   TestRun,
   Waiver,
+  TicketStatusHistory,
 } from './types';
 
 /* --------------------------------------------------------------- primitives */
@@ -68,6 +69,11 @@ export interface JiraGateway {
   /** Ticket of a branch, found by the key inside the branch name (SPEC §10). */
   findIssueByBranch(projectId: string, branch: string): Promise<IssueRef | null>;
   listIssuesOfVersion(projectId: string, versionId: string): Promise<IssueRef[]>;
+  /**
+   * The status history of the project's tickets, in one bounded call: what
+   * says whether a delivered ticket was reopened (SPEC §14 FP-18).
+   */
+  statusHistories(projectId: string): Promise<TicketStatusHistory[]>;
   /** Rewrites only the criteria section of the description (SPEC §8.2). */
   rewriteDescriptionSection(issueId: string, section: string): Promise<boolean>;
   /** The `Preuves n / m` field, or an indexed issue property as a fallback. */
@@ -177,6 +183,8 @@ export interface CoverageStore {
   saveCoverage(coverage: Coverage): Promise<void>;
   /** Tickets closed without coverage, listed every night (SPEC §20). */
   listClosedWithoutCoverage(projectId: string, limit: number): Promise<string[]>;
+  /** Every ticket's coverage in a project, by project key (SPEC §14 FP-18). */
+  listCoveragesByProject(projectKey: string): Promise<Coverage[]>;
 }
 
 export interface SettingsStore {

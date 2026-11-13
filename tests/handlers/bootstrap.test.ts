@@ -45,8 +45,7 @@ afterEach(() => {
   delete process.env[BOOTSTRAP_TOKEN_VAR];
 });
 
-describe('amorçage — accès', () => {
-  it('refuse tout amorçage quand la variable d’app est absente', async () => {
+describe('amorçage — accès', () => {  it('refuse tout amorçage quand la variable d’app est absente', async () => {
     const h = await createAcceptanceHarness();
     const outcome = await handleBootstrap(
       { method: 'POST', headers: { 'x-bootstrap-token': TOKEN }, body: bootstrapBody() },
@@ -162,5 +161,53 @@ describe('amorçage — écritures', () => {
     const parsed = parseBootstrapBody(bootstrapBody(ISSUE_KEY));
     expect(parsed?.issueKey).toBe(ISSUE_KEY);
     expect(parsed?.cast.developer).toBe('user-developer');
+  });
+});
+
+describe('amorçage — dossier de preuve d’une version', () => {
+  /** Le corps d’une demande de reconstruction du dossier. */
+  function dossierBody(issueKey: string): string {
+    return JSON.stringify({ action: 'dossier', issueKey });
+  }
+
+  it('reconstruit le dossier figé de la version du ticket', async () => {
+    process.env[BOOTSTRAP_TOKEN_VAR] = TOKEN;
+    const h = await createAcceptanceHarness();
+
+    const outcome = await handleBootstrap(
+      { method: 'POST', headers: { 'x-bootstrap-token': TOKEN }, body: dossierBody(ISSUE_KEY) },
+      h.deps,
+    );
+
+    expect(outcome).toEqual({ statusCode: 200, outputKey: 'ok' });
+    const dossier = await h.deps.store.getDossier('2.4');
+    expect(dossier).not.toBeNull();
+    expect(dossier?.projectKey).toBe('PAY');
+    expect(dossier?.issues.map((issue) => issue.issueKey)).toContain(ISSUE_KEY);
+  });
+
+  it('refuse un dossier pour un ticket inconnu', async () => {
+    process.env[BOOTSTRAP_TOKEN_VAR] = TOKEN;
+    const h = await createAcceptanceHarness();
+
+    const outcome = await handleBootstrap(
+      {
+        method: 'POST',
+        headers: { 'x-bootstrap-token': TOKEN },
+        body: dossierBody('PAY-000'),
+      },
+      h.deps,
+    );
+
+    expect(outcome).toEqual({ statusCode: 404, outputKey: 'not-found' });
+  });
+
+  it('refuse un dossier sans jeton', async () => {
+    const h = await createAcceptanceHarness();
+    const outcome = await handleBootstrap(
+      { method: 'POST', headers: { 'x-bootstrap-token': TOKEN }, body: dossierBody(ISSUE_KEY) },
+      h.deps,
+    );
+    expect(outcome.outputKey).toBe('forbidden');
   });
 });

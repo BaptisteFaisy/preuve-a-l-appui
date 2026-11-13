@@ -11,6 +11,7 @@
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import type { ReactElement } from 'react';
+import type { DemoSnapshotData } from '../../../src/demo-contract.js';
 import type { Coverage, Language } from '../../../src/types.js';
 import { stringsFor } from '../i18n/index.js';
 import { text } from '../../../src/i18n/index.js';
@@ -20,6 +21,7 @@ import { buildCoverageFieldViewModel } from '../../../src/viewmodel/coverage.js'
 import { buildMatrixViewModel } from '../../../src/viewmodel/matrix.js';
 import type { MatrixRowViewModel } from '../../../src/viewmodel/matrix.js';
 import { bundledSnapshot } from '../demo/live-snapshot.js';
+import { DossierBlock } from './parts/DossierBlock.js';
 import { ProjectPageMock, type ProjectPageLive } from './parts/ProjectPageMock.js';
 import { SettingsMock } from './parts/SettingsMock.js';
 import './Screens.css';
@@ -184,8 +186,7 @@ function CoverageFieldMock(props: { coverage: Coverage; lang: Language }): React
  * installée, résolues par les acteurs qu'elle a nommés. À défaut d'instantané
  * exploitable, la maquette garde le jeu embarqué PAY-123.
  */
-function liveProject(): ProjectPageLive | undefined {
-  const snapshot = bundledSnapshot();
+function liveProject(snapshot: DemoSnapshotData | null): ProjectPageLive | undefined {
   if (snapshot === null || snapshot.coverage === null || snapshot.stats === null) {
     return undefined;
   }
@@ -204,6 +205,7 @@ function liveProject(): ProjectPageLive | undefined {
 export function Screens({ lang }: { lang: Language }): ReactElement {
   const t = stringsFor(lang);
   const coverage = createInitialDemoCoverage();
+  const snapshot = bundledSnapshot();
   return (
     <section id="screens" aria-labelledby="screens-title">
       <div className="wrap">
@@ -217,7 +219,8 @@ export function Screens({ lang }: { lang: Language }): ReactElement {
         <TicketPanelMock coverage={coverage} lang={lang} />
         <CoverageFieldMock coverage={coverage} lang={lang} />
         <SettingsMock lang={lang} />
-        <ProjectPageMock lang={lang} live={liveProject()} />
+        <ProjectPageMock lang={lang} live={liveProject(snapshot)} />
+        <DossierBlock lang={lang} snapshot={snapshot} />
       </div>
     </section>
   );

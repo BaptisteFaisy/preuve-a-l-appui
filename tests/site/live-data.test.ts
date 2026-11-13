@@ -114,12 +114,24 @@ describe('monde bâti sur les données réelles', () => {
 describe('les deux finitions, portées par les données réelles', () => {
   it('le récap « dérogations par personne » nomme l’accordeur sans identifiant', () => {
     const data = snapshot();
+    // Deux personnes ont dérogé, pour trois dérogations : le récap compte
+    // par personne, comme le veut la mesure (SPEC §14 FP-18).
     expect(data.stats?.waiversByGranter).toEqual([
-      { accountId: expect.any(String), displayName: 'John Doe', count: 1 },
+      { accountId: expect.any(String), displayName: 'John Doe', count: 2 },
+      { accountId: expect.any(String), displayName: 'Alison Swift', count: 1 },
     ]);
     const raw = JSON.stringify(data.stats);
     expect(raw).not.toContain('qm:');
     expect(raw).not.toContain('712020:');
+  });
+
+  it('les réouvertures sont lues dans l’historique Jira, pas laissées à zéro', () => {
+    const data = snapshot();
+    const machine = data.stats?.reopenings.find((rate) => rate.strength === 'machine-verified');
+    // Au moins un ticket livré, dont au moins un rouvert : c'est PRF-7, livré
+    // puis rouvert quand son test a disparu de la branche principale.
+    expect(machine?.closed).toBeGreaterThan(0);
+    expect(machine?.reopened).toBeGreaterThan(0);
   });
 
   it('la preuve vivante réelle porte un critère livré qui n’est plus prouvé', () => {
