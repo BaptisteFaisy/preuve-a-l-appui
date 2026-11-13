@@ -15,6 +15,7 @@ import {
   bounded,
   criterionIdsOfIssue,
   inProject,
+  projectKeyOf,
   type FakeStoreTables,
 } from './fake-store-core.js';
 
@@ -89,12 +90,17 @@ export function testLinkStore(tables: FakeStoreTables): TestLinkStore {
 }
 
 export function livingStore(tables: FakeStoreTables): LivingStore {
+  // Les preuves vivantes sont lues par la CLÉ du projet (la vraie table
+  // `living_proof` la porte) ; l'id numérique marche aussi via le lien ticket.
+  const inProjectOrKey = (issueKey: string, projectId: string): boolean =>
+    inProject(tables, issueKey, projectId) ||
+    projectKeyOf(issueKey) === projectKeyOf(projectId);
   return {
     async listLivingByProject(projectId, state) {
       return bounded(
         [...tables.living.values()].filter(
           (row) =>
-            inProject(tables, row.issueKey, projectId) &&
+            inProjectOrKey(row.issueKey, projectId) &&
             (state === undefined || row.state === state),
         ),
       );
@@ -103,7 +109,7 @@ export function livingStore(tables: FakeStoreTables): LivingStore {
     async listUnprovenLiving(projectId) {
       return bounded(
         [...tables.living.values()].filter(
-          (row) => inProject(tables, row.issueKey, projectId) && row.state !== 'proven',
+          (row) => inProjectOrKey(row.issueKey, projectId) && row.state !== 'proven',
         ),
       );
     },

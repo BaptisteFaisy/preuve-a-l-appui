@@ -389,7 +389,7 @@ async function handleGetProjectPage(req: ResolverRequest, deps: AppDeps): Promis
   const [settings, waivers, living, stats, closedIds] = await Promise.all([
     deps.store.getSettings(id),
     deps.store.listWaiversByProject(projectKey, EPOCH),
-    deps.store.listLivingByProject(id),
+    deps.store.listLivingByProject(projectKey),
     deps.store.computeStats(projectKey, EPOCH),
     deps.store.listClosedWithoutCoverage(id, 20),
   ]);

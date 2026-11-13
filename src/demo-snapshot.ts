@@ -165,7 +165,7 @@ export async function buildDemoSnapshot(
     deps.store.listEvidencesByIssue(issue.id),
     deps.store.listWaiversByIssue(issue.id),
     deps.store.getCoverage(issue.id),
-    deps.store.listLivingByProject(issue.projectId),
+    deps.store.listLivingByProject(issue.projectKey),
     deps.store.computeStats(issue.projectKey, SNAPSHOT_EPOCH),
     readDossier(deps, issue.fixVersions[0]),
     readCi(deps, input),
@@ -228,10 +228,32 @@ async function finalize(deps: SnapshotDeps, raw: RawSnapshot): Promise<DemoSnaps
     waivers: clean.waivers,
     coverage: clean.coverage,
     living: clean.living,
-    stats: clean.stats,
+    stats: resolveGranterNames(clean.stats, actors),
     dossier: clean.dossier,
     ci: clean.ci,
     actors,
+  };
+}
+
+/**
+ * Les statistiques portent `waiversByGranter` dont le `displayName` est, côté
+ * domaine, l'`accountId` brut. L'anonymisation remplace `accountId` (champ de
+ * `ACCOUNT_FIELDS`) mais laisse `displayName` tel quel : ce n'est donc pas un
+ * nom, c'est l'identifiant qui fuiterait dans un fichier public. On le
+ * remplace par le nom résolu de l'acteur, ou par sa seule référence.
+ */
+export function resolveGranterNames(
+  stats: ProofStats | null,
+  actors: readonly SnapshotActor[],
+): ProofStats | null {
+  if (stats === null) return null;
+  const namesByRef = new Map(actors.map((actor) => [actor.ref, actor.displayName]));
+  return {
+    ...stats,
+    waiversByGranter: stats.waiversByGranter.map((granter) => ({
+      ...granter,
+      displayName: namesByRef.get(granter.accountId) ?? granter.accountId,
+    })),
   };
 }
 

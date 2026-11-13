@@ -179,7 +179,12 @@ export async function refreshLivingProofs(
   projectId: string,
   message: CiIngestMessage,
 ): Promise<{ updated: number; alerts: number }> {
-  const items = await collectTrackedItems(deps, projectId, message.summary.tests);
+  // Les preuves vivantes sont rangées sous la CLÉ du projet (déduite de la clé
+  // du ticket) : on la résout depuis l'identifiant du message. Lire avec l'id
+  // numérique ne trouvait jamais rien — et chaque run créait alors un doublon.
+  const projectKey = await deps.jira.projectKey(projectId);
+  if (projectKey === '') return { updated: 0, alerts: 0 };
+  const items = await collectTrackedItems(deps, projectKey, message.summary.tests);
   if (items.length === 0) return { updated: 0, alerts: 0 };
 
   const evaluation = evaluateLivingProofs(

@@ -19,7 +19,8 @@ import { createInitialDemoCoverage, DEMO_ISSUE_KEY } from '../../../src/sample/p
 import { buildCoverageFieldViewModel } from '../../../src/viewmodel/coverage.js';
 import { buildMatrixViewModel } from '../../../src/viewmodel/matrix.js';
 import type { MatrixRowViewModel } from '../../../src/viewmodel/matrix.js';
-import { ProjectPageMock } from './parts/ProjectPageMock.js';
+import { bundledSnapshot } from '../demo/live-snapshot.js';
+import { ProjectPageMock, type ProjectPageLive } from './parts/ProjectPageMock.js';
 import { SettingsMock } from './parts/SettingsMock.js';
 import './Screens.css';
 
@@ -177,6 +178,29 @@ function CoverageFieldMock(props: { coverage: Coverage; lang: Language }): React
   );
 }
 
+/**
+ * La page projet sur les données RÉELLES quand l'instantané est présent : ses
+ * dérogations (récap par personne) et ses preuves vivantes viennent de l'app
+ * installée, résolues par les acteurs qu'elle a nommés. À défaut d'instantané
+ * exploitable, la maquette garde le jeu embarqué PAY-123.
+ */
+function liveProject(): ProjectPageLive | undefined {
+  const snapshot = bundledSnapshot();
+  if (snapshot === null || snapshot.coverage === null || snapshot.stats === null) {
+    return undefined;
+  }
+  const names = new Map(snapshot.actors.map((actor) => [actor.ref, actor.displayName]));
+  return {
+    data: {
+      coverages: [snapshot.coverage],
+      waivers: snapshot.waivers,
+      living: snapshot.living,
+      stats: snapshot.stats,
+    },
+    nameOf: (accountId) => names.get(accountId) ?? accountId,
+  };
+}
+
 export function Screens({ lang }: { lang: Language }): ReactElement {
   const t = stringsFor(lang);
   const coverage = createInitialDemoCoverage();
@@ -193,7 +217,7 @@ export function Screens({ lang }: { lang: Language }): ReactElement {
         <TicketPanelMock coverage={coverage} lang={lang} />
         <CoverageFieldMock coverage={coverage} lang={lang} />
         <SettingsMock lang={lang} />
-        <ProjectPageMock lang={lang} />
+        <ProjectPageMock lang={lang} live={liveProject()} />
       </div>
     </section>
   );
