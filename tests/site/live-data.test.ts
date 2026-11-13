@@ -17,6 +17,7 @@ import { createLiveScenario, liveCast } from '../../site/src/demo/live-world.js'
 import { bundledSnapshot, isSnapshot } from '../../site/src/demo/live-snapshot.js';
 import { snapshotOf } from '../../site/src/demo/state.js';
 import { createWorld } from '../../site/src/demo/world.js';
+import { buildProjectPageViewModel } from '../../src/viewmodel/project.js';
 
 const FIXTURE = fileURLToPath(new URL('../../site/public/live-snapshot.json', import.meta.url));
 
@@ -107,5 +108,43 @@ describe('monde bâti sur les données réelles', () => {
     );
     const attestable = asAssignee.matrix.rows.filter((row) => row.canAttest);
     expect(attestable).toHaveLength(0);
+  });
+});
+
+describe('les deux finitions, portées par les données réelles', () => {
+  it('le récap « dérogations par personne » nomme l’accordeur sans identifiant', () => {
+    const data = snapshot();
+    expect(data.stats?.waiversByGranter).toEqual([
+      { accountId: expect.any(String), displayName: 'John Doe', count: 1 },
+    ]);
+    const raw = JSON.stringify(data.stats);
+    expect(raw).not.toContain('qm:');
+    expect(raw).not.toContain('712020:');
+  });
+
+  it('la preuve vivante réelle porte un critère livré qui n’est plus prouvé', () => {
+    const data = snapshot();
+    const unproven = data.living.filter((item) => item.state !== 'proven');
+    expect(unproven.length).toBeGreaterThan(0);
+    expect(unproven.every((item) => item.issueKey.startsWith('PRF-'))).toBe(true);
+  });
+
+  it('la page projet bâtie sur l’instantané montre le récap et les preuves vivantes', () => {
+    const data = snapshot();
+    const names = new Map(data.actors.map((actor) => [actor.ref, actor.displayName]));
+    const vm = buildProjectPageViewModel({
+      projectId: data.issue.projectKey,
+      coverages: data.coverage === null ? [] : [data.coverage],
+      waivers: data.waivers,
+      living: data.living,
+      stats: data.stats,
+      language: 'fr',
+    });
+    // Le récap se rend avec le nom résolu, jamais l'identifiant.
+    expect(vm.stats?.waiversByGranter[0]?.displayName).toBe('John Doe');
+    const ref = vm.stats?.waiversByGranter[0]?.accountId ?? '';
+    expect(names.get(ref)).toBe('John Doe');
+    // Les preuves vivantes dégradées sont listées.
+    expect(vm.unprovenLivingCount).toBeGreaterThan(0);
   });
 });

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T21:17:08.555Z",
+  "generatedAt": "2026-11-13T13:47:52.406Z",
   "site": "one-atlas-cndz.atlassian.net",
   "project": {
     "id": "10238",
@@ -118,7 +118,7 @@
     "ciKeyHash": "",
     "requireChildren": false,
     "language": "en",
-    "updatedAt": "2026-11-12T21:09:17.000Z"
+    "updatedAt": "2026-11-13T13:47:51.000Z"
   },
   "criteria": [
     {
@@ -502,9 +502,50 @@
         "waiverId": ""
       }
     ],
-    "updatedAt": "2026-11-12T21:17:07.000Z"
+    "updatedAt": "2026-11-13T13:47:51.000Z"
   },
-  "living": [],
+  "living": [
+    {
+      "id": "lp_mwf15mlq003",
+      "issueKey": "PRF-2",
+      "criterionId": "66728-crit-2",
+      "testName": "checkout logs the refusal reason",
+      "state": "unproven",
+      "component": "",
+      "commit": "f6e5d4c3b2a1",
+      "since": "2026-11-13T13:47:38.000Z"
+    },
+    {
+      "id": "lp_mwf15mlp001",
+      "issueKey": "PRF-2",
+      "criterionId": "66728-crit-1",
+      "testName": "checkout refuses an expired card",
+      "state": "proven",
+      "component": "",
+      "commit": "b1a2c3d4e5f6a7b8",
+      "since": "2026-11-13T13:46:20.000Z"
+    },
+    {
+      "id": "lp_mwf15mlq004",
+      "issueKey": "PRF-3",
+      "criterionId": "66729-crit-2",
+      "testName": "checkout logs the refusal reason",
+      "state": "unproven",
+      "component": "",
+      "commit": "f6e5d4c3b2a1",
+      "since": "2026-11-13T13:47:38.000Z"
+    },
+    {
+      "id": "lp_mwf15mlq002",
+      "issueKey": "PRF-3",
+      "criterionId": "66729-crit-1",
+      "testName": "checkout refuses an expired card",
+      "state": "proven",
+      "component": "",
+      "commit": "b1a2c3d4e5f6a7b8",
+      "since": "2026-11-13T13:46:20.000Z"
+    }
+  ],
   "stats": {
     "projectId": "PRF",
     "since": "1970-01-01 00:00:00",
@@ -513,7 +554,13 @@
       "attested": 1,
       "machine-verified": 2
     },
-    "waiversByGranter": [],
+    "waiversByGranter": [
+      {
+        "accountId": "actor-3",
+        "displayName": "John Doe",
+        "count": 1
+      }
+    ],
     "closedWithoutValidator": 3,
     "reopenings": []
   },
@@ -650,7 +697,7 @@
                 "commit": "",
                 "freshness": "fresh",
                 "verified": true,
-                "addedBy": "actor-3",
+                "addedBy": "actor-4",
                 "addedByAgent": false,
                 "at": "2026-11-12T21:09:06.000Z",
                 "replacedBy": ""
@@ -869,7 +916,7 @@
     },
     {
       "ref": "actor-3",
-      "displayName": "Alison Swift",
+      "displayName": "John Doe",
       "agent": false,
       "roles": [
         "Administrators"
@@ -877,7 +924,7 @@
     },
     {
       "ref": "actor-4",
-      "displayName": "John Doe",
+      "displayName": "Alison Swift",
       "agent": false,
       "roles": [
         "Administrators"
