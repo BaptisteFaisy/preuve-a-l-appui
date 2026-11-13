@@ -20,8 +20,10 @@ import type {
   ProofStats,
   ReopeningRate,
   Strength,
+  TicketStatusHistory,
   Waiver,
 } from '../types';
+import { isClosedStatus } from './status';
 
 /** Les trois forces, de la plus forte à la plus faible, pour l'affichage. */
 export const STRENGTHS_DISPLAY_ORDER: readonly Strength[] = [
@@ -116,6 +118,57 @@ export function reopeningRates(events: readonly ReopenEvent[]): ReopeningRate[] 
 export function reopeningShare(rate: ReopeningRate): number {
   if (rate.closed === 0) return 0;
   return Math.round((rate.reopened / rate.closed) * 100);
+}
+
+/**
+ * Vrai si un ticket a été livré puis rouvert : son historique passe par un
+ * statut livré, puis par un statut ouvert (SPEC §14 FP-18).
+ */
+export function wasReopened(history: TicketStatusHistory): boolean {
+  let delivered = false;
+  for (const transition of history.transitions) {
+    if (isClosedStatus(transition.to)) delivered = true;
+    else if (delivered) return true;
+  }
+  return false;
+}
+
+/** La force de la preuve d'un ticket : la meilleure de ses critères prouvés. */
+function strengthOf(coverage: Coverage | undefined): Strength {
+  let best: Strength = 'declared';
+  for (const state of coverage?.criteria ?? []) {
+    if (!state.proven || state.bestStrength === null) continue;
+    // `STRENGTHS_DISPLAY_ORDER` va de la plus forte à la plus faible : c'est le
+    // plus petit indice qui gagne.
+    if (STRENGTHS_DISPLAY_ORDER.indexOf(state.bestStrength) < STRENGTHS_DISPLAY_ORDER.indexOf(best)) {
+      best = state.bestStrength;
+    }
+  }
+  return best;
+}
+
+/**
+ * Les réouvertures d'un projet : un événement par ticket livré, dit s'il a
+ * été rouvert ensuite. La force est celle de sa preuve (SPEC §14, §26 : plus
+ * la preuve est faible, plus le ticket rouvre).
+ */
+export function reopeningEvents(
+  histories: readonly TicketStatusHistory[],
+  coverages: readonly Coverage[],
+): ReopenEvent[] {
+  const byIssueId = new Map(coverages.map((coverage) => [coverage.issueId, coverage]));
+  const events: ReopenEvent[] = [];
+  for (const history of histories) {
+    const delivered =
+      history.transitions.some((transition) => isClosedStatus(transition.to)) ||
+      isClosedStatus(history.currentStatus);
+    if (!delivered) continue;
+    events.push({
+      strength: strengthOf(byIssueId.get(history.issueId)),
+      reopened: wasReopened(history),
+    });
+  }
+  return events;
 }
 
 /** Assemble les statistiques d'un projet à partir des données brutes. */

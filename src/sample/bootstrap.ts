@@ -1,16 +1,20 @@
 /**
  * Amorçage du jeu de démonstration dans l'app RÉELLE (lot `app-donnees-reelles`).
  *
- * Ce module écrit le scénario du SPEC §7 (quatre critères, deux preuves de test
- * déclarées, un critère en attente d'attestation, un sans preuve) dans le Forge
- * SQL d'une installation réelle, pour un ticket Jira réel. Il ne fabrique aucune
- * règle : il pose des lignes, puis laisse le moteur de couverture calculer.
+ * Ce module écrit l'histoire d'un ticket dans le Forge SQL d'une installation
+ * réelle, pour un ticket Jira réel. Il ne fabrique aucune règle : il pose des
+ * lignes, puis laisse le moteur de couverture calculer.
+ *
+ * L'histoire vient du **scénario** du ticket (`src/sample/scenario.ts`) : ses
+ * propres critères, ses preuves de plusieurs types, ses gestes humains, ses
+ * paires test ↔ critère, ses révisions. Sans scénario, c'est le jeu du sample
+ * (quatre critères du SPEC §7) qui est posé — le comportement d'avant.
  *
  * Ce qui est réel après amorçage : le ticket, sa description réécrite par l'app,
  * les identifiants, les réglages du projet, et la couverture calculée par le
- * moteur. Les deux preuves de test partent **déclarées** : c'est le vrai
- * web trigger `ci-results` (signé) qui les fait monter en `machine-verified`,
- * comme dans un vrai pipeline.
+ * moteur. Les preuves d'amorçage partent **déclarées** : c'est le vrai web
+ * trigger `ci-results` (signé) qui les fait monter en `machine-verified`, comme
+ * dans un vrai pipeline.
  *
  * Idempotent : si le ticket porte déjà des critères, rien n'est recréé.
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
@@ -18,20 +22,32 @@
 import type { AppDeps } from '../deps';
 import type {
   Actor,
-  Attestation,
   Criterion,
   Evidence,
   IssueRef,
   Language,
   ProjectSettings,
-  Waiver,
 } from '../types';
-import { canAttest } from '../domain/independence';
-import { confirmLink } from '../domain/matching';
-import { validateWaiverCandidate } from '../domain/waivers';
 import { renderCriteriaSection } from '../domain/criteria';
 import { hashCiKey } from '../ingest/webtrigger';
 import { createDemoCriteria, createDemoEvidences, createDemoSettings } from './pay-123';
+import type { DemoScenario } from './scenario';
+import {
+  applyAttestations,
+  applyRevisions,
+  applyTestLinks,
+  applyWaivers,
+  criteriaFromScenario,
+  evidencesFromScenario,
+  mergeScenario,
+  rekey,
+  scenarioReplacesStory,
+  supersedePreviousStory,
+  type BootstrapFlow,
+  type GestureOutcome,
+} from './scenario-replay';
+
+export type { BootstrapFlow } from './scenario-replay';
 
 /** Les trois personnes du scénario, prises parmi les vrais utilisateurs du site. */
 export interface BootstrapCast {
@@ -45,31 +61,16 @@ export interface BootstrapCast {
   readonly agent?: string;
 }
 
-/**
- * Les gestes humains de la démo : des attestations et des dérogations, avec la
- * personne qui les a faites. Le domaine décide (SPEC §9.4, §12.4) : si la
- * personne n'a pas le droit, l'amorçage le dit au lieu d'écrire.
- */
-export interface BootstrapFlow {
-  /** Attestations : le code du critère et le compte qui atteste. */
-  readonly attest?: readonly { readonly code: string; readonly accountId: string }[];
-  /** Dérogations : le code du critère, le compte, son rôle et le motif. */
-  readonly waive?: readonly {
-    readonly code: string;
-    readonly accountId: string;
-    readonly role: string;
-    readonly reason: string;
-  }[];
-}
-
 export interface BootstrapInput {
   readonly issueKey: string;
   /** Clé de CI du projet : seule son empreinte SHA-256 est rangée en base. */
   readonly ciKey: string;
   readonly cast: BootstrapCast;
   readonly language?: Language;
-  /** Gestes humains à rejouer (attestation, dérogation). */
+  /** Gestes humains à rejouer (attestation, dérogation) — ancien format. */
   readonly flow?: BootstrapFlow;
+  /** L'histoire du ticket : ses critères, ses preuves, ses gestes, ses révisions. */
+  readonly scenario?: DemoScenario;
 }
 
 export interface BootstrapResult {
@@ -78,23 +79,36 @@ export interface BootstrapResult {
   readonly issueKey: string;
   /** `false` quand les critères existaient déjà : rien n'a été recréé. */
   readonly created: boolean;
+  /** Les codes des critères posés, dans l'ordre. */
   readonly criteria: readonly string[];
+  /** Preuves écrites, attestations comprises. */
   readonly evidences: number;
-  /** Dérogations accordées pendant l'amorçage. */
   /** Paires test ↔ critère confirmées (preuve vivante). */
   readonly links: number;
+  /** Attestations écrites (le domaine les a acceptées). */
+  readonly attestations: number;
+  /** Attestations refusées par le domaine : rien n'a été écrit pour elles. */
+  readonly attestationsRefused: number;
+  /** Dérogations accordées pendant l'amorçage. */
   readonly waivers: number;
+  /** Dérogations refusées par le domaine : rien n'a été écrit pour elles. */
+  readonly waiversRefused: number;
+  /** Révisions de critère jouées (version 2 créée). */
+  readonly revisions: number;
   readonly descriptionRewritten: boolean;
   readonly coverage: { readonly proven: number; readonly total: number } | null;
 }
 
-/** Identifiants dérivés du ticket réel : deux tickets ne se marchent pas dessus. */
-function rekey(issueId: string, sampleId: string): string {
-  return `${issueId}-${sampleId}`;
-}
-
-/** Les quatre critères du scénario, rattachés au ticket réel. */
-function criteriaFor(issue: IssueRef, author: string, at: string): Criterion[] {
+/** Les critères du ticket : ceux du scénario, ou ceux du sample. */
+function criteriaFor(
+  issue: IssueRef,
+  author: string,
+  at: string,
+  scenario: DemoScenario,
+): Criterion[] {
+  if (scenario.criteria.length > 0) {
+    return criteriaFromScenario(issue, author, at, scenario);
+  }
   return createDemoCriteria().map((criterion) => ({
     ...criterion,
     id: rekey(issue.id, criterion.id),
@@ -106,12 +120,26 @@ function criteriaFor(issue: IssueRef, author: string, at: string): Criterion[] {
 }
 
 /**
- * Les trois preuves du scénario, rattachées au ticket réel et laissées
- * **déclarées** : c'est le vrai web trigger `ci-results` qui les fera monter en
- * `machine-verified` (SPEC §9.1). Le critère visé suit la même règle de
- * ré-indexation que `criteriaFor` : aucune table de correspondance à tenir.
+ * Les preuves du ticket : celles du scénario, ou celles du sample. Elles
+ * restent **déclarées** : c'est le vrai web trigger `ci-results` qui les fera
+ * monter en `machine-verified` (SPEC §9.1). Le critère visé suit la même règle
+ * de ré-indexation que `criteriaFor` : aucune table de correspondance à tenir.
+ *
+ * Les preuves du sample ne servent que si le ticket n'a pas de scénario : un
+ * scénario a ses propres preuves (ou n'en a pas), jamais celles d'un autre
+ * ticket.
  */
-function evidencesFor(issue: IssueRef, author: string, at: string): Evidence[] {
+function evidencesFor(
+  issue: IssueRef,
+  author: string,
+  developer: string,
+  at: string,
+  scenario: DemoScenario,
+  criteria: readonly Criterion[],
+): Evidence[] {
+  if (scenario.criteria.length > 0) {
+    return evidencesFromScenario(issue, author, developer, at, scenario, criteria);
+  }
   return createDemoEvidences().map((evidence) => ({
     ...evidence,
     id: rekey(issue.id, evidence.id),
@@ -123,6 +151,12 @@ function evidencesFor(issue: IssueRef, author: string, at: string): Evidence[] {
     addedByAgent: true,
     at,
   }));
+}
+
+/** L'agent du cast : c'est lui qui attache les preuves et demande les révisions. */
+function agentActor(cast: BootstrapCast): Actor {
+  const accountId = cast.agent ?? cast.developer;
+  return { accountId, displayName: accountId, agent: true, roles: [] };
 }
 
 /** Écrit les réglages du projet : empreinte de la clé de CI, langue, rôles. */
@@ -144,142 +178,102 @@ async function writeSettings(
   return settings;
 }
 
+/** Ce que le ticket porte déjà : l'amorçage ne recrée rien. */
+async function existingState(
+  deps: AppDeps,
+  issue: IssueRef,
+  criteria: readonly Criterion[],
+): Promise<BootstrapResult> {
+  const coverage = await deps.coverage.recompute(issue.id);
+  let attestations = 0;
+  for (const criterion of criteria) {
+    attestations += (await deps.store.listAttestations(criterion.id)).length;
+  }
+  return {
+    projectId: issue.projectId,
+    issueId: issue.id,
+    issueKey: issue.key,
+    created: false,
+    criteria: criteria.map((criterion) => criterion.code),
+    evidences: (await deps.store.listEvidencesByIssue(issue.id)).length,
+    links: (await deps.store.listProposedLinks(issue.id)).length,
+    attestations,
+    attestationsRefused: 0,
+    waivers: (await deps.store.listWaiversByIssue(issue.id)).length,
+    waiversRefused: 0,
+    revisions: 0,
+    descriptionRewritten: false,
+    coverage: coverage === null ? null : { proven: coverage.proven, total: coverage.total },
+  };
+}
+
+/** L'histoire du ticket, écrite : critères, preuves, révisions, description. */
+interface WrittenScenario {
+  readonly criteria: Criterion[];
+  readonly evidences: readonly Evidence[];
+  readonly revisions: number;
+  readonly descriptionRewritten: boolean;
+}
+
+/** Les gestes joués : paires test ↔ critère, attestations, dérogations. */
+interface PlayedGestures {
+  readonly links: number;
+  readonly attestations: GestureOutcome;
+  readonly waivers: GestureOutcome;
+}
+
+/**
+ * L'histoire du ticket, écrite : les critères et leurs preuves, puis les
+ * révisions (le texte changé porte version 2 et les preuves antérieures passent
+ * « à revoir », SPEC §8.4), puis la description réécrite.
+ */
+async function writeScenario(
+  deps: AppDeps,
+  issue: IssueRef,
+  input: BootstrapInput,
+  scenario: DemoScenario,
+  author: string,
+  at: string,
+  language: Language,
+): Promise<WrittenScenario> {
+  const criteria = criteriaFor(issue, author, at, scenario);
+  for (const criterion of criteria) await deps.store.saveCriterion(criterion);
+  const evidences = evidencesFor(issue, author, input.cast.developer, at, scenario, criteria);
+  for (const evidence of evidences) await deps.store.saveEvidence(evidence);
+  const revisions = await applyRevisions(deps, criteria, scenario, agentActor(input.cast));
+  const descriptionRewritten = await deps.jira.rewriteDescriptionSection(
+    issue.id,
+    renderCriteriaSection(revisions.criteria, language),
+  );
+  return {
+    criteria: revisions.criteria,
+    evidences,
+    revisions: revisions.count,
+    descriptionRewritten,
+  };
+}
+
+/** Les gestes du scénario joués sur le ticket : paires, attestations, dérogations. */
+async function playGestures(
+  deps: AppDeps,
+  issue: IssueRef,
+  written: WrittenScenario,
+  settings: ProjectSettings,
+  scenario: DemoScenario,
+): Promise<PlayedGestures> {
+  const links = await applyTestLinks(deps, written.criteria, written.evidences, scenario);
+  const attestations = await applyAttestations(
+    deps,
+    issue,
+    written.criteria,
+    settings,
+    scenario.attest,
+  );
+  const waivers = await applyWaivers(deps, issue, written.criteria, settings, scenario.waive);
+  return { links, attestations, waivers };
+}
+
 /** Amorce le jeu de démonstration sur un ticket réel ; `null` si ticket inconnu. */
-/**
- * Les attestations demandées : le domaine tranche (l'assigné et l'agent ne
- * peuvent pas attester), puis l'app écrit la preuve et l'attestation.
- */
-async function applyAttestations(
-  deps: AppDeps,
-  issue: IssueRef,
-  criteria: readonly Criterion[],
-  settings: ProjectSettings,
-  flow: BootstrapFlow,
-): Promise<number> {
-  let count = 0;
-  for (const wanted of flow.attest ?? []) {
-    const criterion = criteria.find((one) => one.code === wanted.code);
-    if (criterion === undefined) continue;
-    const roles = await deps.jira.projectRoles(issue.projectId, wanted.accountId);
-    const actor: Actor = {
-      accountId: wanted.accountId,
-      displayName: wanted.accountId,
-      agent: false,
-      roles,
-    };
-    if (!canAttest(actor, issue, criterion, settings).allowed) continue;
-    const evidenceId = deps.ids.next('ev');
-    const evidence: Evidence = {
-      id: evidenceId,
-      criterionId: criterion.id,
-      criterionVersion: criterion.version,
-      type: 'attestation',
-      reference: 'manual-check',
-      note: 'Attestation verifiee manuellement.',
-      strength: 'attested',
-      commit: '',
-      freshness: 'fresh',
-      verified: true,
-      addedBy: wanted.accountId,
-      addedByAgent: false,
-      at: deps.clock.now(),
-      replacedBy: '',
-    };
-    await deps.store.saveEvidence(evidence);
-    const attestation: Attestation = {
-      id: deps.ids.next('att'),
-      criterionId: criterion.id,
-      evidenceId,
-      attesterAccountId: wanted.accountId,
-      role: roles[0] ?? '',
-      note: 'Attestation verifiee manuellement.',
-      attachmentRef: '',
-      at: deps.clock.now(),
-    };
-    await deps.store.addAttestation(attestation);
-    count += 1;
-  }
-  return count;
-}
-
-/**
- * Les dérogations demandées : le domaine tranche (rôle autorisé, motif
- * obligatoire), puis l'app écrit la dérogation.
- */
-async function applyWaivers(
-  deps: AppDeps,
-  issue: IssueRef,
-  criteria: readonly Criterion[],
-  settings: ProjectSettings,
-  flow: BootstrapFlow,
-): Promise<number> {
-  let count = 0;
-  for (const wanted of flow.waive ?? []) {
-    const criterion = criteria.find((one) => one.code === wanted.code);
-    if (criterion === undefined) continue;
-    const roles = await deps.jira.projectRoles(issue.projectId, wanted.accountId);
-    const verdict = validateWaiverCandidate({
-      criterionId: criterion.id,
-      grantedBy: wanted.accountId,
-      role: wanted.role,
-      reason: wanted.reason,
-      actorIsAgent: false,
-      actorRoles: roles,
-      rolesPolicy: settings.roles,
-    });
-    if (!verdict.valid) continue;
-    const waiver: Waiver = {
-      id: deps.ids.next('wv'),
-      criterionId: criterion.id,
-      grantedBy: wanted.accountId,
-      role: wanted.role,
-      reason: wanted.reason,
-      at: deps.clock.now(),
-      expiresAt: '',
-      revokedAt: '',
-    };
-    await deps.store.saveWaiver(waiver);
-    count += 1;
-  }
-  return count;
-}
-
-/**
- * Les paires test ↔ critère **confirmées** : c'est ce qui fait vivre une
- * preuve après la clôture (SPEC §13). L'agent propose, un humain confirme —
- * l'amorçage joue le rôle de l'agent qui rattache chaque preuve de test au
- * critère qu'elle prouve.
- */
-async function applyTestLinks(
-  deps: AppDeps,
-  criteria: readonly Criterion[],
-  evidences: readonly Evidence[],
-): Promise<number> {
-  let count = 0;
-  for (const evidence of evidences) {
-    if (evidence.type !== 'test') continue;
-    const criterion = criteria.find((one) => one.id === evidence.criterionId);
-    if (criterion === undefined) continue;
-    const link = confirmLink(
-      {
-        id: deps.ids.next('lnk'),
-        criterionId: criterion.id,
-        testName: evidence.reference,
-        status: 'proposed',
-        confidence: 0.9,
-        rationale: 'Rattachement proposé par l’agent, confirmé par l’opérateur.',
-        confirmedBy: '',
-        at: deps.clock.now(),
-      },
-      evidence.addedBy,
-      deps.clock.now(),
-    );
-    await deps.store.saveLink(link);
-    count += 1;
-  }
-  return count;
-}
-
 export async function bootstrapDemoData(
   deps: AppDeps,
   input: BootstrapInput,
@@ -287,53 +281,46 @@ export async function bootstrapDemoData(
   const issue = await deps.jira.getIssue(input.issueKey);
   if (issue === null) return null;
   const language: Language = input.language ?? 'fr';
+  const scenario = mergeScenario(input.flow, input.scenario);
   await writeSettings(deps, issue, input);
 
-  const existing = await deps.store.listCriteriaByIssue(issue.id);
-  if (existing.length > 0) {
-    const coverage = await deps.coverage.recompute(issue.id);
-    return {
-      projectId: issue.projectId,
-      issueId: issue.id,
-      issueKey: issue.key,
-      created: false,
-      criteria: existing.map((criterion) => criterion.code),
-      evidences: (await deps.store.listEvidencesByIssue(issue.id)).length,
-      links: (await deps.store.listProposedLinks(issue.id)).length,
-      waivers: (await deps.store.listWaiversByIssue(issue.id)).length,
-      descriptionRewritten: false,
-      coverage: coverage === null ? null : { proven: coverage.proven, total: coverage.total },
-    };
+  const existing = await deps.store.listCriteriaByIssue(issue.id, ['active', 'proposed']);
+  // Un scénario identique ne touche à rien (l'amorçage est idempotent).
+  // Un scénario différent remplace l'histoire : l'ancienne prend fin — ses
+  // critères passent « superseded », ses dérogations sont révoquées, ses paires
+  // rejetées — et la nouvelle s'écrit à côté.
+  if (existing.length > 0 && !scenarioReplacesStory(existing, scenario)) {
+    return existingState(
+      deps,
+      issue,
+      existing.filter((criterion) => criterion.status === 'active'),
+    );
   }
+  if (existing.length > 0) await supersedePreviousStory(deps, issue, existing);
 
   const now = deps.clock.now();
   // Les critères et leurs preuves viennent de l'agent : c'est son compte qui
   // porte la trace (SPEC §19), pas celui du développeur assigné.
   const author = input.cast.agent ?? input.cast.developer;
-  const criteria = criteriaFor(issue, author, now);
-  for (const criterion of criteria) await deps.store.saveCriterion(criterion);
-  const evidences = evidencesFor(issue, author, now);
-  for (const evidence of evidences) await deps.store.saveEvidence(evidence);
-  const descriptionRewritten = await deps.jira.rewriteDescriptionSection(
-    issue.id,
-    renderCriteriaSection(criteria, language),
-  );
+  const written = await writeScenario(deps, issue, input, scenario, author, now, language);
   const settings =
     (await deps.store.getSettings(issue.projectId)) ?? createDemoSettings(issue.projectId);
-  const linked = await applyTestLinks(deps, criteria, evidences);
-  const attested = await applyAttestations(deps, issue, criteria, settings, input.flow ?? {});
-  const waived = await applyWaivers(deps, issue, criteria, settings, input.flow ?? {});
+  const gestures = await playGestures(deps, issue, written, settings, scenario);
   const coverage = await deps.coverage.recompute(issue.id);
   return {
     projectId: issue.projectId,
     issueId: issue.id,
     issueKey: issue.key,
     created: true,
-    criteria: criteria.map((criterion) => criterion.code),
-    evidences: evidences.length + attested,
-    links: linked,
-    waivers: waived,
-    descriptionRewritten,
+    criteria: written.criteria.map((criterion) => criterion.code),
+    evidences: written.evidences.length + gestures.attestations.written,
+    links: gestures.links,
+    attestations: gestures.attestations.written,
+    attestationsRefused: gestures.attestations.refused,
+    waivers: gestures.waivers.written,
+    waiversRefused: gestures.waivers.refused,
+    revisions: written.revisions,
+    descriptionRewritten: written.descriptionRewritten,
     coverage: coverage === null ? null : { proven: coverage.proven, total: coverage.total },
   };
 }

@@ -19,6 +19,9 @@ import {
 
 const TABLE = 'coverage';
 
+/** Borne de la liste des couvertures d'un projet (SPEC §20 : rien d'infini). */
+const COVERAGE_PROJECT_LIMIT = 500;
+
 export function createCoverageStore(sql: SqlClient): CoverageStore {
   const columns = selectColumns(TABLE);
   const placeholders = insertPlaceholders(TABLE);
@@ -91,6 +94,18 @@ export function createCoverageStore(sql: SqlClient): CoverageStore {
       const params = projectId.length === 0 ? [] : [prefix, prefix];
       const rows = await sql.query<{ issue_id: string }>(statement, params);
       return rows.map((r) => r.issue_id);
+    },
+
+    async listCoveragesByProject(projectKey: string): Promise<Coverage[]> {
+      const statement = `
+        SELECT ${columns}
+        FROM ${TABLE}
+        WHERE issue_key LIKE ?
+        ORDER BY updated_at DESC
+        LIMIT ${COVERAGE_PROJECT_LIMIT}
+      `;
+      const rows = await sql.query<CoverageRow>(statement, [`${projectKey}-%`]);
+      return rows.map(rowToCoverage);
     },
   };
 }
