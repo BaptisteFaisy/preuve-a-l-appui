@@ -17,7 +17,8 @@ import { describe, expect, it } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { DemoSnapshotData } from '../../src/demo-contract.js';
-import type { DossierIssue, Waiver } from '../../src/types.js';
+import type { Waiver } from '../../src/types.js';
+import type { SnapshotDossierIssue } from '../../src/demo-contract.js';
 import { isSnapshot } from '../../site/src/demo/live-snapshot.js';
 import { buildDossierView } from '../../site/src/sections/parts/dossier-viewmodel.js';
 import { DossierBlock } from '../../site/src/sections/parts/DossierBlock.js';
@@ -34,7 +35,7 @@ function realSnapshot(): DemoSnapshotData {
 }
 
 /** Un ticket du dossier réel, repéré par sa clé. */
-function issueOf(snapshot: DemoSnapshotData, key: string): DossierIssue {
+function issueOf(snapshot: DemoSnapshotData, key: string): SnapshotDossierIssue {
   const issue = snapshot.dossier?.issues.find((candidate) => candidate.issueKey === key);
   if (issue === undefined) throw new Error(`ticket absent du dossier : ${key}`);
   return issue;
@@ -43,7 +44,7 @@ function issueOf(snapshot: DemoSnapshotData, key: string): DossierIssue {
 /** Le même instantané, avec un autre dossier. */
 function withDossier(
   snapshot: DemoSnapshotData,
-  issues: readonly DossierIssue[],
+  issues: readonly SnapshotDossierIssue[],
 ): DemoSnapshotData {
   const dossier = snapshot.dossier;
   if (dossier === null) throw new Error('instantané sans dossier');
