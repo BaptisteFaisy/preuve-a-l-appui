@@ -10,9 +10,10 @@
  *
  * Le script crée les deux tickets manquants (idempotent), les amorce avec
  * l'app (critères, preuves, paires test ↔ critère confirmées, attestation ou
- * dérogation), joue un pipeline vert, les clôture, puis un passage sur la
- * branche principale où un test a disparu — le critère livré n'est plus
- * prouvé, et l'app le signale sur le ticket.
+ * dérogation sur le critère livré), joue un pipeline vert, les clôture, puis
+ * deux passages sur la branche principale : le premier établit la preuve
+ * vivante (`proven`), le second n'y voit plus qu'un test — le critère livré
+ * n'est plus prouvé, et l'app le signale sur le ticket (SPEC §7.5, §13).
  *
  * Usage :
  *   ATLASSIAN_SITE=one-atlas-cndz.atlassian.net \
@@ -36,6 +37,17 @@ const VERSION = process.env.DEMO_VERSION ?? '2.4';
 const BRANCH = `feature/PRF-1-refusal-email`;
 const MAIN_BRANCH = 'main';
 
+/**
+ * Les noms de tests RÉELS du dépôt : ce sont exactement les références des
+ * preuves créées par l'amorçage (`createDemoEvidences`). Un résumé de CI dont
+ * les noms ne correspondent à aucune preuve ne rafraîchit rien — et une paire
+ * test ↔ critère confirmée n'a de preuve vivante que si le test existe sur la
+ * branche principale. Garder ces deux noms alignés rend la preuve vivante
+ * réelle de bout en bout.
+ */
+const TEST_REFUSAL = 'checkout refuses an expired card';
+const TEST_LOG = 'checkout logs the refusal reason';
+
 const AUTH = `Basic ${Buffer.from(`${EMAIL}:${TOKEN}`).toString('base64')}`;
 
 /** Les personnes du projet : l'agent, l'assignée, la testeuse, le product owner. */
@@ -52,12 +64,12 @@ const TICKETS = [
   {
     key: 'PRF-2',
     summary: "Envoyer l'e-mail de refus au client",
-    tests: ['refusal email is sent once', 'refusal email quotes the reason'],
+    tests: [TEST_REFUSAL, TEST_LOG],
   },
   {
     key: 'PRF-3',
     summary: 'Rendre la limite de refus réglable par un administrateur',
-    tests: ['refund limit is configurable', 'refund limit applies to next checkout'],
+    tests: [TEST_REFUSAL, TEST_LOG],
   },
 ];
 
@@ -116,12 +128,15 @@ async function ensureTicket(ticket, typeId) {
   return issue.key;
 }
 
-/** Fait passer le ticket à « Terminé ». */
+/** Fait passer le ticket à « Terminé », s'il ne l'est pas déjà. */
 async function closeTicket(key) {
+  const issue = await jira('GET', `/rest/api/3/issue/${key}?fields=status`);
+  const status = String(issue?.fields?.status?.name ?? '').toLowerCase();
+  if (/termin|done|clos|ferm|résolu|resolu|resolved/.test(status)) return false;
   const transitions = await jira('GET', `/rest/api/3/issue/${key}/transitions`);
-  const wanted =
-    transitions.transitions?.find((transition) => /termin|done/i.test(transition.name)) ??
-    transitions.transitions?.[0];
+  // Jamais de repli sur `transitions[0]` : sur un ticket déjà livré ce serait
+  // « Réouvrir ». Sans transition « Done », on ne ferme pas — on le dit.
+  const wanted = transitions.transitions?.find((transition) => /termin|done/i.test(transition.name));
   if (wanted === undefined) return false;
   await jira('POST', `/rest/api/3/issue/${key}/transitions`, { transition: { id: wanted.id } });
   return true;
@@ -191,12 +206,22 @@ for (const ticket of TICKETS) {
   console.log(`${key} clôture → ${await closeTicket(key)}`);
 }
 
-// Un passage sur la branche principale où un test a disparu : le critère livré
-// de PRF-2 n'est plus prouvé, et l'app le signale.
+// Deux passages sur la branche principale. Le premier voit les deux tests : la
+// preuve vivante des critères livrés s'établit (`proven`). Le second n'en voit
+// plus qu'un : le critère livré dont le test a disparu n'est plus prouvé, et
+// l'app le signale sur le ticket (SPEC §7.5, §13).
 console.log(
-  `main (avec un test disparu) → ${await pipeline({
+  `main (tous les tests) → ${await pipeline({
     branch: MAIN_BRANCH,
-    tests: ['refusal email is sent once'],
+    tests: [TEST_REFUSAL, TEST_LOG],
+    mainBranch: true,
+    commit: 'b1a2c3d4e5f6a7b8',
+  })}`,
+);
+console.log(
+  `main (un test disparu) → ${await pipeline({
+    branch: MAIN_BRANCH,
+    tests: [TEST_REFUSAL],
     mainBranch: true,
     commit: 'f6e5d4c3b2a1',
   })}`,

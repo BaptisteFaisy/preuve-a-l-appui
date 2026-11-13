@@ -141,6 +141,12 @@ export function fromSqlTimestamp(value: unknown): string {
   if (typeof value !== 'string') return '';
   const match = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?)/.exec(value);
   if (!match) return '';
+  // MySQL rend une colonne NOT NULL vide en « zéro date » (`0000-00-00
+  // 00:00:00`) : elle veut dire « pas de date » et doit relire `''`. Sinon une
+  // dérogation jamais révoquée ressortirait `revokedAt` non vide et compterait
+  // comme révoquée (SPEC §12.4) — ce qui vide `waiversByGranter` et neutralise
+  // une dérogation active.
+  if (match[1] === '0000-00-00' && match[2].startsWith('00:00:00')) return '';
   return `${match[1]}T${padFraction(match[2])}Z`;
 }
 

@@ -102,6 +102,17 @@ describe('mapping — preuves, attestations, dérogations', () => {
     expect(row.revoked_at).toBe('');
     expect(rowToWaiver(row).expiresAt).toBe('');
   });
+
+  it('relit la « zéro date » MySQL comme une date absente (dérogation restée active)', () => {
+    // Une colonne TIMESTAMP NOT NULL écrite avec '' ressort en
+    // '0000-00-00 00:00:00' : elle veut dire « pas de date », sinon une
+    // dérogation jamais révoquée compterait comme révoquée (SPEC §12.4).
+    const zero = '0000-00-00 00:00:00.000';
+    const row = { ...waiverToRow(waiver()), expires_at: zero, revoked_at: zero };
+    const read = rowToWaiver(row);
+    expect(read.expiresAt).toBe('');
+    expect(read.revokedAt).toBe('');
+  });
 });
 
 describe('mapping — couverture et réglages', () => {

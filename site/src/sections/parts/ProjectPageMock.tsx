@@ -184,8 +184,12 @@ function IssuesTable(props: { issues: readonly ProjectIssueItemViewModel[]; lang
 }
 
 /** Les dérogations du projet, la révoquée marquée, les actives comptées. */
-function WaiversTable(props: { waivers: readonly ProjectWaiverItemViewModel[]; lang: Language }): ReactElement {
-  const { waivers, lang } = props;
+function WaiversTable(props: {
+  waivers: readonly ProjectWaiverItemViewModel[];
+  lang: Language;
+  nameOf: (accountId: string) => string;
+}): ReactElement {
+  const { waivers, lang, nameOf } = props;
   const extra = SCREENS_EXTRA[lang];
   const head = (key: string) => text(UI_MESSAGES, key, lang);
   return (
@@ -205,7 +209,7 @@ function WaiversTable(props: { waivers: readonly ProjectWaiverItemViewModel[]; l
           <tr key={waiver.id} className="screens-tr">
             <th scope="row" className="screens-th-row">{waiver.criterionId}</th>
             <td className="screens-td">
-              <span className="screens-crittext">{displayNameOf(waiver.grantedBy)}</span>
+              <span className="screens-crittext">{nameOf(waiver.grantedBy)}</span>
               <span className="screens-type">{waiver.role}</span>
             </td>
             <td className="screens-td">{waiver.reason}</td>
@@ -350,11 +354,18 @@ function ReopeningStats(props: { rates: readonly ReopeningRate[]; lang: Language
   );
 }
 
+/** Les entrées d'une page projet : soit le jeu embarqué, soit l'instantané réel. */
+export interface ProjectPageLive {
+  readonly data: ProjectDemoData;
+  readonly nameOf: (accountId: string) => string;
+}
+
 /** Maquette de la page projet : tout vient du view-model réel. */
-export function ProjectPageMock({ lang }: { lang: Language }): ReactElement {
+export function ProjectPageMock({ lang, live }: { lang: Language; live?: ProjectPageLive }): ReactElement {
   const t = stringsFor(lang);
   const extra = SCREENS_EXTRA[lang];
-  const data = createProjectDemoData();
+  const data = live?.data ?? createProjectDemoData();
+  const nameOf = live?.nameOf ?? displayNameOf;
   const vm = buildProjectPageViewModel({
     projectId: DEMO_PROJECT_ID,
     coverages: data.coverages,
@@ -375,7 +386,7 @@ export function ProjectPageMock({ lang }: { lang: Language }): ReactElement {
           <h3 className="screens-subtitle">{text(UI_MESSAGES, 'ui.project.tabs.waivers', lang)}</h3>
           <CountBadge count={vm.activeWaiversCount} label={text(UI_MESSAGES, 'ui.project.tabs.waivers', lang)} />
         </div>
-        <WaiversTable waivers={vm.waivers} lang={lang} />
+        <WaiversTable waivers={vm.waivers} lang={lang} nameOf={nameOf} />
         <div className="screens-subhead">
           <h3 className="screens-subtitle">{text(UI_MESSAGES, 'ui.project.tabs.living', lang)}</h3>
           <CountBadge count={vm.unprovenLivingCount} label={text(UI_MESSAGES, 'ui.project.living.alertTitle', lang)} />
