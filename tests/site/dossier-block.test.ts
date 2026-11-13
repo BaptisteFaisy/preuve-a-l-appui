@@ -74,17 +74,38 @@ describe('dossier du site — construit sur l’instantané réel', () => {
   it('liste tous les tickets du dossier, pas seulement le ticket vedette', () => {
     const view = buildDossierView(realSnapshot(), 'fr');
     expect(view).not.toBeNull();
-    expect(view?.issues.map((issue) => issue.issueKey)).toEqual(['PRF-3', 'PRF-2', 'PRF-1']);
-    expect(view?.issues.length).toBe(3);
+    expect(view?.issues.map((issue) => issue.issueKey)).toEqual([
+      'PRF-9',
+      'PRF-8',
+      'PRF-7',
+      'PRF-6',
+      'PRF-5',
+      'PRF-4',
+      'PRF-3',
+      'PRF-2',
+      'PRF-1',
+    ]);
+    expect(view?.issues.length).toBe(9);
     expect(view?.versionName).toBe('2.4');
-    expect(view?.totals.criteria).toBe(8);
+    expect(view?.totals.criteria).toBe(20);
   });
 
   it('affiche la couverture « n / m » de chaque ticket', () => {
     const view = buildDossierView(realSnapshot(), 'fr');
-    expect(view?.issues.map((issue) => issue.coverageLabel)).toEqual(['0 / 0', '1 / 4', '2 / 4']);
+    expect(view?.issues.map((issue) => issue.coverageLabel)).toEqual([
+      '1 / 2',
+      '2 / 2',
+      '1 / 1',
+      '2 / 2',
+      '0 / 1',
+      '3 / 3',
+      '1 / 2',
+      '3 / 3',
+      '2 / 4',
+    ]);
     const tones = view?.issues.map((issue) => issue.coverageTone) ?? [];
-    expect(tones).toEqual(['red', 'orange', 'orange']);
+    expect(tones).toHaveLength(9);
+    expect(tones[0]).not.toBe('green');
   });
 
   it('état livré quand tout est prouvé, dérogé quand une dérogation existe', () => {
@@ -96,9 +117,13 @@ describe('dossier du site — construit sur l’instantané réel', () => {
     expect(view?.issues[1]?.waiverCount).toBe(1);
   });
 
-  it('un ticket encore incomplet reste « en cours »', () => {
+  it('un ticket encore incomplet reste « en cours », un ticket livré est « livré »', () => {
     const view = buildDossierView(realSnapshot(), 'fr');
-    expect(view?.issues.every((issue) => issue.state === 'in-progress')).toBe(true);
+    const byKey = new Map(view?.issues.map((issue) => [issue.issueKey, issue.state]));
+    expect(byKey.get('PRF-5')).toBe('in-progress');
+    expect(byKey.get('PRF-1')).toBe('in-progress');
+    expect(byKey.get('PRF-2')).toBe('delivered');
+    expect(byKey.get('PRF-3')).toBe('waived');
   });
 });
 

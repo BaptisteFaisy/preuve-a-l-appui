@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T13:47:52.406Z",
+  "generatedAt": "2026-11-13T17:09:56.822Z",
   "site": "one-atlas-cndz.atlassian.net",
   "project": {
     "id": "10238",
@@ -118,7 +118,7 @@
     "ciKeyHash": "",
     "requireChildren": false,
     "language": "en",
-    "updatedAt": "2026-11-13T13:47:51.000Z"
+    "updatedAt": "2026-11-13T17:09:55.000Z"
   },
   "criteria": [
     {
@@ -502,7 +502,7 @@
         "waiverId": ""
       }
     ],
-    "updatedAt": "2026-11-13T13:47:51.000Z"
+    "updatedAt": "2026-11-13T17:09:56.000Z"
   },
   "living": [
     {
@@ -520,10 +520,70 @@
       "issueKey": "PRF-2",
       "criterionId": "66728-crit-1",
       "testName": "checkout refuses an expired card",
+      "state": "unproven",
+      "component": "",
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T16:54:38.000Z"
+    },
+    {
+      "id": "lp_mwf7vs1b002",
+      "issueKey": "PRF-2",
+      "criterionId": "66728-crit-AC-3-1g5tk4",
+      "testName": "refusal email is sent only once",
       "state": "proven",
       "component": "",
-      "commit": "b1a2c3d4e5f6a7b8",
-      "since": "2026-11-13T13:46:20.000Z"
+      "commit": "a4ca0a810587e73d",
+      "since": "2026-11-13T16:54:37.000Z"
+    },
+    {
+      "id": "lp_mwf7vs9w002",
+      "issueKey": "PRF-2",
+      "criterionId": "66728-crit-AC-3-1g5tk4",
+      "testName": "refusal email is sent only once",
+      "state": "proven",
+      "component": "",
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T16:54:38.000Z"
+    },
+    {
+      "id": "lp_mwf7vs1b001",
+      "issueKey": "PRF-2",
+      "criterionId": "66728-crit-AC-1-tpk6xw",
+      "testName": "refusal email reaches the customer",
+      "state": "proven",
+      "component": "",
+      "commit": "a4ca0a810587e73d",
+      "since": "2026-11-13T16:54:37.000Z"
+    },
+    {
+      "id": "lp_mwf7vs9w001",
+      "issueKey": "PRF-2",
+      "criterionId": "66728-crit-AC-1-tpk6xw",
+      "testName": "refusal email reaches the customer",
+      "state": "proven",
+      "component": "",
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T16:54:38.000Z"
+    },
+    {
+      "id": "lp_mwf7vs9w003",
+      "issueKey": "PRF-3",
+      "criterionId": "66729-crit-AC-1-29eb2n",
+      "testName": "administrator sets the refusal threshold",
+      "state": "proven",
+      "component": "",
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T16:54:38.000Z"
+    },
+    {
+      "id": "lp_mwf7vs1b003",
+      "issueKey": "PRF-3",
+      "criterionId": "66729-crit-AC-1-29eb2n",
+      "testName": "administrator sets the refusal threshold",
+      "state": "proven",
+      "component": "",
+      "commit": "a4ca0a810587e73d",
+      "since": "2026-11-13T16:54:37.000Z"
     },
     {
       "id": "lp_mwf15mlq004",
@@ -540,10 +600,120 @@
       "issueKey": "PRF-3",
       "criterionId": "66729-crit-1",
       "testName": "checkout refuses an expired card",
-      "state": "proven",
+      "state": "unproven",
       "component": "",
-      "commit": "b1a2c3d4e5f6a7b8",
-      "since": "2026-11-13T13:46:20.000Z"
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T16:54:38.000Z"
+    },
+    {
+      "id": "lp_mwf7vs1b005",
+      "issueKey": "PRF-4",
+      "criterionId": "66755-crit-AC-1-10iu6n",
+      "testName": "audit line holds no card number",
+      "state": "proven",
+      "component": "checkout-audit",
+      "commit": "a4ca0a810587e73d",
+      "since": "2026-11-13T16:54:37.000Z"
+    },
+    {
+      "id": "lp_mwf7vs9w005",
+      "issueKey": "PRF-4",
+      "criterionId": "66755-crit-AC-1-10iu6n",
+      "testName": "audit line holds no card number",
+      "state": "proven",
+      "component": "checkout-audit",
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T16:54:38.000Z"
+    },
+    {
+      "id": "lp_mwf7vs1b004",
+      "issueKey": "PRF-4",
+      "criterionId": "66755-crit-AC-3-1s68ha",
+      "testName": "every refusal writes an audit line",
+      "state": "proven",
+      "component": "checkout-audit",
+      "commit": "a4ca0a810587e73d",
+      "since": "2026-11-13T16:54:37.000Z"
+    },
+    {
+      "id": "lp_mwf7vs9w004",
+      "issueKey": "PRF-4",
+      "criterionId": "66755-crit-AC-3-1s68ha",
+      "testName": "every refusal writes an audit line",
+      "state": "proven",
+      "component": "checkout-audit",
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T16:54:38.000Z"
+    },
+    {
+      "id": "lp_mwf7vs9w006",
+      "issueKey": "PRF-6",
+      "criterionId": "66757-crit-AC-1-n528s6",
+      "testName": "card number is never persisted",
+      "state": "proven",
+      "component": "checkout-payments",
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T16:54:38.000Z"
+    },
+    {
+      "id": "lp_mwf7vs1c006",
+      "issueKey": "PRF-6",
+      "criterionId": "66757-crit-AC-1-n528s6",
+      "testName": "card number is never persisted",
+      "state": "proven",
+      "component": "checkout-payments",
+      "commit": "a4ca0a810587e73d",
+      "since": "2026-11-13T16:54:37.000Z"
+    },
+    {
+      "id": "lp_mwf7xoqd009",
+      "issueKey": "PRF-7",
+      "criterionId": "66758-crit-AC-1-1chz73",
+      "testName": "refusal answers in under 200 ms at p95",
+      "state": "unproven",
+      "component": "checkout-performance",
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T17:09:55.000Z"
+    },
+    {
+      "id": "lp_mwf7vs1c007",
+      "issueKey": "PRF-8",
+      "criterionId": "66759-crit-AC-2-9m4a50",
+      "testName": "refusal form exposes accessible labels",
+      "state": "proven",
+      "component": "checkout-web",
+      "commit": "a4ca0a810587e73d",
+      "since": "2026-11-13T16:54:37.000Z"
+    },
+    {
+      "id": "lp_mwf7vs9w007",
+      "issueKey": "PRF-8",
+      "criterionId": "66759-crit-AC-2-9m4a50",
+      "testName": "refusal form exposes accessible labels",
+      "state": "proven",
+      "component": "checkout-web",
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T16:54:38.000Z"
+    },
+    {
+      "id": "lp_mwf7vs9w008",
+      "issueKey": "PRF-9",
+      "criterionId": "66760-crit-AC-1-19ii6e",
+      "testName": "request body is never logged on refusal",
+      "state": "proven",
+      "component": "checkout-privacy",
+      "commit": "804f210d8544645a",
+      "since": "2026-11-13T16:54:38.000Z"
+    },
+    {
+      "id": "lp_mwf7vs1c008",
+      "issueKey": "PRF-9",
+      "criterionId": "66760-crit-AC-1-19ii6e",
+      "testName": "request body is never logged on refusal",
+      "state": "proven",
+      "component": "checkout-privacy",
+      "commit": "a4ca0a810587e73d",
+      "since": "2026-11-13T16:54:37.000Z"
     }
   ],
   "stats": {
@@ -551,178 +721,138 @@
     "since": "1970-01-01 00:00:00",
     "coverageByStrength": {
       "declared": 0,
-      "attested": 1,
-      "machine-verified": 2
+      "attested": 4,
+      "machine-verified": 11
     },
     "waiversByGranter": [
       {
         "accountId": "actor-3",
         "displayName": "John Doe",
+        "count": 2
+      },
+      {
+        "accountId": "actor-4",
+        "displayName": "Alison Swift",
         "count": 1
       }
     ],
-    "closedWithoutValidator": 3,
-    "reopenings": []
+    "closedWithoutValidator": 2,
+    "reopenings": [
+      {
+        "strength": "machine-verified",
+        "closed": 7,
+        "reopened": 3
+      },
+      {
+        "strength": "attested",
+        "closed": 0,
+        "reopened": 0
+      },
+      {
+        "strength": "declared",
+        "closed": 0,
+        "reopened": 0
+      }
+    ]
   },
   "dossier": {
     "versionId": "2.4",
     "versionName": "2.4",
     "projectKey": "PRF",
-    "generatedAt": "2026-11-12T21:09:08.000Z",
+    "generatedAt": "2026-11-13T17:09:55.000Z",
+    "totals": {
+      "issues": 9,
+      "criteria": 20,
+      "proven": 15,
+      "machineVerified": 11,
+      "attested": 4,
+      "declared": 0,
+      "waived": 2
+    },
     "issues": [
+      {
+        "issueKey": "PRF-9",
+        "summary": "Ne jamais journaliser le corps de la requête",
+        "total": 2,
+        "proven": 1,
+        "waived": 1,
+        "waivers": [
+          {
+            "grantedBy": "actor-4",
+            "role": "Administrators",
+            "reason": "Reporté à la version 2.5 : le masquage des identifiants arrive avec la reprise du logger. Le product owner est absent, l’administratrice assume la dérogation.",
+            "at": "2026-11-13T16:54:26.000Z"
+          }
+        ]
+      },
+      {
+        "issueKey": "PRF-8",
+        "summary": "Rendre le formulaire de refus accessible",
+        "total": 2,
+        "proven": 2,
+        "waived": 0,
+        "waivers": []
+      },
+      {
+        "issueKey": "PRF-7",
+        "summary": "Tenir le refus sous 200 ms",
+        "total": 1,
+        "proven": 1,
+        "waived": 0,
+        "waivers": []
+      },
+      {
+        "issueKey": "PRF-6",
+        "summary": "Ne jamais stocker le numéro de carte",
+        "total": 2,
+        "proven": 2,
+        "waived": 0,
+        "waivers": []
+      },
+      {
+        "issueKey": "PRF-5",
+        "summary": "Publier la page d'aide sur le refus",
+        "total": 1,
+        "proven": 0,
+        "waived": 0,
+        "waivers": []
+      },
+      {
+        "issueKey": "PRF-4",
+        "summary": "Journaliser chaque refus pour la traçabilité",
+        "total": 3,
+        "proven": 3,
+        "waived": 0,
+        "waivers": []
+      },
       {
         "issueKey": "PRF-3",
         "summary": "Rendre la limite de refus réglable par un administrateur",
-        "total": 0,
-        "proven": 0,
-        "waived": 0,
-        "waivers": [],
-        "criteria": []
+        "total": 2,
+        "proven": 1,
+        "waived": 1,
+        "waivers": [
+          {
+            "grantedBy": "actor-3",
+            "role": "Product Owner",
+            "reason": "Reporté à la version 2.5, le réglage arrive avec la refonte du back-office.",
+            "at": "2026-11-12T21:09:19.000Z"
+          },
+          {
+            "grantedBy": "actor-3",
+            "role": "Product Owner",
+            "reason": "Reporté à la version 2.5 : le rechargement à chaud arrive avec la refonte du back-office. Le service redémarre après chaque réglage.",
+            "at": "2026-11-13T16:53:25.000Z"
+          }
+        ]
       },
       {
         "issueKey": "PRF-2",
         "summary": "Envoyer l'e-mail de refus au client",
-        "total": 4,
-        "proven": 1,
+        "total": 3,
+        "proven": 3,
         "waived": 0,
-        "waivers": [],
-        "criteria": [
-          {
-            "criterionId": "66728-crit-1",
-            "code": "AC-1",
-            "text": "Le paiement par carte expirée est refusé",
-            "type": "functional",
-            "version": 1,
-            "requiredStrength": "machine-verified",
-            "bestEvidenceId": "66728-ev-1",
-            "bestStrength": "declared",
-            "proven": false,
-            "waived": false,
-            "minor": false,
-            "defect": "unverified",
-            "expected": "Green automated test on the branch commit, or updated documentation page",
-            "evidences": [
-              {
-                "id": "66728-ev-1",
-                "criterionId": "66728-crit-1",
-                "criterionVersion": 1,
-                "type": "test",
-                "reference": "checkout refuses an expired card",
-                "note": "Passé sur le commit de la branche de PR",
-                "strength": "declared",
-                "commit": "",
-                "freshness": "fresh",
-                "verified": false,
-                "addedBy": "actor-2",
-                "addedByAgent": true,
-                "at": "2026-11-12T21:09:04.000Z",
-                "replacedBy": ""
-              }
-            ],
-            "waiverId": ""
-          },
-          {
-            "criterionId": "66728-crit-2",
-            "code": "AC-2",
-            "text": "Un paiement déjà refusé ne repasse pas",
-            "type": "regression",
-            "version": 1,
-            "requiredStrength": "machine-verified",
-            "bestEvidenceId": "66728-ev-2",
-            "bestStrength": "declared",
-            "proven": false,
-            "waived": false,
-            "minor": false,
-            "defect": "unverified",
-            "expected": "Green automated test on the branch commit, or updated documentation page",
-            "evidences": [
-              {
-                "id": "66728-ev-2",
-                "criterionId": "66728-crit-2",
-                "criterionVersion": 1,
-                "type": "test",
-                "reference": "checkout logs the refusal reason",
-                "note": "Passé sur le commit de la branche de PR",
-                "strength": "declared",
-                "commit": "",
-                "freshness": "fresh",
-                "verified": false,
-                "addedBy": "actor-2",
-                "addedByAgent": true,
-                "at": "2026-11-12T21:09:04.000Z",
-                "replacedBy": ""
-              }
-            ],
-            "waiverId": ""
-          },
-          {
-            "criterionId": "66728-crit-3",
-            "code": "AC-3",
-            "text": "L'e-mail de refus est envoyé",
-            "type": "functional",
-            "version": 1,
-            "requiredStrength": "attested",
-            "bestEvidenceId": "ev_mwe1j70e003",
-            "bestStrength": "attested",
-            "proven": true,
-            "waived": false,
-            "minor": false,
-            "defect": null,
-            "expected": "Third-party attestation from an independent reviewer",
-            "evidences": [
-              {
-                "id": "66728-ev-3",
-                "criterionId": "66728-crit-3",
-                "criterionVersion": 1,
-                "type": "agent-report",
-                "reference": "report#ac-3",
-                "note": "Le compte rendu de l'agent cite AC-3.",
-                "strength": "declared",
-                "commit": "",
-                "freshness": "fresh",
-                "verified": false,
-                "addedBy": "actor-2",
-                "addedByAgent": true,
-                "at": "2026-11-12T21:09:04.000Z",
-                "replacedBy": ""
-              },
-              {
-                "id": "ev_mwe1j70e003",
-                "criterionId": "66728-crit-3",
-                "criterionVersion": 1,
-                "type": "attestation",
-                "reference": "manual-check",
-                "note": "Attestation verifiee manuellement.",
-                "strength": "attested",
-                "commit": "",
-                "freshness": "fresh",
-                "verified": true,
-                "addedBy": "actor-4",
-                "addedByAgent": false,
-                "at": "2026-11-12T21:09:06.000Z",
-                "replacedBy": ""
-              }
-            ],
-            "waiverId": ""
-          },
-          {
-            "criterionId": "66728-crit-4",
-            "code": "AC-4",
-            "text": "La limite est réglable par l'administrateur",
-            "type": "functional",
-            "version": 1,
-            "requiredStrength": "machine-verified",
-            "bestEvidenceId": "",
-            "bestStrength": null,
-            "proven": false,
-            "waived": false,
-            "minor": false,
-            "defect": "no-evidence",
-            "expected": "Green automated test on the branch commit, or updated documentation page",
-            "evidences": [],
-            "waiverId": ""
-          }
-        ]
+        "waivers": []
       },
       {
         "issueKey": "PRF-1",
@@ -730,171 +860,9 @@
         "total": 4,
         "proven": 2,
         "waived": 0,
-        "waivers": [],
-        "criteria": [
-          {
-            "criterionId": "66653-crit-1",
-            "code": "AC-1",
-            "text": "Le paiement par carte expirée est refusé",
-            "type": "functional",
-            "version": 1,
-            "requiredStrength": "machine-verified",
-            "bestEvidenceId": "ev_mwdtpbur001",
-            "bestStrength": "machine-verified",
-            "proven": true,
-            "waived": false,
-            "minor": false,
-            "defect": null,
-            "expected": "Green automated test on the branch commit, or updated documentation page",
-            "evidences": [
-              {
-                "id": "66653-ev-1",
-                "criterionId": "66653-crit-1",
-                "criterionVersion": 1,
-                "type": "test",
-                "reference": "checkout refuses an expired card",
-                "note": "Passé sur le commit de la branche de PR",
-                "strength": "declared",
-                "commit": "",
-                "freshness": "stale",
-                "verified": false,
-                "addedBy": "actor-2",
-                "addedByAgent": true,
-                "at": "2026-11-12T17:29:47.000Z",
-                "replacedBy": "ev_mwdtpbur001"
-              },
-              {
-                "id": "ev_mwdtpbur001",
-                "criterionId": "66653-crit-1",
-                "criterionVersion": 1,
-                "type": "test",
-                "reference": "checkout refuses an expired card",
-                "note": "Passé sur le commit de la branche de PR",
-                "strength": "machine-verified",
-                "commit": "5bf7f4a465bfb99018de7b8aefdf6d2b79e61ba3",
-                "freshness": "fresh",
-                "verified": true,
-                "addedBy": "actor-2",
-                "addedByAgent": true,
-                "at": "2026-11-12T17:29:56.000Z",
-                "replacedBy": ""
-              }
-            ],
-            "waiverId": ""
-          },
-          {
-            "criterionId": "66653-crit-2",
-            "code": "AC-2",
-            "text": "Un paiement déjà refusé ne repasse pas",
-            "type": "regression",
-            "version": 1,
-            "requiredStrength": "machine-verified",
-            "bestEvidenceId": "ev_mwdtpbv9002",
-            "bestStrength": "machine-verified",
-            "proven": true,
-            "waived": false,
-            "minor": false,
-            "defect": null,
-            "expected": "Green automated test on the branch commit, or updated documentation page",
-            "evidences": [
-              {
-                "id": "66653-ev-2",
-                "criterionId": "66653-crit-2",
-                "criterionVersion": 1,
-                "type": "test",
-                "reference": "checkout logs the refusal reason",
-                "note": "Passé sur le commit de la branche de PR",
-                "strength": "declared",
-                "commit": "",
-                "freshness": "stale",
-                "verified": false,
-                "addedBy": "actor-2",
-                "addedByAgent": true,
-                "at": "2026-11-12T17:29:47.000Z",
-                "replacedBy": "ev_mwdtpbv9002"
-              },
-              {
-                "id": "ev_mwdtpbv9002",
-                "criterionId": "66653-crit-2",
-                "criterionVersion": 1,
-                "type": "test",
-                "reference": "checkout logs the refusal reason",
-                "note": "Passé sur le commit de la branche de PR",
-                "strength": "machine-verified",
-                "commit": "5bf7f4a465bfb99018de7b8aefdf6d2b79e61ba3",
-                "freshness": "fresh",
-                "verified": true,
-                "addedBy": "actor-2",
-                "addedByAgent": true,
-                "at": "2026-11-12T17:29:56.000Z",
-                "replacedBy": ""
-              }
-            ],
-            "waiverId": ""
-          },
-          {
-            "criterionId": "66653-crit-3",
-            "code": "AC-3",
-            "text": "L'e-mail de refus est envoyé",
-            "type": "functional",
-            "version": 1,
-            "requiredStrength": "attested",
-            "bestEvidenceId": "66653-ev-3",
-            "bestStrength": "declared",
-            "proven": false,
-            "waived": false,
-            "minor": false,
-            "defect": "unverified",
-            "expected": "Third-party attestation from an independent reviewer",
-            "evidences": [
-              {
-                "id": "66653-ev-3",
-                "criterionId": "66653-crit-3",
-                "criterionVersion": 1,
-                "type": "agent-report",
-                "reference": "report#ac-3",
-                "note": "Le compte rendu de l'agent cite AC-3.",
-                "strength": "declared",
-                "commit": "",
-                "freshness": "fresh",
-                "verified": false,
-                "addedBy": "actor-2",
-                "addedByAgent": true,
-                "at": "2026-11-12T17:29:47.000Z",
-                "replacedBy": ""
-              }
-            ],
-            "waiverId": ""
-          },
-          {
-            "criterionId": "66653-crit-4",
-            "code": "AC-4",
-            "text": "La limite est réglable par l'administrateur",
-            "type": "functional",
-            "version": 1,
-            "requiredStrength": "machine-verified",
-            "bestEvidenceId": "",
-            "bestStrength": null,
-            "proven": false,
-            "waived": false,
-            "minor": false,
-            "defect": "no-evidence",
-            "expected": "Green automated test on the branch commit, or updated documentation page",
-            "evidences": [],
-            "waiverId": ""
-          }
-        ]
+        "waivers": []
       }
-    ],
-    "totals": {
-      "issues": 3,
-      "criteria": 8,
-      "proven": 3,
-      "machineVerified": 2,
-      "attested": 1,
-      "declared": 0,
-      "waived": 0
-    }
+    ]
   },
   "ci": null,
   "actors": [
