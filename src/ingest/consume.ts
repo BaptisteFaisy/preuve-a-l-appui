@@ -16,24 +16,7 @@ import type { IssueRef, Language, LivingProof, TestOutcome } from '../types';
 import { ciText } from '../i18n/ci';
 import { applyCiSummaryToEvidences } from '../domain/freshness';
 import { evaluateLivingProofs, type LivingAlert, type TrackedLivingItem } from '../domain/living';
-
-/** Statuts Jira qui signifient « livré » : la preuve vivante prend le relais (§13). */
-const CLOSED_STATUSES: readonly string[] = [
-  'done',
-  'closed',
-  'resolved',
-  'terminé',
-  'termine',
-  'fermé',
-  'ferme',
-  'résolu',
-  'resolu',
-];
-
-/** Vrai si le ticket est clos : la preuve vivante ne surveille que ceux-là. */
-export function isClosedStatus(status: string): boolean {
-  return CLOSED_STATUSES.includes(status.trim().toLowerCase());
-}
+import { isClosedStatus } from '../domain/status';
 
 /** Langue du projet, `en` si les réglages sont absents (SPEC §20). */
 export async function languageOf(deps: AppDeps, projectId: string): Promise<Language> {

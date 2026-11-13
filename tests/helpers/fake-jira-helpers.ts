@@ -5,7 +5,7 @@
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import type { ProjectMember } from '../../src/types';
-import type { IssueRef } from '../../src/types.js';
+import type { IssueRef, StatusTransition, TicketStatusHistory } from '../../src/types.js';
 import type { CallJournal, JiraWrite } from './fake-gateways.js';
 
 export interface FakeJiraState {
@@ -19,6 +19,8 @@ export interface FakeJiraState {
   notifications: { accountId: string; subjectKey: string; bodyKey: string; issueKey: string }[];
   /** Les instantanés écrits dans les propriétés de ticket, par ticket. */
   snapshots: Map<string, unknown>;
+  /** Les changements de statut joués, par clé de ticket. */
+  transitions: Map<string, StatusTransition[]>;
 }
 
 export function matchesProject(issue: IssueRef, projectId: string): boolean {
@@ -38,6 +40,17 @@ export function createJiraReader(state: FakeJiraState) {
     async listIssuesOfVersion(projectId: string, versionId: string): Promise<IssueRef[]> {
       state.journal.calls.push({ method: 'listIssuesOfVersion', args: [projectId, versionId] });
       return state.known.filter((i) => matchesProject(i, projectId) && i.fixVersions.includes(versionId));
+    },
+    async statusHistories(projectId: string): Promise<TicketStatusHistory[]> {
+      state.journal.calls.push({ method: 'statusHistories', args: [projectId] });
+      return state.known
+        .filter((issue) => matchesProject(issue, projectId))
+        .map((issue) => ({
+          issueId: issue.id,
+          issueKey: issue.key,
+          currentStatus: issue.status,
+          transitions: state.transitions.get(issue.key) ?? [],
+        }));
     },
   };
 }
