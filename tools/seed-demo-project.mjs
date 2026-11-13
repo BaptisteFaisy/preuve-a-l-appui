@@ -36,6 +36,7 @@ import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { DEMO_SCENARIOS } from './demo-scenarios.mjs';
+import { DEMO_COMMITS, DEMO_MAIN_COMMITS, DEMO_REPO } from './demo-scenarios/repo.mjs';
 
 const SITE = process.env.ATLASSIAN_SITE ?? 'one-atlas-cndz.atlassian.net';
 const EMAIL = process.env.ATLASSIAN_EMAIL ?? 'baptiste.faisy@gmail.com';
@@ -46,7 +47,6 @@ const CI_URL = process.env.DEMO_CI_URL ?? '';
 const CI_KEY = process.env.DEMO_CI_KEY ?? '';
 const CIBLE_FILE = process.env.DEMO_CIBLE ?? join(homedir(), '.atlassian', 'preuve-demo-cible.json');
 const MAIN_BRANCH = 'main';
-const REPO = 'BaptisteFaisy/preuve-a-l-appui';
 
 /** Les quatre rôles du catalogue : les mêmes clés que la cible. */
 const ACTOR_KEYS = ['developer', 'tester', 'owner', 'agent'];
@@ -243,19 +243,33 @@ async function bootstrap(ticket, cast) {
 
 /* -------------------------------------------------------------------- CI */
 
-/** Un commit stable par ticket : rejouer ne change rien. */
+/**
+ * Le commit d'un ticket : **l'empreinte réelle** de la branche qui porte son
+ * test, dans le dépôt public de la démonstration. Un jury peut donc vérifier
+ * une preuve : le commit existe, le test y est, et il passe.
+ */
 function commitOf(label) {
+  const known = DEMO_COMMITS[label];
+  if (typeof known === 'string' && known !== '') return known;
+  const fallback = DEMO_MAIN_COMMITS[label];
+  if (typeof fallback === 'string' && fallback !== '') return fallback;
   return createHash('sha1').update(label).digest('hex').slice(0, 16);
 }
 
 /** Joue un pipeline : résumé signé, poussé au web trigger de l'app. */
-async function pipeline({ branch, tests, commit, mainBranch }) {
+async function pipeline({ branch, tests, commit, mainBranch, failing = [] }) {
   const summary = {
-    repo: REPO,
+    repo: DEMO_REPO,
     branch,
     commit,
     mainBranch,
-    tests: tests.map((name) => ({ name, state: 'passed', durationMs: 40 })),
+    // Un test qui échoue reste un test : c'est ce que la CI publie, et c'est
+    // ce que l'app doit voir pour faire tomber la preuve vivante.
+    tests: tests.map((name) => ({
+      name,
+      state: failing.includes(name) ? 'failed' : 'passed',
+      durationMs: 40,
+    })),
     receivedAt: new Date().toISOString(),
   };
   const body = JSON.stringify(summary);
@@ -331,6 +345,16 @@ function unionTests(column) {
   return [...names];
 }
 
+
+/** Les tests que la branche principale fait ÉCHOUER (la régression rejouée). */
+function failingTests() {
+  const names = new Set();
+  for (const ticket of DEMO_SCENARIOS) {
+    for (const name of ticket.failing ?? []) names.add(name);
+  }
+  return [...names];
+}
+
 /** Joue un ticket : création, amorçage, pipeline, livraison. */
 async function playTicket(ticket, typeId, project, cast) {
   console.log(`${ticket.key} — ${ticket.summary}`);
@@ -342,6 +366,7 @@ async function playTicket(ticket, typeId, project, cast) {
       tests: ticket.tests,
       commit: commitOf(ticket.key),
       mainBranch: false,
+      failing: ticket.failing ?? [],
     });
     console.log(`  pipeline (branche) → ${status}`);
   }
@@ -416,13 +441,14 @@ console.log(
     mainBranch: true,
   })}`,
 );
-console.log(`${MAIN_BRANCH} — le test de latence a disparu`);
+console.log(`${MAIN_BRANCH} — le test de latence est rouge`);
 console.log(
   `  pipeline → ${await pipeline({
     branch: MAIN_BRANCH,
     tests: unionTests('mainTests'),
     commit: commitOf(`${MAIN_BRANCH}-regressed`),
     mainBranch: true,
+    failing: failingTests(),
   })}`,
 );
 

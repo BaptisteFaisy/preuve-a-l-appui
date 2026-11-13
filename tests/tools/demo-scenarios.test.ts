@@ -58,6 +58,7 @@ interface DemoTicket {
   branch: string;
   tests: string[];
   mainTests: string[];
+  failing?: string[];
   cast: Record<string, string>;
   close: boolean;
   reopen: boolean;
@@ -275,11 +276,28 @@ describe('les preuves et les paires test ↔ critère', () => {
     const reopened = tickets.filter((ticket) => ticket.close && ticket.reopen);
     expect(reopened.length).toBeGreaterThanOrEqual(1);
     for (const ticket of reopened) {
+      // La preuve tombe soit parce que le test a disparu de `main`, soit
+      // parce qu'il y est devenu ROUGE : les deux font tomber le critère.
       const fallen = ticket.scenario.links.filter(
-        (link) => link.status === 'confirmed' && !ticket.mainTests.includes(link.testName),
+        (link) =>
+          link.status === 'confirmed' &&
+          (!ticket.mainTests.includes(link.testName) ||
+            (ticket.failing ?? []).includes(link.testName)),
       );
       expect(fallen.length).toBeGreaterThanOrEqual(1);
     }
+  });
+
+  it('déclare un test rouge qui existe toujours sur la branche principale', () => {
+    // Un test « rouge » est un test qui ÉCHOUE : s'il avait disparu, la
+    // preuve serait « non prouvée », pas « régressée ».
+    for (const ticket of tickets) {
+      for (const name of ticket.failing ?? []) {
+        expect(ticket.mainTests).toContain(name);
+        expect(ticket.tests).toContain(name);
+      }
+    }
+    expect(tickets.some((ticket) => (ticket.failing ?? []).length > 0)).toBe(true);
   });
 
   it('garde les tests de main parmi les tests de la branche', () => {

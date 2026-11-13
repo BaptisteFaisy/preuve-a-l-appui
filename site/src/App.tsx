@@ -23,6 +23,7 @@ import { Problem } from './sections/Problem.js';
 import { Recipe } from './sections/Recipe.js';
 import { Rule } from './sections/Rule.js';
 import { Screens } from './sections/Screens.js';
+import { Simulator } from './sections/Simulator.js';
 
 export function App(): ReactElement {
   const [lang, setLang] = useState<Language>(initialLang());
@@ -49,6 +50,7 @@ export function App(): ReactElement {
             <Demo lang={lang} />
           </div>
         </section>
+        <Simulator lang={lang} />
         <Screens lang={lang} />
         <Agents lang={lang} />
         <Architecture lang={lang} />

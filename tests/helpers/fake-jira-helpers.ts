@@ -5,7 +5,12 @@
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import type { ProjectMember } from '../../src/types';
-import type { IssueRef, StatusTransition, TicketStatusHistory } from '../../src/types.js';
+import type {
+  IssueRef,
+  Language,
+  StatusTransition,
+  TicketStatusHistory,
+} from '../../src/types.js';
 import type { CallJournal, JiraWrite } from './fake-gateways.js';
 
 export interface FakeJiraState {
@@ -16,7 +21,13 @@ export interface FakeJiraState {
   writes: Record<JiraWrite, boolean>;
   rewrites: { issueId: string; section: string }[];
   coverageFields: { issueId: string; label: string; proven: number; total: number }[];
-  notifications: { accountId: string; subjectKey: string; bodyKey: string; issueKey: string }[];
+  notifications: {
+    accountId: string;
+    subjectKey: string;
+    bodyKey: string;
+    issueKey: string;
+    language: string;
+  }[];
   /** Les instantanés écrits dans les propriétés de ticket, par ticket. */
   snapshots: Map<string, unknown>;
   /** Les changements de statut joués, par clé de ticket. */
@@ -88,9 +99,18 @@ export function createJiraWriter(state: FakeJiraState) {
       state.snapshots.set(issueId, snapshot);
       return true;
     },
-    async notify(accountId: string, subjectKey: string, bodyKey: string, issueKey: string): Promise<boolean> {
-      state.journal.calls.push({ method: 'notify', args: [accountId, subjectKey, bodyKey, issueKey] });
-      state.notifications.push({ accountId, subjectKey, bodyKey, issueKey });
+    async notify(
+      accountId: string,
+      subjectKey: string,
+      bodyKey: string,
+      issueKey: string,
+      language: Language = 'en',
+    ): Promise<boolean> {
+      state.journal.calls.push({
+        method: 'notify',
+        args: [accountId, subjectKey, bodyKey, issueKey],
+      });
+      state.notifications.push({ accountId, subjectKey, bodyKey, issueKey, language });
       return state.writes.notify;
     },
     async displayName(accountId: string): Promise<string> {

@@ -17,12 +17,17 @@ import type {
   Waiver,
 } from '../types';
 import { buildCoverageFieldViewModel, type CoverageFieldViewModel } from './coverage';
+import { isDoublyProven } from '../domain/strength';
 
 export interface ProjectIssueItemViewModel {
   readonly issueId: string;
   readonly issueKey: string;
   readonly coverage: CoverageFieldViewModel;
   readonly passes: boolean;
+  /** Critères portant deux preuves indépendantes : machine ET humain (§9.1, §9.4). */
+  readonly doublyProvenCount: number;
+  /** Marqueur prêt à afficher ; vide quand aucun critère n'est doublement prouvé. */
+  readonly doublyProvenLabel: string;
 }
 
 export interface ProjectWaiverItemViewModel {
@@ -129,12 +134,22 @@ export function buildProjectPageViewModel(params: {
 }): ProjectPageViewModel {
   const { projectId, coverages, waivers, living, stats, language } = params;
 
-  const issues: ProjectIssueItemViewModel[] = coverages.map((cov) => ({
-    issueId: cov.issueId,
-    issueKey: cov.issueKey,
-    coverage: buildCoverageFieldViewModel(cov, language),
-    passes: cov.passes,
-  }));
+  const issues: ProjectIssueItemViewModel[] = coverages.map((cov) => {
+    // Recalculé depuis les preuves de chaque critère : la couverture stockée
+    // peut précéder le champ `doublyProven` (ligne lue en base).
+    const doublyProvenCount = cov.criteria.filter((state) => isDoublyProven(state)).length;
+    return {
+      issueId: cov.issueId,
+      issueKey: cov.issueKey,
+      coverage: buildCoverageFieldViewModel(cov, language),
+      passes: cov.passes,
+      doublyProvenCount,
+      doublyProvenLabel:
+        doublyProvenCount > 0
+          ? text(UI_MESSAGES, 'ui.project.doublyProven', language, { doubly: doublyProvenCount })
+          : '',
+    };
+  });
 
   const formattedWaivers = waivers.map(formatWaiverItem);
   const activeWaivers = formattedWaivers.filter((w) => !w.isRevoked);

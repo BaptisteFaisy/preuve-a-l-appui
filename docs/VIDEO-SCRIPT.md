@@ -1,83 +1,121 @@
-# Video script — under 5 minutes, English (SPEC §23)
+# Video script — 3 minutes, English (Codegeist 2026)
 
-Seven sequences, timed. *Says* is the spoken text; *Shows* is what is on
-screen. The demo data is PAY-123 exactly as described in
-[DEMO-DATA.md](DEMO-DATA.md): four criteria, two machine-verified proofs, one
-criterion waiting for an attestation, one without evidence — coverage **2 / 4**.
+> The video shows the **real** environment: the demo Jira site with the
+> `PRF` project (nine delivered tickets, version 2.4), the real proofs, and
+> the public site running the real engine on that data.
+>
+> Frames captured from the public site live in `docs/video/frames/`; each shot
+> below says which frame to use. The two shots marked **[session]** need a
+> logged-in Jira browser — they are the only ones that cannot be captured
+> automatically.
 
-## 1. 0:00 – 0:30 — The problem
+Three acts: **the problem**, **the rule**, **the proof that survives**. The
+spoken text is short on purpose: the screen carries the argument.
 
-**Shows.** A ticket marked *Done*, then a bug report: the fourth criterion was
-never actually delivered. Cut to the four acceptance criteria of PAY-123.
+## 0:00 – 0:25 — Act 1: "Done" was a declaration
 
-**Says.** “This ticket is Done. Four criteria were asked; three were actually
-delivered. The fourth one comes back as a bug two weeks later. Nothing in Jira
-linked ‘Done’ to what was asked. Done was a declaration — and with coding
-agents, declarations are cheap and plausible by construction.”
+**Shows.** A delivered ticket, then the bug it produced. Frame `01-probleme.png`
+(the public site, the problem section) cuts to the *real* project view:
+nine tickets, a coverage field per ticket, three of them closed on a waiver.
 
-## 2. 0:30 – 1:10 — The rule and the matrix
+**Says.** “This team shipped nine tickets last quarter. Three of them were
+closed on a waiver — a motivated one, on record. One of them was reopened
+weeks later, because the test that justified it had quietly disappeared from
+the main branch. Nothing in Jira linked *Done* to what was actually asked.
+Done was a declaration. And with coding agents, declarations are cheap and
+plausible by construction.”
 
-**Shows.** The ticket panel: the criteria × proofs matrix of PAY-123, required
-strength per criterion, coverage field `2 / 4`.
+## 0:25 – 0:55 — Act 2: the rule, and where the data comes from
 
-**Says.** “Our rule: no proof, no Done. Every acceptance criterion has a
-stable code, a type, and a minimum strength of proof: machine-verified, a
-named test green on the branch; attested, a third party checked it; or
-declared, an agent says so. The matrix shows, at a glance, what is proven and
-what the app still expects.”
+**Shows.** The one diagram that explains everything, then the site itself.
+Frames `02-schema.png` (the flow diagram) and `03-vitrine.png` (the hero,
+with the eligibility badge and the measured key numbers).
 
-## 3. 1:10 – 2:10 — The agent works, the CI feeds the app
+**Says.** “Our rule is one line: no proof, no Done. Every acceptance
+criterion has a stable code, a type, and a minimum strength of proof —
+machine-verified, a named test green on the branch; attested, a named human
+checked it; or declared, an agent says so. The summary of a CI run carries
+the test names and their states, never the logs. The app computes one
+coverage row, and the validator reads that row.”
 
-**Shows.** An agent calls `attach-evidence` twice (one test per criterion) and
-declares a report section for the third. The pipeline runs; the one-line CI
-command posts the summary; `AC-1` and `AC-2` turn green.
+## 0:55 – 1:35 — Act 3: the gate, for real
 
-**Says.** “The agent attaches two tests and a section of its report. When the
-pipeline ends, one line in it sends the test names and states — never logs —
-to the app. The two tests exist and pass on the pull-request commit: they
-become machine-verified proofs. The agent report stays *declared*: an agent
-can declare, it can never attest.”
+**Shows.** **[session]** The real Jira panel of `PRF-1`: the criteria × proofs
+matrix, the coverage field `2 / 4`, and the developer attempting *Done* —
+Jira refuses and names `AC-3` and `AC-4`, saying which proof each one is
+waiting for. Frame `04-matrice.png` is the same matrix rendered by the real
+view-model on the real data.
 
-## 4. 2:10 – 2:40 — The blocked transition
+**Says.** “She tries to close it. Jira blocks, and says why: *AC-3* needs a
+third-party attestation and only a declaration was received; *AC-4* has no
+evidence at all. The validator reads one precomputed row, so it answers in
+well under a second.”
 
-**Shows.** The developer attempts *Done*. Jira refuses; the message names
-`AC-3` and `AC-4` with the expected proof for each.
+## 1:35 – 2:05 — the two ways out, and the one that is refused
 
-**Says.** “Now she tries to close the ticket. Jira blocks, and says why:
-`AC-3` needs a third-party attestation, only a declaration was received;
-`AC-4` has no evidence at all. The validator reads one precomputed row — it
-answers in well under a second.”
+**Shows.** The simulator on the public site: pick a criterion, pick a proof,
+and the verdict changes. Frames `05-simulateur.png` and
+`06-simulateur-refus.png` — the second one is the refusal: the assignee
+tries to attest her own criterion, and the app says no.
 
-## 5. 2:40 – 3:20 — Attestation, waiver, closure
+**Says.** “Two ways out. The tester actually triggers the case and attests in
+one click — she is not the assignee, and the app forbids self-attestation.
+Or the product owner grants a motivated waiver, criterion by criterion, and
+it stays on record. You can try it right here: pick a criterion, attach a
+proof, and watch the verdict move — and try to attest your own work, and
+watch it refuse.”
 
-**Shows.** The tester clicks *I checked* on `AC-3` with a screenshot; the
-product owner waives `AC-4` with the reason “Postponed to PAY-140”; the
-transition passes.
+## 2:05 – 2:40 — the proof that outlives the ticket
 
-**Says.** “The tester actually triggers a refusal, receives the email, and
-attests in one click — she is not the assignee, the app forbids self-
-attestation. `AC-4` is postponed to another ticket: the product owner grants a
-motivated waiver. The transition passes — and the waiver stays on record.”
+**Shows.** The project page on the public site: the delivered criteria that
+are **no longer proven**, because their test vanished from the main branch.
+Frames `07-preuve-vivante.png` (the living-proof table) and
+`08-dossier.png` (the whole project, ticket by ticket, with the release
+dossier of version 2.4).
 
-## 6. 3:20 – 4:00 — Six months later: the living proof
+**Says.** “And the part that no ticket tracker does. The ticket was delivered
+in March. In June, a test disappeared from the main branch. The app noticed,
+reopened the ticket, and told us which criterion lost its proof — with the
+commit that changed it. The waiver and the attestation are in the release
+dossier of the version. Every number on this page was computed by the app
+that is installed on a real Jira site, not by this page.”
 
-**Shows.** Another ticket disables the test that proved `AC-1`. Next run on
-main: PAY-123 is flagged “`AC-1` is no longer proven since commit `e41f`”.
+## 2:40 – 3:00 — the landing, and the invitation
 
-**Says.** “Six months later, an agent disables the test that proved `AC-1`.
-The app keeps watching the confirmed test-to-criterion pairs after closure:
-the test is gone from the run, so the delivered criterion is no longer proven.
-The team is notified — the proof does not evaporate.”
+**Shows.** The public site, full page: the 21 features, the site URL, the
+call to try it. Frame `09-final.png`.
 
-## 7. 4:00 – 4:50 — The dossier, the architecture, close
+**Says.** “The site you are looking at is static, and it replays the real
+engine on the real data of the demo tenant: the same modules, the same
+rules, the same verdict. Try it — the URL is on screen. And if you want to
+put this on your own Jira, the app is installable in two minutes; the link
+is in the description.”
 
-**Shows.** The proof dossier of version `2.4`: per ticket, criteria, proofs,
-attesters, waivers. Then the architecture slide: workflow validator, CI web
-trigger, consumer, `rovo:mcp`, pure domain.
+## Shooting notes
 
-**Says.** “Every release keeps a proof dossier: what was asked, what proves
-it, who attested, which waivers were granted. Under the hood: a Forge workflow
-validator, a web trigger for CI results, a queue, seven MCP tools and a Rovo
-agent — with a pure domain that never touches the runtime, so every decision
-is tested in memory. Done is no longer a declaration. It is a fact, with proof
-to back it up.”
+| | |
+|---|---|
+| Length | 2:55 — under the 3-minute cap |
+| Language | English (the jury is international); subtitles burned in |
+| Cursor | Highlight the criterion being talked about; no frantic mouse |
+| Cuts | Hard cuts only, on the beat of the sentence |
+| Sound | No music under the voice; a single low bed at −24 LUFS |
+| **[session]** shots | 2 (the real Jira panel and the blocked transition). They need a logged-in Jira browser: log in, open `PRF-1`, show the matrix panel and the coverage field, then attempt *Done* and let the app refuse. Everything else is a frame of the public site. |
+
+## Frames
+
+| Frame | What it shows | Source |
+|---|---|---|
+| `01-probleme.png` | The problem: a delivered ticket that comes back as a bug | `/#problem` |
+| `02-schema.png` | The one diagram: summary → queue → consumer → coverage → validator | `/#architecture` |
+| `03-vitrine.png` | The hero: eligibility badge and measured key numbers | `/` |
+| `04-matrice.png` | The criteria × proofs matrix on the real ticket | `/#demo` |
+| `05-simulateur.png` | The simulator, with a proof attached | `/#simulator` |
+| `06-simulateur-refus.png` | The simulator refusing a self-attestation | `/#simulator` |
+| `07-preuve-vivante.png` | The delivered criteria that are no longer proven | `/#screens` |
+| `08-dossier.png` | The whole project, ticket by ticket | `/#screens` |
+| `09-final.png` | The whole page | `/` |
+
+Captured with: `google-chrome --headless --screenshot=… --window-size=1440,900`.
+The public site is fully static: every frame is the real rendering, with the
+real data of the demo tenant.

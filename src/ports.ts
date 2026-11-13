@@ -9,6 +9,7 @@
  * functions < 50 lines.
  */
 import type {
+  Language,
   Actor,
   Attestation,
   CiSummary,
@@ -89,7 +90,18 @@ export interface JiraGateway {
   projectMembers(projectId: string): Promise<readonly ProjectMember[]>;
   /** The key of a project, from its numeric id (`PAY` from `10238`). */
   projectKey(projectId: string): Promise<string>;
-  notify(accountId: string, subjectKey: string, bodyKey: string, issueKey: string): Promise<boolean>;
+  /**
+   * Notifie un compte sur un ticket. `subjectKey` et `bodyKey` sont des clés
+   * de message : la passerelle les traduit dans la langue du projet. Un texte
+   * déjà traduit est renvoyé tel quel.
+   */
+  notify(
+    accountId: string,
+    subjectKey: string,
+    bodyKey: string,
+    issueKey: string,
+    language?: Language,
+  ): Promise<boolean>;
   displayName(accountId: string): Promise<string>;
 }
 
@@ -139,6 +151,39 @@ export interface ActorContext {
   /** True when the call comes from `rovo:mcp` or `action` (SPEC §15). */
   fromMcp: boolean;
   cloudId: string;
+}
+
+/* ------------------------------------------------------------ notifications */
+
+/**
+ * Un message à porter vers un canal externe (Slack, Teams, Discord).
+ *
+ * Le port ne transporte que du texte déjà résolu : l'adaptateur n'a rien à
+ * deviner de la langue ni du domaine (SPEC §20).
+ */
+export interface WebhookMessage {
+  /** Le message, déjà traduit dans la langue du projet. */
+  readonly text: string;
+  /** Le ticket concerné — pour le journal, jamais envoyé. */
+  readonly issueKey: string;
+}
+
+/**
+ * Notifie un canal externe, en plus de Jira (SPEC §13).
+ *
+ * Le port ne lève jamais : une notification ratée ne doit pas faire échouer
+ * le traitement d'un résumé de CI (SPEC §17). Une implémentation qui n'a
+ * rien à dire renvoie `false` — c'est le cas quand aucun webhook n'est
+ * configuré.
+ */
+export interface WebhookNotifier {
+  /**
+   * Y a-t-il un canal configuré ? Faux quand l'URL est absente ou vide : dans
+   * ce cas l'appelant ne tente rien, ne journalise rien, ne lève rien.
+   */
+  readonly enabled: boolean;
+  /** Vrai quand le message est parti et a été accepté ; faux sinon. */
+  send(message: WebhookMessage): Promise<boolean>;
 }
 
 /* ------------------------------------------------------------------- storage */

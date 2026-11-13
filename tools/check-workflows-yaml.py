@@ -13,7 +13,8 @@ import sys
 FILES = [".github/workflows/ci.yml", ".github/workflows/ci-budget.yml",
          ".github/workflows/couche0.yml", ".github/workflows/pr-auto-merge.yml",
          ".github/workflows/site.yml", ".github/workflows/stale-base-guard.yml",
-         ".github/workflows/triage-rouge.yml"]
+         ".github/workflows/triage-rouge.yml",
+         ".github/workflows/eligibility.yml"]
 
 errors = []
 

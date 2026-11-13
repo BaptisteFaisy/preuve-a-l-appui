@@ -15,7 +15,8 @@
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 import { route } from '@forge/api';
-import type { ProjectMember, TicketStatusHistory } from '../types';
+import type { Language, ProjectMember, TicketStatusHistory } from '../types';
+import { NOTIFICATION_MESSAGES } from '../i18n/notifications';
 import { readStatusHistories } from './jira-changelog';
 import type { Route } from '@forge/api';
 import type { JiraGateway } from '../ports';
@@ -417,6 +418,16 @@ async function notifyByComment(
   });
 }
 
+/**
+ * Traduit une clé de notification dans la langue du projet. Une clé inconnue
+ * est renvoyée telle quelle : certains appelants fournissent déjà un texte.
+ */
+function translateNotification(key: string, language: Language): string {
+  const entry = NOTIFICATION_MESSAGES[key];
+  if (entry === undefined) return key;
+  return entry[language] ?? entry.en ?? key;
+}
+
 /** Rôles, notification et nom affiché : tout ce qui concerne les comptes. */
 function createJiraPeopleWrites(state: JiraState) {
   return {
@@ -432,14 +443,19 @@ function createJiraPeopleWrites(state: JiraState) {
       subjectKey: string,
       bodyKey: string,
       issueKey: string,
+      language: Language = 'en',
     ): Promise<boolean> {
       if (!issueKey) return false;
+      // Les clés sont traduites ici : le destinataire lisait jusqu'ici
+      // « ci.living.unproven.subject » au lieu du texte (SPEC §20).
+      const subject = translateNotification(subjectKey, language);
+      const body = translateNotification(bodyKey, language);
       const sent = await state.transport.write(route`/rest/api/3/issue/${issueKey}/notify`, 'POST', {
-        subject: subjectKey,
-        textBody: bodyKey,
+        subject,
+        textBody: body,
         to: { users: accountId ? [{ accountId }] : [] },
       });
-      return sent || notifyByComment(state, issueKey, accountId, subjectKey, bodyKey);
+      return sent || notifyByComment(state, issueKey, accountId, subject, body);
     },
     async displayName(accountId: string): Promise<string> {
       if (!accountId) return '';

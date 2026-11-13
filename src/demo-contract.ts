@@ -79,6 +79,14 @@ export interface SnapshotDossierIssue {
   readonly total: number;
   readonly proven: number;
   readonly waived: number;
+  /**
+   * Combien de ses critères sont doublement prouvés — une preuve vérifiée par
+   * la machine ET une attestation humaine (SPEC §9.1, §9.4). Un entier, pas le
+   * détail : la propriété Jira qui porte l'instantané refuse plus de
+   * 32 768 octets. Absent d'un instantané publié avant cette information :
+   * il se lit alors comme zéro.
+   */
+  readonly doublyProven?: number;
   readonly waivers: readonly SnapshotDossierWaiver[];
 }
 

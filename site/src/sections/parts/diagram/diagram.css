@@ -1,0 +1,149 @@
+/* Schéma inline de la vitrine — contraste AA, contenu sans couleur seule. */
+
+.diagram-figure {
+  margin: var(--space-6) 0 0;
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.68fr);
+  align-items: start;
+}
+
+.diagram-canvas {
+  min-width: 0;
+  /* Le SVG ne grandit pas au-delà de sa lisibilité : à 30rem, un titre de
+     12,5 unités fait ~17,6 px, et le schéma reste compact sur grand écran. */
+  max-width: 30rem;
+  padding: var(--space-3);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-lg);
+  background: var(--colour-surface-raised);
+}
+
+.diagram-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.diagram-lane {
+  fill: var(--colour-text-subtle);
+  font: 600 8px var(--font-stack);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.diagram-link {
+  fill: none;
+  stroke: var(--colour-brand-strong);
+  stroke-width: 1.8;
+  vector-effect: non-scaling-stroke;
+}
+
+.diagram-link--dashed {
+  stroke: var(--colour-warn);
+  stroke-dasharray: 4 3;
+}
+
+.diagram-arrowhead {
+  fill: var(--colour-brand-strong);
+}
+
+.diagram-box rect {
+  fill: var(--colour-surface);
+  stroke: var(--colour-border);
+  stroke-width: 1;
+}
+
+.diagram-box--gate rect {
+  fill: var(--colour-warn-bg);
+  stroke: var(--colour-warn);
+  stroke-width: 1.4;
+}
+
+.diagram-box--ok rect {
+  fill: var(--colour-ok-bg);
+  stroke: var(--colour-ok);
+  stroke-width: 1.4;
+}
+
+.diagram-box--refused rect {
+  fill: var(--colour-bad-bg);
+  stroke: var(--colour-bad);
+  stroke-width: 1.4;
+}
+
+.diagram-box--human rect {
+  fill: color-mix(in srgb, var(--colour-brand) 10%, var(--colour-surface));
+  stroke: var(--colour-brand);
+  stroke-width: 1.4;
+}
+
+.diagram-title,
+.diagram-detail {
+  fill: var(--colour-text);
+}
+
+.diagram-title {
+  font: 600 12.5px var(--font-stack);
+}
+
+.diagram-detail {
+  font: 10px var(--font-stack);
+}
+
+.diagram-caption {
+  min-width: 0;
+  color: var(--colour-text-subtle);
+}
+
+.diagram-desc {
+  margin: 0 0 var(--space-4);
+}
+
+.diagram-steps-title {
+  margin: 0 0 var(--space-2);
+  color: var(--colour-text);
+  font-weight: 700;
+}
+
+.diagram-steps {
+  margin: 0;
+  padding-left: var(--space-6);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.diagram-step {
+  padding-left: var(--space-1);
+}
+
+@media (max-width: 760px) {
+  .diagram-figure {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sur téléphone, chaque pixel gagné sur les marges est un pixel de texte :
+     le cadre se resserre pour que le SVG reste à l'échelle 1. */
+  .diagram-canvas {
+    padding: var(--space-1);
+  }
+
+  .diagram-caption {
+    max-width: var(--measure);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diagram-svg * {
+    transition: none;
+  }
+}
+
+.diagram-steps-heading {
+  margin-bottom: var(--space-3);
+}
+
+.diagram-steps-block + .diagram-steps-block {
+  margin-top: var(--space-4);
+}

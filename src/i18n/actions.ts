@@ -9,6 +9,15 @@
 import type { Messages } from './index';
 
 export const ACTION_MESSAGES: Messages = {
+  /* --------------------------------------------- demandes de notification (§15) */
+  'request.notify.subject': {
+    en: 'Your verification is requested',
+    fr: 'Votre vérification est demandée',
+  },
+  'request.notify.body': {
+    en: 'One acceptance criterion of this ticket needs your verification.',
+    fr: 'Un critère d’acceptation de ce ticket a besoin de votre vérification.',
+  },
   /* ---------------------------------------------------------------- erreurs */
   'err.forbidden.action': {
     en: 'Action not allowed: agents cannot attest, waive, validate criteria or alter requirements directly (SPEC §15, §22 point 11).',

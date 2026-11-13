@@ -1,11 +1,16 @@
 /**
- * Ouverture du site : la promesse, puis la matrice du ticket de démonstration.
+ * Ouverture du site : la promesse, la preuve d'éligibilité, les chiffres
+ * mesurés, puis la matrice du ticket de démonstration.
  *
  * La maquette n'est pas un dessin : elle affiche les vrais critères du jeu
  * PAY-123 (`src/sample/pay-123.ts`), les vrais libellés de force et de défaut
  * (`src/i18n/gate.ts`) et le vrai libellé du champ de couverture
  * (`coverageFieldLabel`). Ce que le visiteur voit ici est ce que l'app écrit
  * dans Jira.
+ *
+ * Sous la promesse : le badge « Runs on Atlassian » et la bande de chiffres
+ * clés (lot `site-vitrine-confiance`) — les chiffres de l'app sont lus dans
+ * l'instantané réel, ceux du dépôt portent leur source.
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
@@ -17,9 +22,10 @@ import { GATE_MESSAGES } from '../../../src/i18n/gate.js';
 import { DOCS_MESSAGES } from '../../../src/i18n/docs.js';
 import { createDemoCriteria, DEMO_ISSUE_KEY } from '../../../src/sample/pay-123.js';
 import { stringsFor } from '../i18n/index.js';
+import { KeyFigures } from './parts/diagram/KeyFigures.js';
+import { RunsOnAtlassian } from './parts/diagram/RunsOnAtlassian.js';
+import { REPO_URL } from './parts/diagram/sources.js';
 import './Hero.css';
-
-const REPO = 'https://github.com/Tradoooo/preuve-a-l-appui';
 
 /** Une ligne de la maquette : critère réel + état illustratif du §7.2. */
 interface MockRow {
@@ -104,27 +110,20 @@ export function Hero({ lang }: { lang: Language }): ReactElement {
             <em>{t.titleEmphasis}</em>
           </h1>
           <p className="lede">{t.lede}</p>
+          <RunsOnAtlassian lang={lang} />
           <p className="hero-actions">
             <a className="button" href="#demo">
               {t.ctaDemo}
             </a>
-            <a className="button secondary" href={REPO} rel="noreferrer">
+            <a className="button secondary" href={REPO_URL} rel="noreferrer">
               {t.ctaRepo}
             </a>
           </p>
-          <ul className="hero-stats">
-            <li>
-              <strong>4</strong> {t.statCriteria}
-            </li>
-            <li>
-              <strong>6</strong> {t.statProofTypes}
-            </li>
-            <li>
-              <strong>11</strong> {t.statTests}
-            </li>
-          </ul>
         </div>
         <MatrixMock lang={lang} />
+      </div>
+      <div className="wrap">
+        <KeyFigures lang={lang} />
       </div>
     </section>
   );

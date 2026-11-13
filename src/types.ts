@@ -243,6 +243,17 @@ export interface CriterionState {
   bestEvidenceId: string;
   bestStrength: Strength | null;
   proven: boolean;
+  /**
+   * True when the criterion carries two independent proofs: one verified by
+   * the machine (a test) AND one attested by a human (SPEC §9.1, §9.4).
+   *
+   * Additive, not a new strength: the strength of each proof stays what it
+   * is (`declared` / `attested` / `machine-verified`), so the grading scale,
+   * the statistics and the dossier do not move. Optional because a coverage
+   * row read back from the database may predate the field — `isDoublyProven`
+   * recomputes it from the proofs.
+   */
+  doublyProven?: boolean;
   waived: boolean;
   minor: boolean;
   defect: Defect | null;

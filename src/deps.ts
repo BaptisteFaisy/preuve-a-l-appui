@@ -14,6 +14,7 @@ import { createJiraGateway } from './collect/jira';
 import { createEvidenceChecker } from './collect/checker';
 import { createLlmGateway } from './collect/llm';
 import { createIdentityGateway } from './collect/identity';
+import { defaultWebhookNotifier } from './collect/webhook';
 import { createCoverageEngine } from './domain/coverage-engine';
 import { publishSnapshot } from './ingest/snapshot';
 import type {
@@ -27,6 +28,7 @@ import type {
   LlmGateway,
   Logger,
   ProofStore,
+  WebhookNotifier,
 } from './ports';
 
 /** Tout ce dont un handler a besoin, injecté, jamais global. */
@@ -42,6 +44,12 @@ export interface AppDeps {
   clock: Clock;
   ids: IdGenerator;
   logger: Logger;
+  /**
+   * Notification hors Jira (Slack, Teams, Discord), **optionnelle** : le canal
+   * n'existe que si l'URL est posée dans `FORGE_USER_VAR_NOTIFY_WEBHOOK`.
+   * Absent (tests, site public, canal non configuré) → rien n'est envoyé.
+   */
+  webhook?: WebhookNotifier;
 }
 
 /** Horloge réelle : tous les horodatages de l'app passent par là. */
@@ -102,5 +110,8 @@ export function createAppDeps(queue: JobQueue, sql?: SqlClient): AppDeps {
     clock,
     ids: createSystemIds(),
     logger,
+    // L'adaptateur lit la variable d'app à chaque envoi : le canal est
+    // facultatif, et l'absence de variable ne coûte aucun appel réseau.
+    webhook: defaultWebhookNotifier(),
   };
 }

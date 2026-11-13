@@ -9,6 +9,7 @@
  */
 import { text } from '../i18n/index';
 import { UI_MESSAGES } from '../i18n/ui';
+import { isDoublyProven } from '../domain/strength';
 import type {
   Coverage,
   CriterionRevision,
@@ -55,6 +56,10 @@ export interface MatrixRowViewModel {
   readonly statusAppearance: LozengeAppearance;
   readonly isProven: boolean;
   readonly isWaived: boolean;
+  /** Deux preuves indépendantes : machine ET humain (additif, SPEC §9.1, §9.4). */
+  readonly doublyProven: boolean;
+  /** Libellé du marqueur « doublement prouvé », vide quand il ne s'applique pas. */
+  readonly doublyProvenLabel: string;
   readonly hasDefect: boolean;
   readonly defectLabel: string;
   readonly expectedProof: string;
@@ -88,6 +93,8 @@ export interface MatrixViewModel {
   readonly waivedText: string;
   readonly rows: readonly MatrixRowViewModel[];
   readonly defectsCount: number;
+  /** Combien de critères du ticket sont doublement prouvés (SPEC §9.1, §9.4). */
+  readonly doublyProvenCount: number;
   readonly hasCriteria: boolean;
 }
 
@@ -191,6 +198,9 @@ export function buildMatrixRow(
   rights?: MatrixRights,
 ): MatrixRowViewModel {
   const status = resolveStatusKind(crit);
+  // Recalculé depuis les preuves : une ligne de couverture relue en base peut
+  // précéder le champ `doublyProven`.
+  const doublyProven = isDoublyProven(crit);
   return {
     criterionId: crit.criterionId,
     code: crit.code,
@@ -204,6 +214,10 @@ export function buildMatrixRow(
     statusAppearance: resolveLozengeAppearance(status),
     isProven: crit.proven,
     isWaived: crit.waived,
+    doublyProven,
+    doublyProvenLabel: doublyProven
+      ? text(UI_MESSAGES, 'ui.matrix.doublyProven', language)
+      : '',
     hasDefect: crit.defect !== null,
     defectLabel: crit.defect ? text(UI_MESSAGES, `defect.${crit.defect}`, language) : '',
     expectedProof: crit.expected,
@@ -235,6 +249,7 @@ export function buildMatrixViewModel(
       waivedText: '',
       rows: [],
       defectsCount: 0,
+      doublyProvenCount: 0,
       hasCriteria: false,
     };
   }
@@ -256,6 +271,7 @@ export function buildMatrixViewModel(
         : '',
     rows,
     defectsCount: rows.filter((r) => r.hasDefect).length,
+    doublyProvenCount: rows.filter((r) => r.doublyProven).length,
     hasCriteria: coverage.total > 0,
   };
 }

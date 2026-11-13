@@ -10,6 +10,7 @@
  */
 import type { ReactElement } from 'react';
 import type { Language } from '../../../src/types.js';
+import { SIMULATOR_STRINGS } from '../i18n/simulator.js';
 import { stringsFor } from '../i18n/index.js';
 import './Nav.css';
 
@@ -22,12 +23,16 @@ export interface NavProps {
 const REPO = 'https://github.com/Tradoooo/preuve-a-l-appui';
 
 /** Les ancres, dans l'ordre de lecture de la page. */
-function anchors(t: ReturnType<typeof stringsFor>['nav']): { href: string; label: string }[] {
+function anchors(
+  t: ReturnType<typeof stringsFor>['nav'],
+  lang: Language,
+): { href: string; label: string }[] {
   return [
     { href: '#problem', label: t.problem },
     { href: '#rule', label: t.rule },
     { href: '#features', label: t.features },
     { href: '#demo', label: t.demo },
+    { href: '#simulator', label: SIMULATOR_STRINGS[lang].navLabel },
     { href: '#screens', label: t.screens },
     { href: '#agents', label: t.agents },
     { href: '#architecture', label: t.architecture },
@@ -38,7 +43,7 @@ function anchors(t: ReturnType<typeof stringsFor>['nav']): { href: string; label
 
 export function Nav({ lang, onToggleLang }: NavProps): ReactElement {
   const t = stringsFor(lang);
-  const links = anchors(t.nav);
+  const links = anchors(t.nav, lang);
   return (
     <header className="site-header">
       <div className="wrap site-header-row">

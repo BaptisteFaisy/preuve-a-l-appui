@@ -20,6 +20,7 @@ import type {
 import { text } from '../i18n/index';
 import { GATE_MESSAGES } from '../i18n/gate';
 import { findActiveWaiver } from './waivers';
+import { isDoubleProven } from './strength';
 
 export interface CriterionEvaluationInput {
   criterion: Criterion;
@@ -138,6 +139,9 @@ export function evaluateCriterionState(input: CriterionEvaluationInput): Criteri
     bestEvidenceId: evResult.bestEvidenceId,
     bestStrength: evResult.bestStrength,
     proven,
+    // Additif (SPEC §9.1, §9.4) : une preuve machine ET une attestation. La
+    // force de chaque preuve ne change pas ; seule cette information s'ajoute.
+    doublyProven: isDoubleProven(input.evidences, criterion.id, criterion.version),
     waived,
     minor: isMinor,
     defect,

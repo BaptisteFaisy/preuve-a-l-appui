@@ -6,6 +6,17 @@
   font-size: 1.25rem;
 }
 
+/* Le schéma unique « comment ça marche » (lot site-vitrine-confiance). */
+.archi-scheme-title {
+  margin-bottom: var(--space-2);
+}
+
+.archi-scheme-lede {
+  margin: 0 0 var(--space-4);
+  color: var(--colour-text-subtle);
+  max-width: var(--measure);
+}
+
 .archi-flows {
   list-style: none;
   margin: var(--space-4) 0 0;

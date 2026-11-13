@@ -52,6 +52,12 @@ export const UI_MESSAGES: Messages = {
   'ui.matrix.status.waived': { en: 'Waived', fr: 'Dérogé' },
   'ui.matrix.status.missing': { en: 'Missing proof', fr: 'Preuve manquante' },
   'ui.matrix.status.toReconfirm': { en: 'To reconfirm', fr: 'À reconfirmer' },
+  // Preuve doublement prouvée (additif) : machine ET humain, sans nouveau niveau.
+  'ui.matrix.doublyProven': { en: 'Doubly proven', fr: 'Doublement prouvé' },
+  'ui.matrix.doublyProvenTitle': {
+    en: 'Two independent proofs: a machine-verified test and a human attestation',
+    fr: 'Deux preuves indépendantes : un test vérifié par la machine et une attestation humaine',
+  },
 
   // Dialogues / formulaires de la matrice
   'ui.matrix.form.evidenceType': { en: 'Evidence type', fr: 'Type de preuve' },
@@ -119,6 +125,8 @@ export const UI_MESSAGES: Messages = {
   'ui.project.stats.reopeningRate': { en: 'Reopening rates by proof strength', fr: 'Taux de réouverture selon la force des preuves' },
   'ui.project.col.issue': { en: 'Issue', fr: 'Ticket' },
   'ui.project.col.coverage': { en: 'Coverage', fr: 'Couverture' },
+  // Marqueur discret de la matrice du projet : des critères doublement prouvés.
+  'ui.project.doublyProven': { en: '{doubly} doubly proven', fr: '{doubly} doublement prouvés' },
   'ui.project.col.gate': { en: 'Gate', fr: 'Validateur' },
   'ui.project.col.criterion': { en: 'Criterion', fr: 'Critère' },
   'ui.project.col.grantedBy': { en: 'Granted by', fr: 'Accordée par' },
