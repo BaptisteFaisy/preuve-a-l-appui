@@ -59,8 +59,10 @@ jobs:
       - name: Jeton Atlassian présent ?
         id: jeton
         shell: bash
+        env:
+          TOKEN: ${{ secrets.ATLASSIAN_API_TOKEN }}
         run: |
-          if [ -n "${ATLASSIAN_API_TOKEN:-}" ]; then
+          if [ -n "${TOKEN:-}" ]; then
             echo 'present=true' >> "$GITHUB_OUTPUT"
             echo 'Jeton présent : relecture et publication en cours.'
           else
