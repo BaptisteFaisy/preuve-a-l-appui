@@ -19,8 +19,9 @@ name: eligibility (Runs on Atlassian)
 #
 # Budget : 5 minutes par job (règle CI du 24 octobre 2026). Le runner
 # self-hosted est persistant : la CLI Forge est installée une fois dans
-# `$HOME/.cache/forge-cli/<version>` et réutilisée d'un run à l'autre, le cache
-# npm est partagé. Jamais de timeout allongé : on optimise ou on découpe.
+# `$HOME/.cache/forge-cli/<version>` et réutilisée d'un run à l'autre ; `~/.npm`
+# reste chaud sur le runner sans `actions/cache`. Jamais de timeout allongé : on
+# optimise ou on découpe.
 
 on:
   pull_request:
@@ -55,7 +56,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
+          # Pas de `cache: npm` ici : ce job ne court jamais `npm ci` (la CLI
+          # Forge est déjà posée dans $HOME/.cache). L'action archiverait ~1,6
+          # Go de cache npm à chaque absence de clé — 100 s à 15 Mo/s, soit le
+          # budget du job mangé après un check déjà vert (run 43607021687, le
+          # 14/11/2026). Le runner self-hosted garde ~/.npm chaud tout seul.
 
       # La CLI Forge est déjà celle que le dépôt connaît (14.2, cf.
       # tools/check-manifest.mjs) : elle accepte `forge eligibility` et un

@@ -94,9 +94,12 @@ describe('l\'âge des données affichées', () => {
   });
 
   it('affiche une date lisible, jamais un horodatage brut', () => {
+    // Le runner est en UTC, la machine de développement en Europe/Paris : on
+    // verrouille la forme (jour + heure), pas l'heure locale calculée.
     const fr = stampLabel('2026-11-13T17:09:56.822Z', 'fr');
     expect(fr).toContain('13');
-    expect(fr).toContain('18:09');
+    expect(fr).toMatch(/\d{1,2}:\d{2}/);
+    expect(fr).not.toContain('2026-11-13T');
     expect(stampLabel('', 'fr')).toBe('');
     expect(stampLabel('pas une date', 'fr')).toBe('');
   });
