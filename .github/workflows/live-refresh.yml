@@ -61,6 +61,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          # Runner hébergé, comme `site.yml` : le cache npm passe par le service
+          # GitHub et c'est rapide. Ce qui a mangé les 5 minutes du job
+          # d'éligibilité le 14/11/2026, c'était un runner self-hosted archivant
+          # 1,6 Go sur ma ligne domestique — pas le cas ici, et ce job court
+          # bien `npm ci`, contrairement à lui.
           cache: npm
 
       - name: Dépendances (npm ci)
