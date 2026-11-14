@@ -99,6 +99,12 @@ export function createJiraWriter(state: FakeJiraState) {
       state.snapshots.set(issueId, snapshot);
       return true;
     },
+  };
+}
+
+/** Les annonces : le seul endroit où l'app écrit pour un humain. */
+export function createJiraNotifier(state: FakeJiraState) {
+  return {
     async notify(
       accountId: string,
       subjectKey: string,

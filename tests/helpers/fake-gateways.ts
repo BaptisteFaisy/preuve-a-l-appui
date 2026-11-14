@@ -34,6 +34,7 @@ import type {
   StatusTransition,
 } from '../../src/types.js';
 import {
+  createJiraNotifier,
   createJiraReader,
   createJiraWriter,
   type FakeJiraState,
@@ -141,6 +142,7 @@ export function createFakeJira(
     notifications: state.notifications,
     ...createJiraReader(state),
     ...createJiraWriter(state),
+    ...createJiraNotifier(state),
     addIssue(issue) {
       state.known.push(issue);
       return jira;
