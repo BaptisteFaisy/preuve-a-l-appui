@@ -24,8 +24,8 @@ const ISSUE_ID = '66701';
 const ISSUE_KEY = 'PAY-7';
 const CRITERION_ID = '66701-crit-AC-1';
 
-/** Un ticket, ses réglages et une dérogation qui expire. */
-async function setup(expiresAt: string) {
+/** Un ticket de démonstration, ses réglages et son critère de performance. */
+async function setupTicket() {
   const store = createFakeStore();
   const jira = createFakeJira([
     anIssue({
@@ -64,6 +64,11 @@ async function setup(expiresAt: string) {
     criteria: [],
     updatedAt: '2026-11-01T10:00:00.000Z',
   });
+  return { store, jira };
+}
+
+/** La dérogation du critère, avec l'échéance demandée. */
+async function grantWaiver(store: ReturnType<typeof createFakeStore>, expiresAt: string) {
   await store.saveWaiver({
     id: 'wv-1',
     criterionId: CRITERION_ID,
@@ -74,6 +79,12 @@ async function setup(expiresAt: string) {
     expiresAt,
     revokedAt: '',
   });
+}
+
+/** Un ticket, ses réglages et une dérogation qui expire. */
+async function setup(expiresAt: string) {
+  const { store, jira } = await setupTicket();
+  await grantWaiver(store, expiresAt);
   // Le moteur de couverture est scripté : une fois la dérogation expirée, la
   // couverture change (le critère n'est plus dérogé, le ticket ne passe plus).
   const engine = createFakeCoverageEngine(store);
