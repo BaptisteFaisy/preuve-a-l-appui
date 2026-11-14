@@ -1,6 +1,6 @@
 name: Démo live (données réelles)
 
-# Rafraîchit et publie l'instantané réel toutes les dix minutes.
+# Rafraîchit et publie l'instantané réel toutes les quinze minutes.
 #
 # La démo du site public relit ce fichier à l'exécution
 # (`site/src/demo/live-fetch.ts`) : elle montre donc l'état COURANT de l'app
@@ -8,54 +8,62 @@ name: Démo live (données réelles)
 # l'instantané était embarqué à la construction — figé au dernier déploiement,
 # ce qui n'était plus une démo live.
 #
-# Le workflow régénère l'instantané dans le checkout, construit le site et le
-# déploie : il n'écrit rien dans le dépôt, `main` n'est jamais touché.
+# Découpé en deux jobs, parce que le jeton Atlassian ne quitte pas la maison :
 #
-# Sans jeton Atlassian (`gh secret set ATLASSIAN_API_TOKEN`), le run se termine
-# en vert avec un avertissement : rien n'est relu, rien n'est publié, et le
-# site garde son instantané embarqué. Inutile d'avoir un run rouge toutes les
-# dix minutes.
+#   1. relire  — runner self-hosted (la machine a `~/.atlassian-api-token` sur
+#      disque, jamais enregistré dans GitHub) : lit la propriété du ticket et
+#      transmet l'instantané pseudonymisé en artefact. Aucune dépendance npm.
+#   2. publier — runner hébergé : construit le site et le pousse sur Pages,
+#      comme `site.yml`.
+#
+# Aucun des deux n'écrit dans le dépôt : `main` n'est jamais touché, aucune
+# protection de branche n'est contournée.
+#
+# Sans jeton (fichier absent et secret non enregistré), le run sort **vert**
+# avec un avertissement et ne publie rien : un job entièrement sauté était
+# compté « failure » par GitHub, soit un run rouge toutes les quinze minutes
+# pour rien. Le site garde alors son instantané embarqué et l'affiche.
 #
 # Éligibilité « Runs on Atlassian » préservée : l'app garde ses deux
 # déclencheurs STATIQUES, le site lit un fichier public sur sa propre origine,
-# jamais l'app en direct (docs/LIVE-DEMO.md §6). `tools/check-eligibility.mjs`
-# continue de le vérifier dans `ci.yml`.
+# jamais l'app en direct (docs/LIVE-DEMO.md §6).
 #
 # Budget : 5 minutes par job (règle CI de fin octobre 2026), un seul run à la
-# fois, `fetch-depth: 1`.
+# fois, `fetch-depth: 1`, pas de `cache: npm` sur le runner self-hosted (il
+# archiverait 1,6 Go sur la ligne domestique — leçon du run 43607021687).
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
-# Même groupe de concurrence que le déploiement du site : un seul publication à
-# la fois, et on n'annule pas une publication en cours.
+# Même groupe de concurrence que le déploiement du site : une seule publication
+# à la fois, et on n'annule pas une publication en cours.
 concurrency:
   group: pages-main
   cancel-in-progress: false
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
-  publish:
-    name: relire-et-publier
-    runs-on: ubuntu-latest
+  # ─── 1. relire : le jeton reste sur la machine ────────────────────────────
+  relire:
+    name: relire-dans-jira
+    runs-on: [self-hosted, linux, x64, preuve-a-l-appui-worker]
     timeout-minutes: 5
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # Le verdict du job est lu par le job de publication : sans jeton, celui-ci
+    # ne tourne pas (et le run reste vert, le bilan étant porté par `relire`).
+    outputs:
+      present: ${{ steps.jeton.outputs.present }}
+      source: ${{ steps.jeton.outputs.source }}
     env:
+      # Un secret peut quand même être enregistré (autre machine, autre opéra­
+      # teur) : il passe avant le fichier local, sinon le fichier du runner.
       ATLASSIAN_API_TOKEN: ${{ secrets.ATLASSIAN_API_TOKEN }}
       ATLASSIAN_EMAIL: ${{ secrets.ATLASSIAN_EMAIL }}
       ATLASSIAN_SITE: ${{ vars.ATLASSIAN_SITE || 'one-atlas-cndz.atlassian.net' }}
       ATLASSIAN_ISSUE: ${{ vars.ATLASSIAN_ISSUE || 'PRF-1' }}
     steps:
-      # Sans jeton, le workflow n'échoue pas en rouge toutes les dix minutes :
-      # il le dit (avertissement) et ne publie rien. Un job entièrement sauté
-      # était compté comme « failure » par GitHub — du bruit, pas un signal.
       - name: Jeton Atlassian présent ?
         id: jeton
         shell: bash
@@ -64,10 +72,16 @@ jobs:
         run: |
           if [ -n "${TOKEN:-}" ]; then
             echo 'present=true' >> "$GITHUB_OUTPUT"
-            echo 'Jeton présent : relecture et publication en cours.'
+            echo "source=secret" >> "$GITHUB_OUTPUT"
+            echo 'Jeton trouvé dans les secrets du dépôt.'
+          elif [ -r "$HOME/.atlassian-api-token" ]; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+            echo "source=fichier local" >> "$GITHUB_OUTPUT"
+            echo 'Jeton lu dans ~/.atlassian-api-token : il ne quitte pas la machine.'
           else
             echo 'present=false' >> "$GITHUB_OUTPUT"
-            echo "::warning::Jeton ATLASSIAN_API_TOKEN absent : rien n'est relu ni publié. Le site garde son instantané embarqué (gh secret set ATLASSIAN_API_TOKEN --repo Tradoooo/preuve-a-l-appui)."
+            echo "source=aucun" >> "$GITHUB_OUTPUT"
+            echo "::warning::Aucun jeton Atlassian (ni secret, ni ~/.atlassian-api-token sur le runner) : rien n'est relu ni publié. Le site garde son instantané embarqué et l'affiche."
           fi
 
       - uses: actions/checkout@v4
@@ -81,45 +95,75 @@ jobs:
         if: steps.jeton.outputs.present == 'true'
         with:
           node-version: '22'
-          # Runner hébergé, comme `site.yml` : le cache npm passe par le service
-          # GitHub et c'est rapide. Ce qui a mangé les 5 minutes du job
-          # d'éligibilité le 14/11/2026, c'était un runner self-hosted archivant
-          # 1,6 Go sur ma ligne domestique — pas le cas ici, et ce job court
-          # bien `npm ci`, contrairement à lui.
-          cache: npm
-
-      - name: Dépendances (npm ci)
-        if: steps.jeton.outputs.present == 'true'
-        run: npm ci --prefer-offline --no-audit --no-fund
+          # Pas de `cache: npm` : ce job n'installe aucune dépendance (l'outil
+          # est du node pur) et le runner est persistant.
 
       - name: Instantané relu dans Jira
         if: steps.jeton.outputs.present == 'true'
         run: node tools/refresh-live-snapshot.mjs
 
-      - name: Garde — taille des fichiers et des fonctions
+      - name: Instantané transmis
         if: steps.jeton.outputs.present == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-snapshot
+          path: site/public/live-snapshot.json
+          retention-days: 1
+          if-no-files-found: error
+
+  # ─── 2. publier : construction et Pages, comme site.yml ──────────────────
+  publier:
+    name: publier-sur-pages
+    needs: relire
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: needs.relire.outputs.present == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Dépendances (npm ci)
+        run: npm ci --prefer-offline --no-audit --no-fund
+
+      - name: Instantané reçu
+        uses: actions/download-artifact@v4
+        with:
+          name: live-snapshot
+          path: site/public
+
+      - name: Garde — taille des fichiers et des fonctions
         run: npm run check:limits
 
       - name: Types du site (tsc -p site/tsconfig.json)
-        if: steps.jeton.outputs.present == 'true'
         run: npm run site:typecheck
 
       - name: Tests de la relecture et de l'âge
-        if: steps.jeton.outputs.present == 'true'
         run: npx vitest run tests/site
 
       - name: Construction du site (vite build)
-        if: steps.jeton.outputs.present == 'true'
         run: npm run site:build
 
       - name: Artefact Pages
-        if: steps.jeton.outputs.present == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist
 
       - name: Publication sur GitHub Pages
-        if: steps.jeton.outputs.present == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
 
@@ -127,9 +171,4 @@ jobs:
         if: always()
         shell: bash
         run: |
-          if [ "${{ steps.jeton.outputs.present }}" = 'true' ]; then
-            echo 'Instantané relu dans Jira et site republié.'
-          else
-            echo "Rien n'a été relu ni publié : jeton Atlassian absent."
-          fi
-
+          echo "Instantané relu par ${{ needs.relire.outputs.source }} et site republié."
