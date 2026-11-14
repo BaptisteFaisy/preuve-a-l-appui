@@ -131,7 +131,7 @@ export const EN: SiteStrings = {
   },
   demo: {
     title: "Live demo: {issue}",
-    lede: "This page runs the app’s real decision engine, compiled to the browser — the same criteria, strengths, coverage, independence rules and gate message as the Forge app. Nothing is faked, nothing is sent anywhere.",
+    lede: "This page runs the app’s real decision engine, compiled to the browser — the same criteria, strengths, coverage, independence rules and gate message as the Forge app. The data shown is the real state of the app installed on the demo site, re-read at runtime. Nothing is faked, nothing is sent anywhere.",
     engineNote: "Engine: src/domain/* and src/handlers/* of this repository, running in memory.",
     reset: "Reset the ticket",
     coverage: "Proofs",

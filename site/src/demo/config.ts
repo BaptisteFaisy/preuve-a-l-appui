@@ -1,33 +1,28 @@
 /**
- * Où la démo lit ses données, et sur quel ticket.
+ * Où la démo lit ses données, et à quelles conditions.
  *
- * Par défaut, la démo du site public lit l'état RÉEL de l'app installée sur le
- * site de démonstration Jira (web trigger `demo-data`, lot
- * `app-donnees-reelles`) : le même ticket, les mêmes critères, la même
- * couverture, lus dans Forge SQL et dans Jira. Le jeu PAY-123 embarqué dans le
- * dépôt reste le repli quand le réseau manque.
+ * La démo du site public relit **à l'exécution** l'instantané pseudonymisé que
+ * l'app installée écrit dans le ticket Jira (`proof-live-snapshot`). Ce fichier
+ * est publié sur la même origine que le site (GitHub Pages) par le workflow
+ * `live-refresh.yml`, qui rejoue `tools/refresh-live-snapshot.mjs` toutes les
+ * dix minutes : la démo part donc de l'état RÉEL de l'app, et affiche l'âge de
+ * cet état. Le jeu PAY-123 embarqué reste le repli quand la relecture échoue.
  *
- * Ces valeurs sont publiques par nature : l'URL du web trigger ne donne accès
- * qu'à une lecture pseudonymisée (aucun identifiant de compte ne sort).
+ * L'app, elle, garde deux déclencheurs **statiques** : le site lit un fichier
+ * public, jamais l'app en direct. C'est ce qui préserve l'éligibilité « Runs on
+ * Atlassian » (docs/LIVE-DEMO.md §6).
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
 
-/** URL du web trigger `demo-data` (lecture seule). */
-export const LIVE_ENDPOINT: string =
-  import.meta.env.VITE_PROOF_DEMO_URL ??
-  'https://b8d18d82-727c-47f9-9453-41e2309b7647.webtrigger.atlassian.app/public/0friQZ9-Ojl2OdCfYPCglQCfGjE';
+/** L'URL de base du site, posée par Vite (`site/vite.config.ts`, `base`). */
+const BASE_URL: string = (import.meta.env?.BASE_URL as string | undefined) ?? '/preuve-a-l-appui/';
 
-/** Le ticket lu en direct. */
-export const LIVE_ISSUE_KEY: string = import.meta.env.VITE_PROOF_DEMO_ISSUE ?? 'PRF-1';
+/** Où la démo relit les données réelles : la même origine que le site. */
+export const SNAPSHOT_URL: string = `${BASE_URL}live-snapshot.json`;
 
-/** Le site Jira d'origine, affiché comme provenance. */
-export const LIVE_SITE: string =
-  import.meta.env.VITE_PROOF_DEMO_SITE ?? 'one-atlas-cndz.atlassian.net';
+/** Délai maximal d'une relecture, en millisecondes : au-delà, on tombe au repli. */
+export const RELOAD_TIMEOUT_MS = 6000;
 
-/** Dépôt et branche du dernier passage de CI (pour rejouer un vrai résumé). */
-export const LIVE_REPO: string = 'BaptisteFaisy/preuve-a-l-appui';
-export const LIVE_BRANCH: string = 'feature/PRF-1-refusal-email';
-
-/** Délai maximal d'attente de la lecture, en millisecondes. */
-export const LIVE_TIMEOUT_MS = 8000;
+/** Fréquence de mise à jour de l'âge affiché, en millisecondes. */
+export const FRESHNESS_TICK_MS = 30_000;

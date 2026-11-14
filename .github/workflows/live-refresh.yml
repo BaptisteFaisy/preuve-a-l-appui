@@ -1,0 +1,91 @@
+name: Démo live (données réelles)
+
+# Rafraîchit et publie l'instantané réel toutes les dix minutes.
+#
+# La démo du site public relit ce fichier à l'exécution
+# (`site/src/demo/live-fetch.ts`) : elle montre donc l'état COURANT de l'app
+# installée sur le site de démonstration, avec son âge affiché. Avant,
+# l'instantané était embarqué à la construction — figé au dernier déploiement,
+# ce qui n'était plus une démo live.
+#
+# Le workflow régénère l'instantané dans le checkout, construit le site et le
+# déploie : il n'écrit rien dans le dépôt, `main` n'est jamais touché.
+#
+# Éligibilité « Runs on Atlassian » préservée : l'app garde ses deux
+# déclencheurs STATIQUES, le site lit un fichier public sur sa propre origine,
+# jamais l'app en direct (docs/LIVE-DEMO.md §6). `tools/check-eligibility.mjs`
+# continue de le vérifier dans `ci.yml`.
+#
+# Budget : 5 minutes par job (règle CI de fin octobre 2026), un seul run à la
+# fois, `fetch-depth: 1`.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+# Même groupe de concurrence que le déploiement du site : un seul publication à
+# la fois, et on n'annule pas une publication en cours.
+concurrency:
+  group: pages-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  publish:
+    name: relire-et-publier
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Sans jeton Atlassian enregistré, le job s'arrête là au lieu d'échouer en
+    # boucle toutes les dix minutes : `gh secret set ATLASSIAN_API_TOKEN`
+    # (et ATLASSIAN_EMAIL) l'active. Rien n'est publié tant que c'est absent.
+    if: ${{ secrets.ATLASSIAN_API_TOKEN != '' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      ATLASSIAN_API_TOKEN: ${{ secrets.ATLASSIAN_API_TOKEN }}
+      ATLASSIAN_EMAIL: ${{ secrets.ATLASSIAN_EMAIL }}
+      ATLASSIAN_SITE: ${{ vars.ATLASSIAN_SITE || 'one-atlas-cndz.atlassian.net' }}
+      ATLASSIAN_ISSUE: ${{ vars.ATLASSIAN_ISSUE || 'PRF-1' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Dépendances (npm ci)
+        run: npm ci --prefer-offline --no-audit --no-fund
+
+      - name: Instantané relu dans Jira
+        run: node tools/refresh-live-snapshot.mjs
+
+      - name: Garde — taille des fichiers et des fonctions
+        run: npm run check:limits
+
+      - name: Types du site (tsc -p site/tsconfig.json)
+        run: npm run site:typecheck
+
+      - name: Tests de la relecture et de l'âge
+        run: npx vitest run tests/site
+
+      - name: Construction du site (vite build)
+        run: npm run site:build
+
+      - name: Artefact Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+      - name: Publication sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

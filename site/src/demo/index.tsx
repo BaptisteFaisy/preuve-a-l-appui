@@ -37,7 +37,7 @@ export function Demo({ lang }: { lang: Language }): ReactElement {
 
   return (
     <div className="demo">
-      <DemoHeader lang={lang} snapshot={snapshot} />
+      <DemoHeader lang={lang} snapshot={snapshot} onReload={() => demo.reload()} />
 
       <Controls
         lang={lang}

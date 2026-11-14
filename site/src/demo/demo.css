@@ -279,3 +279,36 @@
   flex: 1 1 18rem;
   max-width: var(--measure);
 }
+
+/* Bloc d'âge des données (lot `site-demo-live`) : depuis quand, et le bouton
+   qui relit l'instantané publié par l'app installée. */
+.demo-freshness {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3);
+  border: 1px solid var(--colour-border);
+  border-left: 4px solid var(--colour-border);
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  color: var(--colour-text-subtle);
+}
+
+.demo-freshness[data-tone='fresh'] { border-left-color: var(--colour-ok); }
+.demo-freshness[data-tone='older'] { border-left-color: var(--colour-warn); }
+
+.demo-freshness-title {
+  margin: 0 0 var(--space-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.demo-freshness-lines {
+  margin: 0 0 var(--space-3);
+  padding-left: 1.1rem;
+}
+
+.demo-freshness-lines li { margin: 0 0 2px; }
+
+.demo-freshness-note { margin: var(--space-2) 0 0; max-width: var(--measure); }
+.demo-freshness-note code { font-size: 0.78rem; }

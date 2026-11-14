@@ -40,6 +40,8 @@ export interface DemoApi {
   readonly advanced: Readonly<Record<string, GestureResult>>;
   advancedRun(id: string): Promise<void>;
   reset(): Promise<void>;
+  /** Relit l'instantané publié et reconstruit le monde dessus. */
+  reload(): Promise<void>;
 }
 
 /** Ce dont l'API a besoin : contexte courant, acteur choisi, langue, gestes. */
@@ -51,6 +53,7 @@ export interface ApiParams {
   setActor(accountId: string): void;
   advancedRun(id: string): Promise<void>;
   reset(): Promise<void>;
+  reload(): Promise<void>;
 }
 
 /** Tente la transition : le verdict du validateur entre au journal. */
@@ -88,5 +91,6 @@ export function buildApi(params: ApiParams): DemoApi {
     advanced,
     advancedRun: params.advancedRun,
     reset: params.reset,
+    reload: params.reload,
   };
 }

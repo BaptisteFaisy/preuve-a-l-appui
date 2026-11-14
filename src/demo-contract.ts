@@ -5,7 +5,8 @@
  * Ce fichier ne contient que des TYPES : ni le site ni l'app n'y importent quoi
  * que ce soit, donc le site public peut lire le contrat sans embarquer le
  * runtime Forge. `src/demo-snapshot.ts` produit ces données, le site les
- * consomme (`site/src/demo/remote.ts`), et les tests verrouillent la forme.
+ * consomme (`site/src/demo/live-fetch.ts`, `site/src/demo/live-world.ts`), et
+ * les tests verrouillent la forme.
  *
  * Règle : fichiers < 500 lignes, fonctions < 50 lignes.
  */
