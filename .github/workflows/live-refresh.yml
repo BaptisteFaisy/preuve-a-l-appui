@@ -11,6 +11,11 @@ name: Démo live (données réelles)
 # Le workflow régénère l'instantané dans le checkout, construit le site et le
 # déploie : il n'écrit rien dans le dépôt, `main` n'est jamais touché.
 #
+# Sans jeton Atlassian (`gh secret set ATLASSIAN_API_TOKEN`), le run se termine
+# en vert avec un avertissement : rien n'est relu, rien n'est publié, et le
+# site garde son instantané embarqué. Inutile d'avoir un run rouge toutes les
+# dix minutes.
+#
 # Éligibilité « Runs on Atlassian » préservée : l'app garde ses deux
 # déclencheurs STATIQUES, le site lit un fichier public sur sa propre origine,
 # jamais l'app en direct (docs/LIVE-DEMO.md §6). `tools/check-eligibility.mjs`
@@ -39,10 +44,6 @@ jobs:
     name: relire-et-publier
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    # Sans jeton Atlassian enregistré, le job s'arrête là au lieu d'échouer en
-    # boucle toutes les dix minutes : `gh secret set ATLASSIAN_API_TOKEN`
-    # (et ATLASSIAN_EMAIL) l'active. Rien n'est publié tant que c'est absent.
-    if: ${{ secrets.ATLASSIAN_API_TOKEN != '' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -52,13 +53,30 @@ jobs:
       ATLASSIAN_SITE: ${{ vars.ATLASSIAN_SITE || 'one-atlas-cndz.atlassian.net' }}
       ATLASSIAN_ISSUE: ${{ vars.ATLASSIAN_ISSUE || 'PRF-1' }}
     steps:
+      # Sans jeton, le workflow n'échoue pas en rouge toutes les dix minutes :
+      # il le dit (avertissement) et ne publie rien. Un job entièrement sauté
+      # était compté comme « failure » par GitHub — du bruit, pas un signal.
+      - name: Jeton Atlassian présent ?
+        id: jeton
+        shell: bash
+        run: |
+          if [ -n "${ATLASSIAN_API_TOKEN:-}" ]; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+            echo 'Jeton présent : relecture et publication en cours.'
+          else
+            echo 'present=false' >> "$GITHUB_OUTPUT"
+            echo '::warning::Jeton ATLASSIAN_API_TOKEN absent : rien n\'est relu ni publié. Le site garde son instantané embarqué (gh secret set ATLASSIAN_API_TOKEN --repo Tradoooo/preuve-a-l-appui).'
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.jeton.outputs.present == 'true'
         with:
           fetch-depth: 1
           persist-credentials: false
           clean: false
 
       - uses: actions/setup-node@v4
+        if: steps.jeton.outputs.present == 'true'
         with:
           node-version: '22'
           # Runner hébergé, comme `site.yml` : le cache npm passe par le service
@@ -69,28 +87,47 @@ jobs:
           cache: npm
 
       - name: Dépendances (npm ci)
+        if: steps.jeton.outputs.present == 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: Instantané relu dans Jira
+        if: steps.jeton.outputs.present == 'true'
         run: node tools/refresh-live-snapshot.mjs
 
       - name: Garde — taille des fichiers et des fonctions
+        if: steps.jeton.outputs.present == 'true'
         run: npm run check:limits
 
       - name: Types du site (tsc -p site/tsconfig.json)
+        if: steps.jeton.outputs.present == 'true'
         run: npm run site:typecheck
 
       - name: Tests de la relecture et de l'âge
+        if: steps.jeton.outputs.present == 'true'
         run: npx vitest run tests/site
 
       - name: Construction du site (vite build)
+        if: steps.jeton.outputs.present == 'true'
         run: npm run site:build
 
       - name: Artefact Pages
+        if: steps.jeton.outputs.present == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist
 
       - name: Publication sur GitHub Pages
+        if: steps.jeton.outputs.present == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Bilan
+        if: always()
+        shell: bash
+        run: |
+          if [ "${{ steps.jeton.outputs.present }}" = 'true' ]; then
+            echo 'Instantané relu dans Jira et site republié.'
+          else
+            echo 'Rien n\'a été relu ni publié : jeton Atlassian absent.'
+          fi
+
