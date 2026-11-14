@@ -133,6 +133,7 @@ export async function createLiveScenario(
   snapshot: DemoSnapshotData,
   language: Language,
   error = '',
+  readAt = snapshot.generatedAt,
 ): Promise<DemoScenario> {
   const issue = liveIssue(snapshot);
   const actors = liveCast(snapshot);
@@ -162,10 +163,13 @@ export async function createLiveScenario(
     criteria,
     evidences,
     source: {
-      kind: 'live',
+      // `error` non vide : la relecture a échoué et l'instantané vient du
+      // fichier embarqué à la construction. Le bandeau le dit, la provenance
+      // ne laisse rien deviner.
+      kind: error === '' ? 'live' : 'embedded',
       site: snapshot.site,
       generatedAt: snapshot.generatedAt,
-      readAt: snapshot.generatedAt,
+      readAt,
       error,
     },
   };

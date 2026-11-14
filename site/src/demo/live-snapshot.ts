@@ -2,11 +2,12 @@
  * Le jeu de données réel embarqué dans le site public (lot `app-runs-on-atlassian`).
  *
  * L'app installée écrit son instantané pseudonymisé dans une propriété du
- * ticket Jira ; l'outil `tools/refresh-live-snapshot.mjs` la lit et la versionne
- * dans `site/public/live-snapshot.json`. Le site l'importe **à la
- * construction** : la page reste entièrement statique (pas d'appel réseau à
- * l'exécution, pas de CORS) et l'app n'a besoin d'aucun web trigger dynamique —
- * c'est la condition de l'éligibilité « Runs on Atlassian ».
+ * ticket Jira ; le workflow `live-refresh.yml` (toutes les dix minutes) lit
+ * cette propriété et la publie dans `site/public/live-snapshot.json`. Le site
+ * le **relit à l'exécution** (`live-fetch.ts`) ; ce module n'est plus que le
+ * repli embarqué à la construction, affiché comme tel quand la relecture
+ * échoue. La page reste statique et n'appelle jamais l'app : aucun web trigger
+ * dynamique, condition de l'éligibilité « Runs on Atlassian ».
  *
  * Si le fichier est absent ou illisible, le site bascule sur le jeu PAY-123
  * embarqué et l'affiche comme tel.

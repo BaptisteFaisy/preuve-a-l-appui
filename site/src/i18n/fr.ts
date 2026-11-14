@@ -131,7 +131,7 @@ export const FR: SiteStrings = {
   },
   demo: {
     title: "Démo en direct : {issue}",
-    lede: "Cette page exécute le vrai moteur de décision de l’app, compilé pour le navigateur — les mêmes critères, forces, couvertures, règles d’indépendance et message de blocage que l’app Forge. Rien n’est simulé, rien n’est envoyé nulle part.",
+    lede: "Cette page exécute le vrai moteur de décision de l’app, compilé pour le navigateur — les mêmes critères, forces, couvertures, règles d’indépendance et message de blocage que l’app Forge. Les données affichées sont l’état réel de l’app installée sur le site de démonstration, relu à l’exécution. Rien n’est simulé, rien n’est envoyé nulle part.",
     engineNote: "Moteur : src/domain/* et src/handlers/* de ce dépôt, en mémoire.",
     reset: "Réinitialiser le ticket",
     coverage: "Preuves",

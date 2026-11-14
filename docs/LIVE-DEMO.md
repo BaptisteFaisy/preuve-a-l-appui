@@ -9,25 +9,36 @@
 
 ```
 Forge (site de démonstration)                     GitHub Pages (statique)
-couverture recalculée                            site/src/demo/live-snapshot.ts
-   └─ instantané pseudonymisé                      └─ importe site/public/live-snapshot.json
-      └─ propriété Jira du ticket                     └─ réhydrate le monde de la démo
-         proof-live-snapshot                               └─ même moteur, mêmes règles
+couverture recalculée                            site/src/demo/live-fetch.ts
+   └─ instantané pseudonymisé                      └─ relit /live-snapshot.json à l'exécution
+      └─ propriété Jira du ticket                     └─ (rejouée toutes les 10 min par
+         proof-live-snapshot                              live-refresh.yml)
+                                                        └─ réhydrate le monde de la démo
+                                                           └─ même moteur, mêmes règles
 ```
 
 L'app écrit son état pseudonymisé dans une **propriété du ticket Jira**, à
-chaque écriture de couverture. L'outil `tools/refresh-live-snapshot.mjs` lit
-cette propriété et la versionne dans `site/public/live-snapshot.json` ; le site
-l'importe **à la construction**. La page reste entièrement statique : pas de
-`fetch` à l'exécution, pas de CORS, pas d'egress — et surtout **pas de web
-trigger dynamique dans l'app**, sans quoi elle perdrait l'éligibilité
-« Runs on Atlassian » (voir §6).
+chaque écriture de couverture. Le workflow `live-refresh.yml` rejoue
+`tools/refresh-live-snapshot.mjs` **toutes les dix minutes**, construit le site
+et le publie : l'instantané servi sur la même origine que la page ne date donc
+jamais de plus de dix minutes (hors panne de jeton). Le site le relit **à
+l'exécution** (`site/src/demo/live-fetch.ts`, `cache: 'no-store'`, délai de
+6 s), et un bouton « Relire les données réelles » le redemande à la volée.
+
+La page reste entièrement statique : elle relit **son propre fichier publié**,
+pas l'app. Pas de CORS, pas d'egress — et surtout **pas de web trigger
+dynamique dans l'app**, sans quoi elle perdrait l'éligibilité « Runs on
+Atlassian » (voir §6). C'est la nuance qui a manqué au premier jet : embarquer
+l'instantané à la construction figeait la démo au dernier déploiement, ce qui
+n'était plus une démo live.
 
 Le site réhydrate un magasin en mémoire avec cet instantané, puis **rejoue
 exactement les mêmes modules** que le jeu embarqué (`src/domain/*`,
-`src/handlers/*`, `src/viewmodel/*`). Sans instantané (fichier absent), il
-bascule sur le jeu PAY-123 embarqué et le dit à l'écran : la page ne casse
-jamais, et la provenance est toujours affichée.
+`src/handlers/*`, `src/viewmodel/*`). Sans instantané relu (fichier absent,
+HTTP 404, délai dépassé), il bascule sur celui embarqué à la construction, puis
+sur le jeu PAY-123 du dépôt, et le dit à l'écran : la page ne casse jamais, la
+provenance est toujours affichée, et l'âge des données (« écrites par l'app le
+…, relues par ton navigateur le … ») est calculé par `site/src/demo/freshness.ts`.
 
 Les gestes de la démo modifient la copie en mémoire, jamais le vrai site : un
 site statique public n'a pas de secret à présenter pour écrire, et n'en aura
@@ -127,6 +138,22 @@ Le jeton Atlassian est lu dans `ATLASSIAN_API_TOKEN` ou dans
 `~/.atlassian-api-token` ; le ticket et le site se règlent par
 `ATLASSIAN_ISSUE` et `ATLASSIAN_SITE`.
 
+Le même appel est rejoué **toutes les dix minutes** par
+`.github/workflows/live-refresh.yml` : il régénère l'instantané dans le
+checkout, court `check:limits`, `site:typecheck`, `tests/site`, construit le
+site et le publie sur Pages. Il n'écrit rien dans le dépôt — `main` n'est
+jamais touché, aucune protection de branche n'est contournée. Il se met en
+veille tout seul tant que les secrets manquent :
+
+```bash
+gh secret set ATLASSIAN_API_TOKEN     # jeton API du site (lecture seule)
+gh secret set ATLASSIAN_EMAIL         # baptiste.faisy@gmail.com
+gh secret list | grep ATLASSIAN
+```
+
+Le job est sauté (`if: secrets.ATLASSIAN_API_TOKEN != ''`) tant que le premier
+n'est pas enregistré : rien n'est publié, rien n'échoue en boucle.
+
 ## 6. Éligibilité « Runs on Atlassian »
 
 Le programme exige que l'app **n'ait aucun déclencheur dynamique** : seule une
@@ -151,6 +178,9 @@ forge eligibility -e production
 ```
 
 Le site public n'est plus lisible en direct depuis l'app : c'est le prix du
-badge. Le compromis retenu — l'app publie dans le ticket, l'outil lit, le site
-embarque — garde les données réellement produites par l'app, sans exposition
-d'egress.
+badge. Le compromis retenu — l'app publie dans le ticket, le workflow lit et
+publie un fichier statique, le site relit ce fichier — garde les données
+réellement produites par l'app, sans exposition d'egress. La relecture se fait
+sur la **même origine** que le site : l'app n'est jamais appelée depuis le
+navigateur, et `tools/check-manifest.mjs` continue de refuser tout déclencheur
+dynamique.
