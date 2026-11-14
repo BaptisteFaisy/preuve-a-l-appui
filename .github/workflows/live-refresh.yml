@@ -19,10 +19,10 @@ name: Démo live (données réelles)
 # Aucun des deux n'écrit dans le dépôt : `main` n'est jamais touché, aucune
 # protection de branche n'est contournée.
 #
-# Sans jeton (fichier absent et secret non enregistré), le run sort **vert**
-# avec un avertissement et ne publie rien : un job entièrement sauté était
-# compté « failure » par GitHub, soit un run rouge toutes les quinze minutes
-# pour rien. Le site garde alors son instantané embarqué et l'affiche.
+# Sans jeton (fichier absent sur le runner), le run sort **vert** avec un
+# avertissement et ne publie rien : un job entièrement sauté était compté
+# « failure » par GitHub, soit un run rouge toutes les quinze minutes pour
+# rien. Le site garde alors son instantané embarqué et l'affiche.
 #
 # Éligibilité « Runs on Atlassian » préservée : l'app garde ses deux
 # déclencheurs STATIQUES, le site lit un fichier public sur sa propre origine,
@@ -57,31 +57,28 @@ jobs:
       present: ${{ steps.jeton.outputs.present }}
       source: ${{ steps.jeton.outputs.source }}
     env:
-      # Un secret peut quand même être enregistré (autre machine, autre opéra­
-      # teur) : il passe avant le fichier local, sinon le fichier du runner.
-      ATLASSIAN_API_TOKEN: ${{ secrets.ATLASSIAN_API_TOKEN }}
-      ATLASSIAN_EMAIL: ${{ secrets.ATLASSIAN_EMAIL }}
+      # Le jeton vient du disque du runner, lu par l'outil
+      # (`tools/refresh-live-snapshot.mjs`), et surtout PAS d'un secret GitHub :
+      # un secret du dépôt écrasait ce fichier local, et Jira répondait 404 —
+      # il masque une absence de permission par 404, pas 401 (run 43612827396,
+      # 14/11/2026 : le même ticket lu en HTTP 200 depuis la machine avec le
+      # fichier, et 404 depuis le runner avec le secret). Le dépôt est public :
+      # un identifiant de moins à y enregistrer est toujours un bon échange.
       ATLASSIAN_SITE: ${{ vars.ATLASSIAN_SITE || 'one-atlas-cndz.atlassian.net' }}
       ATLASSIAN_ISSUE: ${{ vars.ATLASSIAN_ISSUE || 'PRF-1' }}
     steps:
       - name: Jeton Atlassian présent ?
         id: jeton
         shell: bash
-        env:
-          TOKEN: ${{ secrets.ATLASSIAN_API_TOKEN }}
         run: |
-          if [ -n "${TOKEN:-}" ]; then
+          if [ -r "$HOME/.atlassian-api-token" ]; then
             echo 'present=true' >> "$GITHUB_OUTPUT"
-            echo "source=secret" >> "$GITHUB_OUTPUT"
-            echo 'Jeton trouvé dans les secrets du dépôt.'
-          elif [ -r "$HOME/.atlassian-api-token" ]; then
-            echo 'present=true' >> "$GITHUB_OUTPUT"
-            echo "source=fichier local" >> "$GITHUB_OUTPUT"
+            echo 'source=fichier du runner' >> "$GITHUB_OUTPUT"
             echo 'Jeton lu dans ~/.atlassian-api-token : il ne quitte pas la machine.'
           else
             echo 'present=false' >> "$GITHUB_OUTPUT"
-            echo "source=aucun" >> "$GITHUB_OUTPUT"
-            echo "::warning::Aucun jeton Atlassian (ni secret, ni ~/.atlassian-api-token sur le runner) : rien n'est relu ni publié. Le site garde son instantané embarqué et l'affiche."
+            echo 'source=aucun' >> "$GITHUB_OUTPUT"
+            echo "::warning::Aucun jeton Atlassian sur ce runner (~/.atlassian-api-token absent) : rien n'est relu ni publié. Le site garde son instantané embarqué et l'affiche."
           fi
 
       - uses: actions/checkout@v4
