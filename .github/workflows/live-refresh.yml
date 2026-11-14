@@ -67,7 +67,7 @@ jobs:
             echo 'Jeton présent : relecture et publication en cours.'
           else
             echo 'present=false' >> "$GITHUB_OUTPUT"
-            echo '::warning::Jeton ATLASSIAN_API_TOKEN absent : rien n\'est relu ni publié. Le site garde son instantané embarqué (gh secret set ATLASSIAN_API_TOKEN --repo Tradoooo/preuve-a-l-appui).'
+            echo "::warning::Jeton ATLASSIAN_API_TOKEN absent : rien n'est relu ni publié. Le site garde son instantané embarqué (gh secret set ATLASSIAN_API_TOKEN --repo Tradoooo/preuve-a-l-appui)."
           fi
 
       - uses: actions/checkout@v4
@@ -130,6 +130,6 @@ jobs:
           if [ "${{ steps.jeton.outputs.present }}" = 'true' ]; then
             echo 'Instantané relu dans Jira et site republié.'
           else
-            echo 'Rien n\'a été relu ni publié : jeton Atlassian absent.'
+            echo "Rien n'a été relu ni publié : jeton Atlassian absent."
           fi
 
